@@ -1,83 +1,64 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>توليد المقال</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>توليد المقال</title>
 </head>
-
 <body style="font-family:Arial;padding:20px;max-width:800px;margin:auto">
 
-<h2>توليد مقال حقيقي</h2>
+  <h2>توليد مقال حقيقي</h2>
 
-<select id="surah">
-<option value="الفاتحة">الفاتحة</option>
-</select>
+  <select id="surah">
+    <option value="الفاتحة">الفاتحة</option>
+  </select>
 
-<input id="ayah" value="1" style="width:60px">
+  <input id="ayah" value="1" type="number" min="1" style="width:60px">
 
-<br><br>
+  <br><br>
 
-<button onclick="generate()">توليد</button>
+  <button onclick="generate()">توليد</button>
 
-<pre id="output" style="white-space:pre-wrap;margin-top:20px;background:#eee;padding:15px"></pre>
+  <pre id="output" style="white-space:pre-wrap;margin-top:20px;background:#eee;padding:15px"></pre>
 
-<script>
-async function generate() {
-  const surah = document.getElementById("surah").value;
-  const ayah = document.getElementById("ayah").value;
-  const output = document.getElementById("output");
+  <script>
+    async function generate() {
+      const surah = document.getElementById("surah").value.trim();
+      const ayah = document.getElementById("ayah").value.trim();
+      const output = document.getElementById("output");
 
-  const prompt = `
-اكتب مقال عربي عميق ومشوق عن سورة ${surah} الآية ${ayah}.
+      output.innerText = "جارٍ التوليد...";
 
-ابدأ بسؤال إنساني.
+      try {
+        const res = await fetch("https://nour-quran-worker.khayati1hafedh.workers.dev", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            surah,
+            ayah
+          })
+        });
 
-ثم:
-- تفسير واضح
-- سبب النزول (أو وضح أنه غير موجود)
-- مثال واقعي
-- عبرة ثلاثية
-- تطبيق عملي
-- خاتمة قوية
+        const data = await res.json();
 
-بدون حشو.
-بدون كلام عام.
-`;
+        if (!res.ok) {
+          output.innerText = "خطأ:\n" + JSON.stringify(data, null, 2);
+          return;
+        }
 
-  output.innerText = "جارٍ التوليد...";
+        if (!data.ok || !data.article) {
+          output.innerText = "الرد غير متوقع:\n" + JSON.stringify(data, null, 2);
+          return;
+        }
 
-  try {
-    const res = await fetch("https://nour-quran-worker.khayati1hafedh.workers.dev", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "llama3-70b-8192",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.7,
-        max_tokens: 2000
-      })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      output.innerText = "خطأ من الـ Worker:\n" + JSON.stringify(data, null, 2);
-      return;
+        output.innerText = data.article;
+      } catch (e) {
+        output.innerText = "خطأ:\n" + e.message;
+      }
     }
-
-    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-      output.innerText = "الرد غير متوقع:\n" + JSON.stringify(data, null, 2);
-      return;
-    }
-
-    output.innerText = data.choices[0].message.content;
-  } catch (e) {
-    output.innerText = "خطأ:\n" + e.message;
-  }
-}
-</script>
+  </script>
 
 </body>
 </html>
