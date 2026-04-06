@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>توليد المقال</title>
+</head>
+
+<body style="font-family:Arial;padding:20px;max-width:800px;margin:auto">
+
+<h2>توليد مقال حقيقي</h2>
+
+<select id="surah">
+<option value="الفاتحة">الفاتحة</option>
+</select>
+
+<input id="ayah" value="1" style="width:60px">
+
+<br><br>
+
+<button onclick="generate()">توليد</button>
+
+<pre id="output" style="white-space:pre-wrap;margin-top:20px;background:#eee;padding:15px"></pre>
+
+<script>
+async function generate() {
+
+const surah = document.getElementById("surah").value;
+const ayah = document.getElementById("ayah").value;
+
+const prompt = `
+اكتب مقال عربي عميق ومشوق عن سورة ${surah} الآية ${ayah}.
+
+ابدأ بسؤال إنساني.
+
+ثم:
+- تفسير واضح
+- سبب النزول (أو وضح أنه غير موجود)
+- مثال واقعي
+- عبرة ثلاثية
+- تطبيق عملي
+- خاتمة قوية
+
+بدون حشو.
+بدون كلام عام.
+`;
+
+const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+method: "POST",
+headers: {
+"Content-Type": "application/json",
+"Authorization": "Bearer YOUR_KEY_HERE"
+},
+body: JSON.stringify({
+model: "llama3-70b-8192",
+messages: [{role:"user", content: prompt}],
+temperature: 0.7,
+max_tokens: 2000
+})
+});
+
+const data = await res.json();
+
+document.getElementById("output").innerText =
+data.choices[0].message.content;
+
+}
+</script>
+
+</body>
+</html>
