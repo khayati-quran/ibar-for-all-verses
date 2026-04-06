@@ -23,11 +23,11 @@
 
 <script>
 async function generate() {
+  const surah = document.getElementById("surah").value;
+  const ayah = document.getElementById("ayah").value;
+  const output = document.getElementById("output");
 
-const surah = document.getElementById("surah").value;
-const ayah = document.getElementById("ayah").value;
-
-const prompt = `
+  const prompt = `
 اكتب مقال عربي عميق ومشوق عن سورة ${surah} الآية ${ayah}.
 
 ابدأ بسؤال إنساني.
@@ -44,25 +44,38 @@ const prompt = `
 بدون كلام عام.
 `;
 
-const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-method: "POST",
-headers: {
-"Content-Type": "application/json",
-"Authorization": "Bearer YOUR_KEY_HERE"
-},
-body: JSON.stringify({
-model: "llama3-70b-8192",
-messages: [{role:"user", content: prompt}],
-temperature: 0.7,
-max_tokens: 2000
-})
-});
+  output.innerText = "جارٍ التوليد...";
 
-const data = await res.json();
+  try {
+    const res = await fetch("https://nour-quran-worker.khayati1hafedh.workers.dev", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "llama3-70b-8192",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7,
+        max_tokens: 2000
+      })
+    });
 
-document.getElementById("output").innerText =
-data.choices[0].message.content;
+    const data = await res.json();
 
+    if (!res.ok) {
+      output.innerText = "خطأ من الـ Worker:\n" + JSON.stringify(data, null, 2);
+      return;
+    }
+
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      output.innerText = "الرد غير متوقع:\n" + JSON.stringify(data, null, 2);
+      return;
+    }
+
+    output.innerText = data.choices[0].message.content;
+  } catch (e) {
+    output.innerText = "خطأ:\n" + e.message;
+  }
 }
 </script>
 
