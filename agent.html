@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>عبر لجميع الآيات — V2 Minimal</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f5ead0;margin:0;color:#1e1e1e}
+header{background:#0a3d2e;color:#fff;padding:18px 20px;border-bottom:3px solid #b8860b}
+header h1{margin:0;font-size:28px;color:#f0c040}
+header p{margin:6px 0 0;font-size:13px;opacity:.9}
+main{max-width:1000px;margin:20px auto;padding:0 14px}
+.card{background:#fff;border:1px solid #e8d5a0;padding:16px;margin-bottom:14px}
+label{display:block;font-weight:bold;margin:10px 0 6px}
+input,select,textarea{width:100%;padding:10px;border:1px solid #d8c9a0;box-sizing:border-box;font-size:14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+button{background:#0a3d2e;color:#fff;border:none;padding:10px 16px;cursor:pointer;font-weight:bold}
+button.secondary{background:#b8860b;color:#222}
+button:disabled{background:#999;cursor:not-allowed}
+#log{padding:10px 12px;background:#eef6ff;border:1px solid #b9d8ff;margin-bottom:14px;white-space:pre-wrap}
+.preview{background:#fff;border:1px solid #e8d5a0;padding:20px;line-height:1.9}
+.preview h1{color:#0a3d2e;font-size:28px}
+.preview h2{color:#0a3d2e;font-size:20px;border-right:4px solid #b8860b;padding-right:8px;margin-top:24px}
+.ayah{background:#fdf6e3;border:2px solid #b8860b;padding:18px;text-align:center;margin:16px 0}
+.ibra{background:#fff8db;border:2px solid #b8860b;padding:14px;margin:18px 0}
+.small{font-size:12px;color:#666}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🕌 عبر لجميع الآيات</h1>
+  <p>نسخة اختبار سريعة. JSON أولًا، معاينة ثم نشر يدوي.</p>
+</header>
+<main>
+  <div id="log">جاهز.</div>
+
+  <div class="card">
+    <div class="grid">
+      <div>
+        <label>Groq API Key</label>
+        <input id="groqKey" type="password" placeholder="gsk_..." />
+      </div>
+      <div>
+        <label>GitHub Token</label>
+        <input id="ghToken" type="password" placeholder="ghp_... / github_pat_..." />
+      </div>
+      <div>
+        <label>GitHub User</label>
+        <input id="ghUser" type="text" value="khayati-quran" />
+      </div>
+      <div>
+        <label>Repo</label>
+        <input id="ghRepo" type="text" value="ibar-for-all-verses" />
+      </div>
+      <div>
+        <label>السورة</label>
+        <select id="surah"></select>
+      </div>
+      <div>
+        <label>الآية</label>
+        <select id="ayah"></select>
+      </div>
+    </div>
+    <div class="row">
+      <button onclick="testGithub()">اختبار GitHub</button>
+      <button class="secondary" onclick="generateArticle()">توليد</button>
+      <button id="publishBtn" onclick="publishAll()" disabled>نشر</button>
+    </div>
+    <div class="small" style="margin-top:10px">مهم: هذه النسخة لا تعيد المحاولة. طلب واحد فقط لكل مقال.</div>
+  </div>
+
+  <div class="card">
+    <strong>Raw JSON</strong>
+    <textarea id="rawJson" rows="16" placeholder="سيظهر JSON هنا بعد التوليد"></textarea>
+  </div>
+
+  <div class="preview" id="preview">لا توجد معاينة بعد.</div>
+</main>
+
+<script>
+const GH_API = 'https://api.github.com';
+const SURAHS = [
+  {n:1,name:'الفاتحة',ayahs:7},{n:2,name:'البقرة',ayahs:286},{n:3,name:'آل عمران',ayahs:200},{n:4,name:'النساء',ayahs:176},{n:5,name:'المائدة',ayahs:120},{n:6,name:'الأنعام',ayahs:165},{n:7,name:'الأعراف',ayahs:206},{n:8,name:'الأنفال',ayahs:75},{n:9,name:'التوبة',ayahs:129},{n:10,name:'يونس',ayahs:109},{n:11,name:'هود',ayahs:123},{n:12,name:'يوسف',ayahs:111},{n:13,name:'الرعد',ayahs:43},{n:14,name:'إبراهيم',ayahs:52},{n:15,name:'الحجر',ayahs:99},{n:16,name:'النحل',ayahs:128},{n:17,name:'الإسراء',ayahs:111},{n:18,name:'الكهف',ayahs:110},{n:19,name:'مريم',ayahs:98},{n:20,name:'طه',ayahs:135},{n:21,name:'الأنبياء',ayahs:112},{n:22,name:'الحج',ayahs:78},{n:23,name:'المؤمنون',ayahs:118},{n:24,name:'النور',ayahs:64},{n:25,name:'الفرقان',ayahs:77},{n:26,name:'الشعراء',ayahs:227},{n:27,name:'النمل',ayahs:93},{n:28,name:'القصص',ayahs:88},{n:29,name:'العنكبوت',ayahs:69},{n:30,name:'الروم',ayahs:60},{n:31,name:'لقمان',ayahs:34},{n:32,name:'السجدة',ayahs:30},{n:33,name:'الأحزاب',ayahs:73},{n:34,name:'سبأ',ayahs:54},{n:35,name:'فاطر',ayahs:45},{n:36,name:'يس',ayahs:83},{n:37,name:'الصافات',ayahs:182},{n:38,name:'ص',ayahs:88},{n:39,name:'الزمر',ayahs:75},{n:40,name:'غافر',ayahs:85},{n:41,name:'فصلت',ayahs:54},{n:42,name:'الشورى',ayahs:53},{n:43,name:'الزخرف',ayahs:89},{n:44,name:'الدخان',ayahs:59},{n:45,name:'الجاثية',ayahs:37},{n:46,name:'الأحقاف',ayahs:35},{n:47,name:'محمد',ayahs:38},{n:48,name:'الفتح',ayahs:29},{n:49,name:'الحجرات',ayahs:18},{n:50,name:'ق',ayahs:45},{n:51,name:'الذاريات',ayahs:60},{n:52,name:'الطور',ayahs:49},{n:53,name:'النجم',ayahs:62},{n:54,name:'القمر',ayahs:55},{n:55,name:'الرحمن',ayahs:78},{n:56,name:'الواقعة',ayahs:96},{n:57,name:'الحديد',ayahs:29},{n:58,name:'المجادلة',ayahs:22},{n:59,name:'الحشر',ayahs:24},{n:60,name:'الممتحنة',ayahs:13},{n:61,name:'الصف',ayahs:14},{n:62,name:'الجمعة',ayahs:11},{n:63,name:'المنافقون',ayahs:11},{n:64,name:'التغابن',ayahs:18},{n:65,name:'الطلاق',ayahs:12},{n:66,name:'التحريم',ayahs:12},{n:67,name:'الملك',ayahs:30},{n:68,name:'القلم',ayahs:52},{n:69,name:'الحاقة',ayahs:52},{n:70,name:'المعارج',ayahs:44},{n:71,name:'نوح',ayahs:28},{n:72,name:'الجن',ayahs:28},{n:73,name:'المزمل',ayahs:20},{n:74,name:'المدثر',ayahs:56},{n:75,name:'القيامة',ayahs:40},{n:76,name:'الإنسان',ayahs:31},{n:77,name:'المرسلات',ayahs:50},{n:78,name:'النبأ',ayahs:40},{n:79,name:'النازعات',ayahs:46},{n:80,name:'عبس',ayahs:42},{n:81,name:'التكوير',ayahs:29},{n:82,name:'الانفطار',ayahs:19},{n:83,name:'المطففين',ayahs:36},{n:84,name:'الانشقاق',ayahs:25},{n:85,name:'البروج',ayahs:22},{n:86,name:'الطارق',ayahs:17},{n:87,name:'الأعلى',ayahs:19},{n:88,name:'الغاشية',ayahs:26},{n:89,name:'الفجر',ayahs:30},{n:90,name:'البلد',ayahs:20},{n:91,name:'الشمس',ayahs:15},{n:92,name:'الليل',ayahs:21},{n:93,name:'الضحى',ayahs:11},{n:94,name:'الشرح',ayahs:8},{n:95,name:'التين',ayahs:8},{n:96,name:'العلق',ayahs:19},{n:97,name:'القدر',ayahs:5},{n:98,name:'البينة',ayahs:8},{n:99,name:'الزلزلة',ayahs:8},{n:100,name:'العاديات',ayahs:11},{n:101,name:'القارعة',ayahs:11},{n:102,name:'التكاثر',ayahs:8},{n:103,name:'العصر',ayahs:3},{n:104,name:'الهمزة',ayahs:9},{n:105,name:'الفيل',ayahs:5},{n:106,name:'قريش',ayahs:4},{n:107,name:'الماعون',ayahs:7},{n:108,name:'الكوثر',ayahs:3},{n:109,name:'الكافرون',ayahs:6},{n:110,name:'النصر',ayahs:3},{n:111,name:'المسد',ayahs:5},{n:112,name:'الإخلاص',ayahs:4},{n:113,name:'الفلق',ayahs:5},{n:114,name:'الناس',ayahs:6}
+];
+let currentArticle = null;
+
+function log(msg){ document.getElementById('log').textContent = msg; }
+function cfg(){ return {
+  groqKey: document.getElementById('groqKey').value.trim(),
+  ghToken: document.getElementById('ghToken').value.trim(),
+  ghUser: document.getElementById('ghUser').value.trim(),
+  ghRepo: document.getElementById('ghRepo').value.trim()
+}; }
+function slugify(sn, an){ return `surah-${sn}-ayah-${an}`; }
+function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function populate(){
+  const surah = document.getElementById('surah');
+  SURAHS.forEach(s=>{ const o=document.createElement('option'); o.value=s.n; o.textContent=`${s.n}. ${s.name}`; surah.appendChild(o); });
+  surah.addEventListener('change', updateAyah);
+  updateAyah();
+}
+function updateAyah(){
+  const sn = parseInt(document.getElementById('surah').value || '1');
+  const s = SURAHS.find(x=>x.n===sn);
+  const ayah = document.getElementById('ayah');
+  ayah.innerHTML='';
+  for(let i=1;i<=s.ayahs;i++){ const o=document.createElement('option'); o.value=i; o.textContent='الآية '+i; ayah.appendChild(o); }
+}
+async function testGithub(){
+  const c=cfg();
+  if(!c.ghToken||!c.ghUser||!c.ghRepo){ log('أدخل GitHub token/user/repo'); return; }
+  log('يختبر GitHub...');
+  const res = await fetch(`${GH_API}/repos/${c.ghUser}/${c.ghRepo}`, {headers:{Authorization:'token '+c.ghToken,Accept:'application/vnd.github.v3+json'}});
+  if(res.ok){ log('GitHub OK'); } else { const t=await res.text(); log('GitHub failed: '+t); }
+}
+function buildPrompt(surahName, ayahNumber){
+  return `أرجع JSON فقط بدون أي شرح ولا markdown.
+الصيغة المطلوبة:
+{
+  "title":"",
+  "ayah_text":"",
+  "intro":"",
+  "tafsir":"",
+  "nuzul":"",
+  "balagha":"",
+  "shaarawi":"",
+  "ijaz":"",
+  "ibra_aqida":"",
+  "ibra_nafs":"",
+  "ibra_hadara":"",
+  "question":"",
+  "example":"",
+  "application":"",
+  "closing":""
+}
+
+الموضوع: سورة ${surahName} الآية ${ayahNumber}.
+الشروط:
+- العربية فقط.
+- نصوص قصيرة إلى متوسطة، واضحة ونظيفة.
+- إذا لم يثبت سبب نزول خاص فقل ذلك بوضوح.
+- إذا لم يوجد إعجاز علمي قوي فاذكر وجهاً بيانياً أو تربوياً.
+- لا تكتب HTML.
+- لا تكتب أي كلام خارج JSON.`;
+}
+function extractJson(raw){
+  raw = String(raw||'').trim();
+  raw = raw.replace(/```json|```/gi,'').trim();
+  const start = raw.indexOf('{');
+  const end = raw.lastIndexOf('}');
+  if(start === -1 || end === -1 || end <= start) throw new Error('لم يتم العثور على JSON صالح');
+  return raw.slice(start, end+1);
+}
+function renderArticle(a, surahName, ayahNumber){
+  return `
+    <div class="ayah"><div style="font-size:28px;color:#0a3d2e;font-weight:bold;line-height:2">${escapeHtml(a.ayah_text)}</div><div class="small">سورة ${escapeHtml(surahName)} — الآية ${ayahNumber}</div></div>
+    <h1>${escapeHtml(a.title)}</h1>
+    <h2>📍 مدخل</h2><p>${escapeHtml(a.intro)}</p>
+    <h2>📚 التفسير</h2><p>${escapeHtml(a.tafsir)}</p>
+    <h2>🕰️ سبب النزول والسياق</h2><p>${escapeHtml(a.nuzul)}</p>
+    <h2>🔤 المفردات والبلاغة</h2><p>${escapeHtml(a.balagha)}</p>
+    <h2>🎙️ لمسة الشعراوي</h2><p>${escapeHtml(a.shaarawi)}</p>
+    <h2>🔬 الإعجاز</h2><p>${escapeHtml(a.ijaz)}</p>
+    <div class="ibra">
+      <h2>💎 العبرة العميقة</h2>
+      <p><strong>① المستوى العقدي:</strong> ${escapeHtml(a.ibra_aqida)}</p>
+      <p><strong>② المستوى النفسي:</strong> ${escapeHtml(a.ibra_nafs)}</p>
+      <p><strong>③ المستوى الحضاري:</strong> ${escapeHtml(a.ibra_hadara)}</p>
+      <p><strong>❓ سؤال:</strong> ${escapeHtml(a.question)}</p>
+    </div>
+    <h2>📌 مثال واقعي</h2><p>${escapeHtml(a.example)}</p>
+    <h2>🌍 التطبيق</h2><p>${escapeHtml(a.application)}</p>
+    <h2>🕌 خاتمة</h2><p>${escapeHtml(a.closing)}</p>`;
+}
+async function generateArticle(){
+  const c=cfg();
+  if(!c.groqKey){ log('أدخل Groq key'); return; }
+  const sn = parseInt(document.getElementById('surah').value);
+  const an = parseInt(document.getElementById('ayah').value);
+  const s = SURAHS.find(x=>x.n===sn);
+  const prompt = buildPrompt(s.name, an);
+  log('يتصل بـ Groq... طلب واحد فقط.');
+  document.querySelector('button.secondary').disabled = true;
+  try{
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+c.groqKey},
+      body: JSON.stringify({
+        model:'llama-3.1-8b-instant',
+        temperature:0.4,
+        max_tokens:1800,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error((data.error && data.error.message) || ('HTTP '+res.status));
+    const raw = data.choices[0].message.content;
+    document.getElementById('rawJson').value = raw;
+    const jsonText = extractJson(raw);
+    const obj = JSON.parse(jsonText);
+    currentArticle = { surah: sn, ayah: an, surahName: s.name, slug: slugify(sn,an), data: obj };
+    document.getElementById('preview').innerHTML = renderArticle(obj, s.name, an);
+    document.getElementById('publishBtn').disabled = false;
+    log('OK: تم التوليد والمعاينة جاهزة.');
+  }catch(e){
+    document.getElementById('preview').innerHTML = '<div style="color:red">فشل التوليد: '+escapeHtml(e.message)+'</div>';
+    log('فشل: '+e.message);
+  }finally{
+    document.querySelector('button.secondary').disabled = false;
+  }
+}
+async function ghGet(path){
+  const c=cfg();
+  const res = await fetch(`${GH_API}/repos/${c.ghUser}/${c.ghRepo}/contents/${path}`, {headers:{Authorization:'token '+c.ghToken,Accept:'application/vnd.github.v3+json'}});
+  return res.ok ? await res.json() : null;
+}
+async function ghPut(path, content, message){
+  const c=cfg();
+  const existing = await ghGet(path);
+  const body = {message, content:btoa(unescape(encodeURIComponent(content)))};
+  if(existing && existing.sha) body.sha = existing.sha;
+  const res = await fetch(`${GH_API}/repos/${c.ghUser}/${c.ghRepo}/contents/${path}`, {
+    method:'PUT', headers:{Authorization:'token '+c.ghToken,'Content-Type':'application/json',Accept:'application/vnd.github.v3+json'}, body:JSON.stringify(body)
+  });
+  if(!res.ok){ const t=await res.text(); throw new Error(t); }
+  return await res.json();
+}
+function articleHtmlPage(article){
+  return `<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${escapeHtml(article.data.title)}</title><style>body{font-family:Arial,sans-serif;background:#f5ead0;margin:0;color:#1e1e1e}.wrap{max-width:900px;margin:20px auto;background:#fff;border:1px solid #e8d5a0;padding:20px}.ayah{background:#fdf6e3;border:2px solid #b8860b;padding:18px;text-align:center;margin:16px 0}.ibra{background:#fff8db;border:2px solid #b8860b;padding:14px;margin:18px 0}h1{color:#0a3d2e}h2{color:#0a3d2e;border-right:4px solid #b8860b;padding-right:8px}p{line-height:1.9}</style></head><body><div class="wrap">${renderArticle(article.data, article.surahName, article.ayah)}</div></body></html>`;
+}
+async function publishAll(){
+  const c=cfg();
+  if(!currentArticle){ log('لا يوجد مقال جاهز'); return; }
+  if(!c.ghToken||!c.ghUser||!c.ghRepo){ log('أدخل بيانات GitHub'); return; }
+  log('ينشر...');
+  try{
+    const jsonPath = `data/articles/${currentArticle.slug}.json`;
+    const htmlPath = `articles/${currentArticle.slug}.html`;
+    await ghPut(jsonPath, JSON.stringify(currentArticle, null, 2), `data: ${currentArticle.slug}`);
+    await ghPut(htmlPath, articleHtmlPage(currentArticle), `article: ${currentArticle.slug}`);
+
+    let index = [];
+    const idxExisting = await ghGet('data/index.json');
+    if(idxExisting && idxExisting.download_url){ index = await (await fetch(idxExisting.download_url)).json(); }
+    index = Array.isArray(index) ? index.filter(x=>x.slug!==currentArticle.slug) : [];
+    index.push({slug: currentArticle.slug, title: currentArticle.data.title, surah: currentArticle.surah, ayah: currentArticle.ayah, surahName: currentArticle.surahName});
+    index.sort((a,b)=>a.surah-b.surah || a.ayah-b.ayah);
+    await ghPut('data/index.json', JSON.stringify(index, null, 2), 'update index.json');
+    log(`تم النشر: ${currentArticle.slug}`);
+  }catch(e){ log('فشل النشر: '+e.message); }
+}
+populate();
+</script>
+</body>
+</html>
