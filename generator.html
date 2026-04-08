@@ -177,12 +177,12 @@ const SURAHS=[{n:1,name:"الفاتحة",ayat:7},{n:2,name:"البقرة",ayat:2
 
 // Tafsirs disponibles (IDs quran.com)
 const TAFSIRS = [
-  { id: 169, label: "التفسير الميسر" },
-  { id: 168, label: "ابن كثير" },
-  { id: 94,  label: "القرطبي" },
-  { id: 93,  label: "السعدي" },
-  { id: 90,  label: "الجلالين" },
-  { id: 92,  label: "الطبري" }
+  { id: 169, label: "الميسر"   },
+  { id: 91,  label: "ابن كثير" },
+  { id: 92,  label: "الطبري"   },
+  { id: 94,  label: "القرطبي"  },
+  { id: 93,  label: "السعدي"   },
+  { id: 90,  label: "الجلالين" }
 ];
 
 const WORKER = "https://nour-quran-worker.khayati1hafedh.workers.dev";
@@ -530,7 +530,7 @@ ${tafsirPanelsHTML}
 </footer>
 <script>
 // Tafsir IDs
-const _TID=[169,168,94,93,90,92];
+const _TID=[169,91,92,94,93,90];
 const _TC={169:"${(data.tafsir_muyassar||"").replace(/\n/g,"\\n").replace(/"/g,'\\"').replace(/'/g,"\\'")}"}; 
 function sw(id){
   document.querySelectorAll(".tt").forEach(t=>t.classList.remove("active"));
