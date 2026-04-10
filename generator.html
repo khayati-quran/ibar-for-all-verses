@@ -446,13 +446,16 @@ const next = `<a href="${SITE_BASE}/surah-${sn}-ayah-${an+1}g.html">الآية $
     "في ظلال القرآن":104,"التفسير الميسر":121
   };
   const preloaded = {};
-  if (data.classical_tafsirs) {
-    for (const [name, text] of Object.entries(data.classical_tafsirs)) {
-      const id = nameToId[name];
-      if (id && text) preloaded[id] = text.replace(/\\/g,"\\\\").replace(/`/g,"\\`").replace(/\$/g,"\\$");
-    }
+if (data.classical_tafsirs) {
+  for (const [name, text] of Object.entries(data.classical_tafsirs)) {
+    const id = nameToId[name];
+    if (id && text) preloaded[id] = text;
   }
-  const tcInit = JSON.stringify(preloaded).replace(/"/g,"'").replace(/'(\d+)':/g,"$1:");
+}
+const tcInit = JSON.stringify(preloaded)
+  .replace(/</g, "\\u003c")
+  .replace(/>/g, "\\u003e")
+  .replace(/&/g, "\\u0026");
 
   return `<!DOCTYPE html><html lang="ar" dir="rtl"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
