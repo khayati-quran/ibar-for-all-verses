@@ -125,9 +125,9 @@ body{font-family:'Cairo',sans-serif;background:#0d1117;color:#e6e6e6;min-height:
       <div><h1>مولّد نور القرآن</h1><p>تفسير أصيل + تأمل + نشر مباشر</p></div>
     </div>
     <nav class="gen-nav">
-      <a href="/ibar-for-all-verses/index.html">🏠 الرئيسية</a>
-      <a href="/ibar-for-all-verses/intro.html">📖 عن المشروع</a>
-      <a href="/ibar-for-all-verses/articles.html">📚 المقالات</a>
+      <a href="index.html">🏠 الرئيسية</a>
+      <a href="intro.html">📖 عن المشروع</a>
+      <a href="articles.html">📚 المقالات</a>
     </nav>
   </div>
 </header>
@@ -247,7 +247,7 @@ async function generate(){
 
 function renderArticle(data){
   const sn=data.surah_number,an=data.ayah_number;
-  const prev=an>1?`<a href="surah-${sn}-ayah-${an-1}g.html">→ الآية ${an-1}</a>`:`<a href="../ibar-for-all-verses/index.html">→ الرئيسية</a>`;
+  const prev=an>1?`<a href="surah-${sn}-ayah-${an-1}g.html">→ الآية ${an-1}</a>`:`<a href="../index.html">→ الرئيسية</a>`;
   const next=`<a href="surah-${sn}-ayah-${an+1}g.html">الآية ${an+1} ←</a>`;
   document.getElementById("preview-zone").innerHTML=
     `<div class="art-wrap">${buildBody(data,prev,next)}</div>`;
@@ -388,7 +388,7 @@ ${buildTafsirHTML(sn,an)}
     </div>
   </div>
 </div>
-<div class="nav-art">${prev}<a href="../ibar-for-all-verses/articles.html">📚 المقالات</a>${next}</div>
+<div class="nav-art">${prev}<a href="../articles.html">📚 المقالات</a>${next}</div>
 </div>
 <div class="art-footer">
   <div class="fayah">﴿ إِنَّا نَحْنُ نَزَّلْنَا الذِّكْرَ وَإِنَّا لَهُ لَحَافِظُونَ ﴾</div>
@@ -399,8 +399,13 @@ ${buildTafsirHTML(sn,an)}
 // ══ STANDALONE HTML ══
 function buildStandalone(data){
   const a=data.article||{},sn=data.surah_number,an=data.ayah_number;
-  const prev=an>1?`<a href="surah-${sn}-ayah-${an-1}g.html">→ الآية ${an-1}</a>`:`<a href="../ibar-for-all-verses/index.html">→ الرئيسية</a>`;
-  const next=`<a href="surah-${sn}-ayah-${an+1}g.html">الآية ${an+1} ←</a>`;
+  const SITE_BASE = `https://khayati-quran.github.io/ibar-for-all-verses`;
+
+const prev = an > 1
+  ? `<a href="${SITE_BASE}/surah-${sn}-ayah-${an-1}g.html">→ الآية ${an-1}</a>`
+  : `<a href="${SITE_BASE}/index.html">→ الرئيسية</a>`;
+
+const next = `<a href="${SITE_BASE}/surah-${sn}-ayah-${an+1}g.html">الآية ${an+1} ←</a>`;
   const tafsirIds=TAFSIRS.map(t=>t.id).join(",");
   const tafsirLabels=JSON.stringify(TAFSIRS.reduce((o,t)=>{o[t.id]=t.label;return o},{}));
 
@@ -490,14 +495,14 @@ p{line-height:2.1;color:#1a0e05;margin-bottom:12px;font-size:1em;}
 </style></head><body>
 <header class="site-header"><div class="hborder"></div><div class="htop">
 <div class="logo"><div class="logo-gem">🕌</div><div><h1>نور القرآن</h1><p>تفسير وعبر للإنسانية</p></div></div>
-<nav><a href="../ibar-for-all-verses/index.html">🏠</a><a href="../ibar-for-all-verses/articles.html">المقالات</a><a href="../references.html">المراجع</a><a href="../ibar-for-all-verses/intro.html">عن المشروع</a></nav>
+<nav><a href="${SITE_BASE}/index.html">🏠</a><a href="${SITE_BASE}/articles.html">المقالات</a><a href="${SITE_BASE}/references.html">المراجع</a><a href="${SITE_BASE}/intro.html">عن المشروع</a></nav>
 </div></header>
 <div class="art-intro">
   <span class="bism">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>
   <div class="salah">أَحْمَدُكَ رَبِّي وَأَسْتَعِيْنُ بِكَ وَأُصَلِّي وَأُسَلِّمُ عَلَى خَيْرِ خَلْقِكَ سَيِّدِنَا مُحَمَّدٍ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ وَعَلَى آلِهِ وَصَحْبِهِ أَجْمَعِينَ إِلَى يَوْمِ الدِّينِ</div>
 </div>
 <div class="wrap">
-<div class="bc"><a href="../ibar-for-all-verses/index.html">الرئيسية</a> ← <a href="../ibar-for-all-verses/articles.html">المقالات</a> ← تفسير سورة ${data.surah_name} — الآية ${an}</div>
+<div class="bc"><a href="${SITE_BASE}/index.html">الرئيسية</a> ← <a href="${SITE_BASE}/articles.html">المقالات</a> ← تفسير سورة ${data.surah_name} — الآية ${an}</div>
 <div class="frame">
 <div class="ornament">✦ &nbsp; بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ &nbsp; ✦</div>
 <div class="art-head"><div class="badge">سورة ${data.surah_name} • الآية ${an}</div>
@@ -529,7 +534,7 @@ p{line-height:2.1;color:#1a0e05;margin-bottom:12px;font-size:1em;}
 <div class="sh-body"><p style="margin-bottom:10px;font-size:.84em;color:#555">استمع إلى الشيخ الشعراوي :</p>
 <div class="yt-wrap"><iframe src="https://www.youtube.com/embed/videoseries?list=PLiJSlz8e4RlG7I_eLF3tQ0MMpPgV68FoK" title="الشعراوي" allowfullscreen loading="lazy"></iframe></div>
 </div></div>
-<div class="nav-art">${prev}<a href="../ibar-for-all-verses/articles.html">📚 المقالات</a>${next}</div>
+<div class="nav-art">${prev}<a href="${SITE_BASE}/articles.html">📚 المقالات</a>${next}</div>
 </div></div></div>
 <footer class="site-footer"><div class="hborder" style="margin-bottom:16px"></div>
 <div class="fayah">﴿ إِنَّا نَحْنُ نَزَّلْنَا الذِّكْرَ وَإِنَّا لَهُ لَحَافِظُونَ ﴾</div>
@@ -565,18 +570,29 @@ function _sw(id){
 // Init tabs
 (function(){
   const tb=document.getElementById("tabs"),pn=document.getElementById("panels");
+  const firstWithContent = _TID.find(id => _TC[id]) || _TID[0];
+
   _TID.forEach((id,i)=>{
+    const isActive = id === firstWithContent;
+
     const t=document.createElement("div");
-    t.className="tt"+(i===0?" active":""); t.id="t"+id;
-    t.textContent=_TL[id]; t.onclick=()=>_sw(id); tb.appendChild(t);
+    t.className="tt"+(isActive?" active":"");
+    t.id="t"+id;
+    t.textContent=_TL[id];
+    t.onclick=()=>_sw(id);
+    tb.appendChild(t);
+
     const p=document.createElement("div");
-    p.className="tp"+(i===0?" active":""); p.id="p"+id;
+    p.className="tp"+(isActive?" active":"");
+    p.id="p"+id;
     pn.appendChild(p);
   });
-  // Show first tab that has content
-  const firstWithContent = _TID.find(id => _TC[id]);
-  if(firstWithContent) _ren(firstWithContent, _TC[firstWithContent]);
-  else if(_TC[121]) _ren(121,_TC[121]);
+
+  if(_TC[firstWithContent]) {
+    _ren(firstWithContent, _TC[firstWithContent]);
+  } else {
+    _sw(firstWithContent);
+  }
 })();
 <\/script>
 </body></html>`;
