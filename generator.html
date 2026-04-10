@@ -283,21 +283,10 @@ function expandTp(btn){
 }
 
 
-// تحميل تفسير واحد حسب المصدر
+// تحميل تفسير واحد — Worker GET endpoint
 async function fetchTafsirTab(id, sn, an) {
-  // كل التفاسير الآن من tafasir.online عبر الـ Worker
-  // نستخدم Worker endpoint مباشرة لتجنب CORS
-  // Fallback: quran.com للتوافق مع الأرقام القديمة
-  const quranComIds = {169:169, 91:91, 92:92, 93:93, 94:94, 74:74};
-  if (quranComIds[id]) {
-    return fetch(`https://api.quran.com/api/v4/tafsirs/${id}/by_ayah/${sn}:${an}`);
-  }
-  // للـ tafasir.online IDs — نستخدم Worker كـ proxy
-  return fetch(`${WORKER}`, {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({surah_name:'', surah_number:sn, ayah_number:an, tafsir_only:id})
-  });
+  // استخدم Worker endpoint الجديد لكل التفاسير
+  return fetch(`${WORKER}?mode=tafsir&sn=${sn}&an=${an}&book=${id}`);
 }
 
 async function swTab(id,sn,an){
@@ -312,7 +301,8 @@ async function swTab(id,sn,an){
     try{
       const res=await fetchTafsirTab(id, sn, an);
       const td=await res.json();
-      const raw=td?.tafsir?.text||"";
+      // Worker GET: {ok:true, content:"..."} — quran.com: {tafsir:{text:"..."}}
+      const raw=td?.content||td?.tafsir?.text||"";
       const txt=stripH(raw);
       tafsirCache[id]=txt;
       const {short,full}=shortPreview(txt);
@@ -548,10 +538,10 @@ function _sw(id){
   if(tb)tb.classList.add("active");if(p)p.classList.add("active");
   if(!_TC[id]&&p){
     p.innerHTML='<div class="tl">⏳ جارٍ التحميل...</div>';
-    fetch("https://api.quran.com/api/v4/tafsirs/"+id+"/by_ayah/"+_SN+":"+_AN)
+    fetch("https://nour-quran-worker.khayati1hafedh.workers.dev?mode=tafsir&sn="+_SN+"&an="+_AN+"&book="+id)
     .then(r=>r.json()).then(d=>{
-      const raw=d?.tafsir?.text||"";
-      const txt=raw.replace(/<br\s*\\/?>/gi,"\\n").replace(/<\\/p>/gi,"\\n\\n").replace(/<[^>]+>/g,"").replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&nbsp;/g," ").trim();
+      const raw=d?.content||d?.tafsir?.text||"";
+      const txt=raw.replace(/<br\s*\/?>/gi,"\n").replace(/<\/p>/gi,"\n\n").replace(/<[^>]+>/g,"").replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&nbsp;/g," ").trim();
       _TC[id]=txt;_ren(id,txt);
     }).catch(()=>{if(p)p.innerHTML='<div class="tl" style="color:#c00">تعذّر التحميل</div>';});
   }
@@ -567,7 +557,10 @@ function _sw(id){
     p.className="tp"+(i===0?" active":""); p.id="p"+id;
     pn.appendChild(p);
   });
-  if(_TC[169])_ren(169,_TC[169]);
+  // Show first tab that has content
+  const firstWithContent = _TID.find(id => _TC[id]);
+  if(firstWithContent) _ren(firstWithContent, _TC[firstWithContent]);
+  else if(_TC[121]) _ren(121,_TC[121]);
 })();
 <\/script>
 </body></html>`;
