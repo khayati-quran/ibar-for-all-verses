@@ -262,51 +262,21 @@ function shortPreview(text,maxChars=180){
 }
 
 function buildTafsirHTML(sn,an){
-  const firstWithContent = TAFSIRS.find(t => tafsirCache[t.id])?.id || TAFSIRS[0].id;
-
-  const tabs = TAFSIRS.map(t =>
-    `<div class="tt${t.id===firstWithContent?' active':''}" onclick="swTabLocal(${t.id})">${t.label}</div>`
-  ).join("");
-
-  const panels = TAFSIRS.map(t=>{
-    const txt = tafsirCache[t.id] || "";
-    const {short,full} = shortPreview(txt);
-
-    let inner = `<div class="tp-loading">لا يوجد نص متاح لهذا التفسير</div>`;
-    if(txt){
-      inner = full
-        ? `<span class="tp-short">${e(short)} <button class="btn-more" onclick="expandTp(this)">اقرأ المزيد ▼</button></span><span class="tp-full">${e(full)}</span>`
-        : `<span class="tp-short">${e(txt)}</span>`;
+  const firstId=TAFSIRS[0].id;
+const tabs=TAFSIRS.map(t=>`<div class="tt${t.id===firstId?' active':''}" onclick="swTab(${t.id},${sn},${an})">${t.label}</div>`).join("");
+  const panels=TAFSIRS.map(t=>{
+    const firstId=TAFSIRS[0].id;
+    if(t.id===firstId){
+      const txt=tafsirCache[firstId]||tafsirCache[169]||"";
+      const {short,full}=shortPreview(txt);
+      const inner=full
+        ?`<span class="tp-short">${e(short)} <button class="btn-more" onclick="expandTp(this)">اقرأ المزيد ▼</button></span><span class="tp-full">${e(full)}</span>`
+        :`<span class="tp-short">${e(txt)}</span>`;
+      return `<div class="tp active" id="tp-${t.id}">${inner}</div>`;
     }
-
-    return `<div class="tp${t.id===firstWithContent?' active':''}" id="tp-${t.id}">${inner}</div>`;
+    return `<div class="tp" id="tp-${t.id}"><div class="tp-loading">اضغط لتحميل هذا التفسير</div></div>`;
   }).join("");
-
-  return `<div class="tafsir-wrap"><div class="tafsir-tabs">${tabs}</div>${panels}</div>`;
-}
-
-function swTabLocal(id){
-  document.querySelectorAll('.tafsir-tabs .tt').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.tafsir-wrap .tp').forEach(x=>x.classList.remove('active'));
-
-  const tabs = [...document.querySelectorAll('.tafsir-tabs .tt')];
-  const idx = TAFSIRS.findIndex(t => t.id === id);
-  if(idx >= 0 && tabs[idx]) tabs[idx].classList.add('active');
-
-  const panel = document.getElementById(`tp-${id}`);
-  if(panel) panel.classList.add('active');
-}
-
-function swTabLocal(id){
-  document.querySelectorAll('.tafsir-tabs .tt').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.tafsir-wrap .tp').forEach(x=>x.classList.remove('active'));
-
-  const tabs = [...document.querySelectorAll('.tafsir-tabs .tt')];
-  const idx = TAFASIRS.findIndex(t => t.id === id);
-  if(idx >= 0 && tabs[idx]) tabs[idx].classList.add('active');
-
-  const panel = document.getElementById(`tp-${id}`);
-  if(panel) panel.classList.add('active');
+  return `<div><div class="tafsir-tabs">${tabs}</div>${panels}</div>`;
 }
 
 function expandTp(btn){
@@ -439,72 +409,20 @@ const next = `<a href="${SITE_BASE}/surah-${sn}-ayah-${an+1}g.html">الآية $
   const tafsirIds=TAFSIRS.map(t=>t.id).join(",");
   const tafsirLabels=JSON.stringify(TAFSIRS.reduce((o,t)=>{o[t.id]=t.label;return o},{}));
 
-function buildStaticStandaloneTafsir(data){
+  // Précharger TOUS les classical_tafsirs dans _TC
   const nameToId = {
-    "ابن كثير":50,
-    "القرطبي":45,
-    "البغوي":33,
-    "الجلالين":66,
-    "الآلوسي":84,
-    "ابن سعدي":102,
-    "ابن عاشور":105,
-    "الشوكاني":82,
-    "في ظلال القرآن":104,
-    "التفسير الميسر":121
+    "ابن كثير":50,"القرطبي":45,"البغوي":33,"الجلالين":66,
+    "الآلوسي":84,"ابن سعدي":102,"ابن عاشور":105,"الشوكاني":82,
+    "في ظلال القرآن":104,"التفسير الميسر":121
   };
-
-  const localCache = {};
-
-  if (data.tafsir_muyassar) {
-    localCache[121] = data.tafsir_muyassar;
-  }
-
-  if (data.classical_tafsirs && typeof data.classical_tafsirs === "object") {
+  const preloaded = {};
+  if (data.classical_tafsirs) {
     for (const [name, text] of Object.entries(data.classical_tafsirs)) {
       const id = nameToId[name];
-      if (id && text) localCache[id] = text;
+      if (id && text) preloaded[id] = text.replace(/\\/g,"\\\\").replace(/`/g,"\\`").replace(/\$/g,"\\$");
     }
   }
-
-  const firstWithContent = TAFSIRS.find(t => localCache[t.id])?.id || TAFSIRS[0].id;
-
-  const tabs = TAFSIRS.map(t =>
-    `<div class="tt${t.id===firstWithContent?' active':''}" onclick="swStaticTab(${t.id})">${t.label}</div>`
-  ).join("");
-
-  const panels = TAFSIRS.map(t=>{
-    const txt = localCache[t.id] || "";
-    const {short,full} = shortPreview(txt, 200);
-
-    let inner = `<div class="tl">لا يوجد نص متاح لهذا التفسير</div>`;
-    if(txt){
-      inner = full
-        ? `<span class="tp-short">${e(short)} <button class="btn-more" onclick="expandStaticTp(this)">اقرأ المزيد ▼</button></span><span class="tp-full">${e(full)}</span>`
-        : `<span>${e(txt)}</span>`;
-    }
-
-    return `<div class="tp${t.id===firstWithContent?' active':''}" id="sp-${t.id}">${inner}</div>`;
-  }).join("");
-
-  return `<div class="tafsir-wrap"><div class="tafsir-tabs">${tabs}</div>${panels}</div>`;
-}
-
-
-function swStaticTab(id){
-  document.querySelectorAll('.tt').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));
-
-  const tabs = [...document.querySelectorAll('.tt')];
-  const idx = TAFSIRS.findIndex(t => t.id === id);
-  if(idx >= 0 && tabs[idx]) tabs[idx].classList.add('active');
-
-  const panel = document.getElementById('sp-' + id);
-  if(panel) panel.classList.add('active');
-}
-
-function expandStaticTp(btn){
-  btn.closest('.tp').classList.add('exp');
-}
+  const tcInit = JSON.stringify(preloaded).replace(/"/g,"'").replace(/'(\d+)':/g,"$1:");
 
   return `<!DOCTYPE html><html lang="ar" dir="rtl"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -594,7 +512,8 @@ p{line-height:2.1;color:#1a0e05;margin-bottom:12px;font-size:1em;}
 <div class="ayah-box"><div class="ayah-text">${data.ayah_text||""}</div><div class="ayah-ref">سورة ${data.surah_name} — الآية ${an}</div></div>
 <h2>🌅 مدخل يمسّ الإنسان</h2><p>${a.question_hook||""}</p>
 <h2>📚 التفسير — من كتب التراث</h2>
-${buildStaticStandaloneTafsir(data)}
+<div class="tafsir-tabs" id="tabs"></div>
+<div id="panels"></div>
 <h2>🔤 المفردات والبلاغة</h2><p>${a.mufradat||""}</p>
 <h2>📍 سبب النزول والسياق</h2><div class="sabab-box">${a.sabab_nuzul||""}</div>
 <h2>🎙️ خاطرة الشيخ الشعراوي رحمه الله</h2><p>${a.sharawi||""}</p>
