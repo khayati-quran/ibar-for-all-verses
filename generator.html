@@ -399,9 +399,23 @@ function buildStandalone(data){
   const a=data.article||{},sn=data.surah_number,an=data.ayah_number;
   const prev=an>1?`<a href="surah-${sn}-ayah-${an-1}g.html">→ الآية ${an-1}</a>`:`<a href="../index.html">→ الرئيسية</a>`;
   const next=`<a href="surah-${sn}-ayah-${an+1}g.html">الآية ${an+1} ←</a>`;
-  const muyassar=(data.tafsir_muyassar||"").replace(/\n/g,"<br>").replace(/'/g,"\\'");
   const tafsirIds=TAFSIRS.map(t=>t.id).join(",");
   const tafsirLabels=JSON.stringify(TAFSIRS.reduce((o,t)=>{o[t.id]=t.label;return o},{}));
+
+  // Précharger TOUS les classical_tafsirs dans _TC
+  const nameToId = {
+    "ابن كثير":50,"القرطبي":45,"البغوي":33,"الجلالين":66,
+    "الآلوسي":84,"ابن سعدي":102,"ابن عاشور":105,"الشوكاني":82,
+    "في ظلال القرآن":104,"التفسير الميسر":121
+  };
+  const preloaded = {};
+  if (data.classical_tafsirs) {
+    for (const [name, text] of Object.entries(data.classical_tafsirs)) {
+      const id = nameToId[name];
+      if (id && text) preloaded[id] = text.replace(/\\/g,"\\\\").replace(/`/g,"\\`").replace(/\$/g,"\\$");
+    }
+  }
+  const tcInit = JSON.stringify(preloaded).replace(/"/g,"'").replace(/'(\d+)':/g,"$1:");
 
   return `<!DOCTYPE html><html lang="ar" dir="rtl"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -523,7 +537,7 @@ p{line-height:2.1;color:#1a0e05;margin-bottom:12px;font-size:1em;}
 const _SN=${sn},_AN=${an};
 const _TL=${tafsirLabels};
 const _TID=[${tafsirIds}];
-const _TC={169:'${muyassar}'};
+const _TC=${tcInit};
 function _sh(t,ml){if(!t||t.length<=ml)return{s:t,f:null};const c=t.lastIndexOf(" ",ml)||ml;return{s:t.slice(0,c)+"...",f:t};}
 function _exp(btn){btn.closest(".tp").classList.add("exp");}
 function _ren(id,txt){
