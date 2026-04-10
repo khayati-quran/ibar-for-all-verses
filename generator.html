@@ -262,13 +262,13 @@ function shortPreview(text,maxChars=180){
 }
 
 function buildTafsirHTML(sn,an){
-  const firstWithContent = TAFASIRS.find(t => tafsirCache[t.id])?.id || TAFASIRS[0].id;
+  const firstWithContent = TAFSIRS.find(t => tafsirCache[t.id])?.id || TAFSIRS[0].id;
 
-  const tabs = TAFASIRS.map(t =>
+  const tabs = TAFSIRS.map(t =>
     `<div class="tt${t.id===firstWithContent?' active':''}" onclick="swTabLocal(${t.id})">${t.label}</div>`
   ).join("");
 
-  const panels = TAFASIRS.map(t=>{
+  const panels = TAFSIRS.map(t=>{
     const txt = tafsirCache[t.id] || "";
     const {short,full} = shortPreview(txt);
 
@@ -283,6 +283,18 @@ function buildTafsirHTML(sn,an){
   }).join("");
 
   return `<div class="tafsir-wrap"><div class="tafsir-tabs">${tabs}</div>${panels}</div>`;
+}
+
+function swTabLocal(id){
+  document.querySelectorAll('.tafsir-tabs .tt').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.tafsir-wrap .tp').forEach(x=>x.classList.remove('active'));
+
+  const tabs = [...document.querySelectorAll('.tafsir-tabs .tt')];
+  const idx = TAFSIRS.findIndex(t => t.id === id);
+  if(idx >= 0 && tabs[idx]) tabs[idx].classList.add('active');
+
+  const panel = document.getElementById(`tp-${id}`);
+  if(panel) panel.classList.add('active');
 }
 
 function swTabLocal(id){
