@@ -173,7 +173,7 @@ const TAFSIRS = [
   {id:33,  label:"البغوي"},
   {id:102, label:"ابن سعدي"},
   {id:105, label:"ابن عاشور"},
-  {id:66,  label:"الجلالين"},
+  {id:167,  label:"تفسير الشافعي"},
   {id:84,  label:"الآلوسي"},
   {id:82,  label:"الشوكاني"},
   {id:104, label:"ظلال القرآن"}
@@ -481,7 +481,7 @@ function swTabLocal(id){
   document.querySelectorAll(".tafsir-tabs .tt").forEach(x => x.classList.remove("active"));
   document.querySelectorAll(".tafsir-wrap .tp").forEach(x => x.classList.remove("active"));
 
-  const ids = [121,50,45,33,102,105,66,84,82,104];
+  const ids = [121,50,45,33,102,105,167,84,82,104];
   const tabs = [...document.querySelectorAll(".tafsir-tabs .tt")];
   const idx = ids.findIndex(x => x === id);
   if (idx >= 0 && tabs[idx]) tabs[idx].classList.add("active");
