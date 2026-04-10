@@ -262,21 +262,39 @@ function shortPreview(text,maxChars=180){
 }
 
 function buildTafsirHTML(sn,an){
-  const firstId=TAFSIRS[0].id;
-const tabs=TAFSIRS.map(t=>`<div class="tt${t.id===firstId?' active':''}" onclick="swTab(${t.id},${sn},${an})">${t.label}</div>`).join("");
-  const panels=TAFSIRS.map(t=>{
-    const firstId=TAFSIRS[0].id;
-    if(t.id===firstId){
-      const txt=tafsirCache[firstId]||tafsirCache[169]||"";
-      const {short,full}=shortPreview(txt);
-      const inner=full
-        ?`<span class="tp-short">${e(short)} <button class="btn-more" onclick="expandTp(this)">اقرأ المزيد ▼</button></span><span class="tp-full">${e(full)}</span>`
-        :`<span class="tp-short">${e(txt)}</span>`;
-      return `<div class="tp active" id="tp-${t.id}">${inner}</div>`;
+  const firstWithContent = TAFASIRS.find(t => tafsirCache[t.id])?.id || TAFASIRS[0].id;
+
+  const tabs = TAFASIRS.map(t =>
+    `<div class="tt${t.id===firstWithContent?' active':''}" onclick="swTabLocal(${t.id})">${t.label}</div>`
+  ).join("");
+
+  const panels = TAFASIRS.map(t=>{
+    const txt = tafsirCache[t.id] || "";
+    const {short,full} = shortPreview(txt);
+
+    let inner = `<div class="tp-loading">لا يوجد نص متاح لهذا التفسير</div>`;
+    if(txt){
+      inner = full
+        ? `<span class="tp-short">${e(short)} <button class="btn-more" onclick="expandTp(this)">اقرأ المزيد ▼</button></span><span class="tp-full">${e(full)}</span>`
+        : `<span class="tp-short">${e(txt)}</span>`;
     }
-    return `<div class="tp" id="tp-${t.id}"><div class="tp-loading">اضغط لتحميل هذا التفسير</div></div>`;
+
+    return `<div class="tp${t.id===firstWithContent?' active':''}" id="tp-${t.id}">${inner}</div>`;
   }).join("");
-  return `<div><div class="tafsir-tabs">${tabs}</div>${panels}</div>`;
+
+  return `<div class="tafsir-wrap"><div class="tafsir-tabs">${tabs}</div>${panels}</div>`;
+}
+
+function swTabLocal(id){
+  document.querySelectorAll('.tafsir-tabs .tt').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.tafsir-wrap .tp').forEach(x=>x.classList.remove('active'));
+
+  const tabs = [...document.querySelectorAll('.tafsir-tabs .tt')];
+  const idx = TAFASIRS.findIndex(t => t.id === id);
+  if(idx >= 0 && tabs[idx]) tabs[idx].classList.add('active');
+
+  const panel = document.getElementById(`tp-${id}`);
+  if(panel) panel.classList.add('active');
 }
 
 function expandTp(btn){
