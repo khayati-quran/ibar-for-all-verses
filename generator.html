@@ -223,7 +223,7 @@ async function generate(){
       return;
     }
     currentData=data;
-    tafsirCache[169]=data.tafsir_muyassar;
+    tafsirCache[121]=data.tafsir_muyassar; tafsirCache[169]=data.tafsir_muyassar;
     // Pré-charger les tafasirs depuis tafasir.online (fournis par le Worker)
     if(data.classical_tafsirs && typeof data.classical_tafsirs === 'object') {
       const nameToId = {
@@ -262,10 +262,12 @@ function shortPreview(text,maxChars=180){
 }
 
 function buildTafsirHTML(sn,an){
-  const tabs=TAFSIRS.map(t=>`<div class="tt${t.id===169?' active':''}" onclick="swTab(${t.id},${sn},${an})">${t.label}</div>`).join("");
+  const firstId=TAFSIRS[0].id;
+const tabs=TAFSIRS.map(t=>`<div class="tt${t.id===firstId?' active':''}" onclick="swTab(${t.id},${sn},${an})">${t.label}</div>`).join("");
   const panels=TAFSIRS.map(t=>{
-    if(t.id===169){
-      const txt=tafsirCache[169]||"";
+    const firstId=TAFSIRS[0].id;
+    if(t.id===firstId){
+      const txt=tafsirCache[firstId]||tafsirCache[169]||"";
       const {short,full}=shortPreview(txt);
       const inner=full
         ?`<span class="tp-short">${e(short)} <button class="btn-more" onclick="expandTp(this)">اقرأ المزيد ▼</button></span><span class="tp-full">${e(full)}</span>`
