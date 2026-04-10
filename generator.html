@@ -565,18 +565,29 @@ function _sw(id){
 // Init tabs
 (function(){
   const tb=document.getElementById("tabs"),pn=document.getElementById("panels");
+  const firstWithContent = _TID.find(id => _TC[id]) || _TID[0];
+
   _TID.forEach((id,i)=>{
+    const isActive = id === firstWithContent;
+
     const t=document.createElement("div");
-    t.className="tt"+(i===0?" active":""); t.id="t"+id;
-    t.textContent=_TL[id]; t.onclick=()=>_sw(id); tb.appendChild(t);
+    t.className="tt"+(isActive?" active":"");
+    t.id="t"+id;
+    t.textContent=_TL[id];
+    t.onclick=()=>_sw(id);
+    tb.appendChild(t);
+
     const p=document.createElement("div");
-    p.className="tp"+(i===0?" active":""); p.id="p"+id;
+    p.className="tp"+(isActive?" active":"");
+    p.id="p"+id;
     pn.appendChild(p);
   });
-  // Show first tab that has content
-  const firstWithContent = _TID.find(id => _TC[id]);
-  if(firstWithContent) _ren(firstWithContent, _TC[firstWithContent]);
-  else if(_TC[121]) _ren(121,_TC[121]);
+
+  if(_TC[firstWithContent]) {
+    _ren(firstWithContent, _TC[firstWithContent]);
+  } else {
+    _sw(firstWithContent);
+  }
 })();
 <\/script>
 </body></html>`;
