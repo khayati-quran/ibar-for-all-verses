@@ -165,16 +165,23 @@ const SURAHS=[{n:1,name:"الفاتحة",ayat:7},{n:2,name:"البقرة",ayat:2
 // IDs quran.com — tous arabes
 // التفاسير من tafasir.online API
 const TAFSIRS=[
-  {id:121, label:"الميسر",      src:"tafasir"},
-  {id:50,  label:"ابن كثير",    src:"tafasir"},
-  {id:45,  label:"القرطبي",     src:"tafasir"},
-  {id:33,  label:"البغوي",      src:"tafasir"},
-  {id:102, label:"ابن سعدي",    src:"tafasir"},
-  {id:105, label:"ابن عاشور",   src:"tafasir"},
-  {id:66,  label:"الجلالين",    src:"tafasir"},
-  {id:84,  label:"الآلوسي",     src:"tafasir"},
-  {id:82,  label:"الشوكاني",    src:"tafasir"},
-  {id:104, label:"ظلال القرآن", src:"tafasir"},
+  {id:121, label:"الميسر", src:"tafasir"},
+  {id:50,  label:"ابن كثير", src:"tafasir"},
+  {id:45,  label:"القرطبي", src:"tafasir"},
+  {id:33,  label:"البغوي", src:"tafasir"},
+  {id:102, label:"ابن سعدي", src:"tafasir"},
+  {id:105, label:"ابن عاشور", src:"tafasir"},
+  {id:66,  label:"الجلالين", src:"tafasir"},
+  {id:84,  label:"الآلوسي", src:"tafasir"},
+  {id:82,  label:"الشوكاني", src:"tafasir"},
+  {id:35,  label:"ابن عطية", src:"tafasir"},
+  {id:54,  label:"أبو حيان", src:"tafasir"},
+  {id:68,  label:"الدر المنثور", src:"tafasir"},
+  {id:176, label:"مكي بن أبي طالب", src:"tafasir"},
+  {id:167, label:"الشافعي", src:"tafasir"},
+  {id:165, label:"مالك", src:"tafasir"},
+  {id:106, label:"الشنقيطي", src:"tafasir"},
+  {id:104, label:"ظلال القرآن", src:"tafasir"}
 ];
 
 const WORKER="https://nour-quran-worker.khayati1hafedh.workers.dev";
@@ -471,7 +478,7 @@ p{line-height:2.1;color:#1a0e05;margin-bottom:12px;font-size:1em;}
 <div class="wrap"><div class="bc"><a href="${SITE_BASE}/index.html">الرئيسية</a> ← <a href="${SITE_BASE}/articles.html">المقالات</a> ← تفسير سورة ${e(data.surah_name)} — الآية ${an}</div><div class="frame"><div class="ornament">✦ &nbsp; بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ &nbsp; ✦</div><div class="art-head"><div class="badge">سورة ${e(data.surah_name)} • الآية ${an}</div><div class="art-title">تفسير سورة ${e(data.surah_name)} — الآية ${an}</div><div class="art-meta">تفسير أصيل • الشعراوي • إعجاز علمي • عبرة • تطبيق معاصر</div></div><div class="art-body"><div class="ayah-box"><div class="ayah-text">${e(data.ayah_text || "")}</div><div class="ayah-ref">سورة ${e(data.surah_name)} — الآية ${an}</div></div><h2>🌅 مدخل يمسّ الإنسان</h2><p>${e(a.question_hook || "")}</p><h2>📚 التفسير — من كتب التراث</h2>${buildStaticStandaloneTafsir(data)}<h2>🔤 المفردات والبلاغة</h2><p>${e(a.mufradat || "")}</p><h2>📍 سبب النزول والسياق</h2><div class="sabab-box">${e(a.sabab_nuzul || "")}</div><h2>🎙️ خاطرة الشيخ الشعراوي رحمه الله</h2><p>${e(a.sharawi || "")}</p><div class="science-box"><div class="sci-title">🔬 الإعجاز — القرآن يثبت نفسه</div><p>${e(a.ijaz_ilmi || "")}</p></div><h2>💎 العبرة العميقة — ثلاثة مستويات</h2><div class="ibra-box"><div class="ibra-title">💎 العبرة الجوهرية :</div><p><strong>① المستوى العقدي :</strong> ${e(a.ibra_1 || "")}</p><p><strong>② المستوى النفسي :</strong> ${e(a.ibra_2 || "")}</p><p><strong>③ المستوى الحضاري :</strong> ${e(a.ibra_3 || "")}</p><p style="font-style:italic;color:#555;border-top:1px dashed #daa520;padding-top:10px;margin-top:10px">${e(a.ibra_question || "")}</p></div><h2>🌍 التطبيق في حياتنا اليوم</h2><p>${e(a.tatbiq || "")}</p><h2>🕌 القرآن رسالة لك أنت</h2><div class="cta-box"><h3>﴿ أَفَلَا يَتَدَبَّرُونَ الْقُرْآنَ ﴾</h3><p>تأمّل هذه الآية واجعلها منطلقاً للتغيير في حياتك اليومية.</p></div><div class="divider">❧ ✦ ❧</div><div class="sharawi-box"><div class="sh-head"><span style="font-size:1.3em">▶</span><div><div class="sh-title">الشيخ محمد متولي الشعراوي رحمه الله</div><div class="sh-sub">تفسير سورة ${e(data.surah_name)}</div></div></div><div class="sh-body"><p style="margin-bottom:10px;font-size:.84em;color:#555">استمع إلى الشيخ الشعراوي :</p><div class="yt-wrap"><iframe src="https://www.youtube.com/embed/videoseries?list=PLiJSlz8e4RlG7I_eLF3tQ0MMpPgV68FoK" title="الشعراوي" allowfullscreen loading="lazy"></iframe></div></div></div><div class="nav-art">${prev}<a href="${SITE_BASE}/articles.html">📚 المقالات</a>${next}</div></div></div></div>
 <footer class="site-footer"><div class="hborder" style="margin-bottom:16px"></div><div class="fayah">﴿ إِنَّا نَحْنُ نَزَّلْنَا الذِّكْرَ وَإِنَّا لَهُ لَحَافِظُونَ ﴾</div><p>سورة الحجر — الآية 9 | 🕌 موقع نور القرآن الكريم</p></footer>
 <script>
-function swStaticTab(id){document.querySelectorAll('.tt').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));const tabs=[...document.querySelectorAll('.tt')];const ids=${str([121,50,45,33,102,105,66,84,82,104])};const idx=ids.findIndex(x=>x===id);if(idx>=0&&tabs[idx])tabs[idx].classList.add('active');const panel=document.getElementById('sp-'+id);if(panel)panel.classList.add('active');}
+function swStaticTab(id){document.querySelectorAll('.tt').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));const tabs=[...document.querySelectorAll('.tt')];const ids=${JSON.stringify(TAFSIRS.map(t => t.id))};const idx=ids.findIndex(x=>x===id);if(idx>=0&&tabs[idx])tabs[idx].classList.add('active');const panel=document.getElementById('sp-'+id);if(panel)panel.classList.add('active');}
 function expandStaticTp(btn){const panel=btn.closest('.tp');if(panel)panel.classList.add('expanded');}
 <\/script>
 </body></html>`;
