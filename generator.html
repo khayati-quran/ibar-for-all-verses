@@ -581,10 +581,10 @@ nav a{color:rgba(255,255,255,.85);text-decoration:none;font-size:.84em;padding:5
 </div></header>
 <div class="wrap"><div class="bc"><a href="${SITE_BASE}/index.html">الرئيسية</a> ← <a href="${SITE_BASE}/articles.html">المقالات</a> ← تفسير سورة ${data.surah_name} — الآية ${an}</div><div class="frame">${articleHtml}</div></div>
 <footer class="site-footer"><div class="hborder" style="margin-bottom:16px"></div><div class="fayah">﴿ إِنَّا نَحْنُ نَزَّلْنَا الذِّكْرَ وَإِنَّا لَهُ لَحَافِظُونَ ﴾</div><p>سورة الحجر — الآية 9 | 🕌 موقع نور القرآن الكريم</p></footer>
-<script>
+
 function swStaticTab(id){document.querySelectorAll('.tt').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));const tabs=[...document.querySelectorAll('.tt')];const ids=${JSON.stringify([121,50,45,33,102,105,66,84,82,35,54,68,176,167,165,106,104])};const idx=ids.findIndex(x=>x===id);if(idx>=0&&tabs[idx])tabs[idx].classList.add('active');const panel=document.getElementById('sp-'+id);if(panel)panel.classList.add('active');}
 function expandStaticTp(btn){const panel=btn.closest('.tp');if(panel)panel.classList.add('expanded');}
-</script>
+<\/script>
 </body></html>`;
 }
 
@@ -675,42 +675,41 @@ async function updateArticlesJson(token, entry){
 
 function buildArticlesPage(entries){
   const list = Array.isArray(entries) ? entries : [];
-  const cards = list.map(item => `
-  <div class="article-card">
-    <h3>${e(item.title || "")}</h3>
-    <p>سورة ${e(item.surah_name || "")} • الآية ${e(item.ayah_number || "")}</p>
-    <a href="https://khayati-quran.github.io/ibar-for-all-verses/${e(item.file || "")}">فتح المقال</a>
-  </div>`).join("");
+  const cards = list.map(item =>
+    '<div class="article-card">' +
+    '<h3>' + e(item.title || "") + '</h3>' +
+    '<p>سورة ' + e(item.surah_name || "") + ' • الآية ' + e(String(item.ayah_number || "")) + '</p>' +
+    '<a href="https://khayati-quran.github.io/ibar-for-all-verses/' + e(item.file || "") + '">فتح المقال</a>' +
+    '</div>'
+  ).join("");
 
-  return `<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>المقالات | نور القرآن</title>
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-:root{--em:#0a3d2e;--em2:#1a5c42;--gold:#b8860b;--gold2:#daa520;--parch:#fdf6e3;}
-*{box-sizing:border-box}body{margin:0;font-family:'Cairo',sans-serif;background:var(--parch);color:#1a0e05}
-.header{background:linear-gradient(180deg,var(--em),var(--em2));color:#fff;padding:18px 20px;border-bottom:3px solid var(--gold2)}
-.header h1{margin:0;font-family:'Amiri',serif;color:#f0c040}
-.header p{margin:6px 0 0 0;color:rgba(255,255,255,.75)}
-.wrap{max-width:1100px;margin:0 auto;padding:24px 16px}
-.article-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
-.article-card{background:#fff;border:1px solid var(--gold2);padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
-.article-card h3{font-family:'Amiri',serif;margin:0 0 8px 0;color:var(--em)}
-.article-card p{margin:0 0 12px 0;line-height:1.8;color:#444}
-.article-card a{display:inline-block;text-decoration:none;color:var(--em2);border:1px solid var(--em2);padding:6px 10px}
-.empty{padding:24px;background:#fff;border:1px solid var(--gold2)}
-</style>
-</head>
-<body>
-<div class="header"><h1>المقالات</h1><p>آخر المقالات المنشورة آية بآية</p></div>
-<div class="wrap">
-${cards ? `<div class="article-grid">${cards}</div>` : `<div class="empty">لا توجد مقالات منشورة بعد.</div>`}
-</div>
-</body>
-</html>`;
+  const gridHtml = cards
+    ? '<div class="article-grid">' + cards + '</div>'
+    : '<div class="empty">لا توجد مقالات منشورة بعد.</div>';
+
+  return '<!DOCTYPE html>' +
+    '<html lang="ar" dir="rtl"><head>' +
+    '<meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width,initial-scale=1.0">' +
+    '<title>المقالات | نور القرآن</title>' +
+    '<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">' +
+    '<style>' +
+    ':root{--em:#0a3d2e;--em2:#1a5c42;--gold:#b8860b;--gold2:#daa520;--parch:#fdf6e3;}' +
+    '*{box-sizing:border-box}body{margin:0;font-family:Cairo,sans-serif;background:var(--parch);color:#1a0e05}' +
+    '.header{background:linear-gradient(180deg,var(--em),var(--em2));color:#fff;padding:18px 20px;border-bottom:3px solid var(--gold2)}' +
+    '.header h1{margin:0;font-family:Amiri,serif;color:#f0c040}' +
+    '.header p{margin:6px 0 0 0;color:rgba(255,255,255,.75)}' +
+    '.wrap{max-width:1100px;margin:0 auto;padding:24px 16px}' +
+    '.article-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}' +
+    '.article-card{background:#fff;border:1px solid var(--gold2);padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.08)}' +
+    '.article-card h3{font-family:Amiri,serif;margin:0 0 8px 0;color:var(--em)}' +
+    '.article-card p{margin:0 0 12px 0;line-height:1.8;color:#444}' +
+    '.article-card a{display:inline-block;text-decoration:none;color:var(--em2);border:1px solid var(--em2);padding:6px 10px}' +
+    '.empty{padding:24px;background:#fff;border:1px solid var(--gold2)}' +
+    '</style></head><body>' +
+    '<div class="header"><h1>المقالات</h1><p>آخر المقالات المنشورة آية بآية</p></div>' +
+    '<div class="wrap">' + gridHtml + '</div>' +
+    '</body></html>';
 }
 
 function buildSitemapXml(entries){
