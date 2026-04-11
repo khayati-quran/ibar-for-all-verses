@@ -198,6 +198,41 @@ let currentData=null, tafsirCache={};
   if(tok) document.getElementById("gh-token").value=tok;
 })();
 
+
+// ══ Fetch all tafsirs in parallel (from Worker) ══
+async function fetchAllTafsirs(sn, an){
+  const out = {};
+  const jobs = TAFSIRS.map(async t => {
+    try {
+      const res = await fetch(`${WORKER}?mode=tafsir&sn=${sn}&an=${an}&book=${t.id}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      const txt = data?.content || "";
+      if (txt) out[t.id] = txt;
+    } catch {}
+  });
+  await Promise.allSettled(jobs);
+  return out;
+}
+
+// ══ Build tafsir tabs from cache ══
+function buildTafsirHTML(cache, sn, an){
+  const firstId = (TAFSIRS.find(t => cache[t.id]) || TAFSIRS[0]).id;
+  const tabs = TAFSIRS.map(t =>
+    `<div class="tt${t.id === firstId ? " active" : ""}" onclick="swTab(${t.id},${sn},${an})">${t.label}</div>`
+  ).join("");
+  const panels = TAFSIRS.map(t => {
+    const txt = tafsirCache[t.id] || cache[t.id] || "";
+    const {short,full} = shortPreview(txt);
+    let inner = txt
+      ? (full ? `<span class="tp-short">${e(short)} <button class="btn-more" onclick="expandTp(this)">اقرأ المزيد ▼</button></span><span class="tp-full">${e(full)}</span>`
+               : `<span class="tp-short">${e(txt)}</span>`)
+      : `<div class="tp-loading">⏳ سيُحمّل عند النقر</div>`;
+    return `<div class="tp${t.id === firstId ? " active" : ""}" id="tp-${t.id}">${inner}</div>`;
+  }).join("");
+  return `<div><div class="tafsir-tabs">${tabs}</div>${panels}</div>`;
+}
+
 async function generate(){
   const sn=parseInt(document.getElementById("sel-surah").value);
   const an=parseInt(document.getElementById("inp-ayah").value);
@@ -224,17 +259,24 @@ async function generate(){
     }
     currentData=data;
     tafsirCache[121]=data.tafsir_muyassar; tafsirCache[169]=data.tafsir_muyassar;
-    // Pré-charger les tafasirs depuis tafasir.online (fournis par le Worker)
+    // Pré-charger les tafasirs classiques depuis Worker response
+    const nameToId = {
+      "ابن كثير":50,"القرطبي":45,"البغوي":33,"الجلالين":66,
+      "الآلوسي":84,"ابن سعدي":102,"ابن عاشور":105,"الشوكاني":82,
+      "في ظلال القرآن":104,"التفسير الميسر":121
+    };
     if(data.classical_tafsirs && typeof data.classical_tafsirs === 'object') {
-      const nameToId = {
-        "ابن كثير":50,"القرطبي":45,"البغوي":33,"الجلالين":66,
-        "الآلوسي":84,"ابن سعدي":102,"ابن عاشور":105,"الشوكاني":82,
-        "في ظلال القرآن":104,"التفسير الميسر":121
-      };
       for(const [name, text] of Object.entries(data.classical_tafsirs)) {
         const id = nameToId[name];
         if(id && text) tafsirCache[id] = text;
       }
+    }
+    // Si pas assez de tafsirs, fetch en parallèle
+    const loaded = Object.keys(tafsirCache).filter(k => tafsirCache[k]).length;
+    if(loaded < 3) {
+      fetchAllTafsirs(sn, an).then(extra => {
+        for(const [id, txt] of Object.entries(extra)) tafsirCache[id] = tafsirCache[id] || txt;
+      });
     }
     renderArticle(data);
     document.getElementById("actions").classList.add("show");
@@ -262,47 +304,60 @@ function shortPreview(text,maxChars=180){
 }
 
 function buildTafsirHTML(sn,an){
-  const firstWithContent = TAFSIRS.find(t => tafsirCache[t.id])?.id || TAFSIRS[0].id;
-
-  const tabs = TAFSIRS.map(t =>
-    `<div class="tt${t.id===firstWithContent?' active':''}" onclick="swTabLocal(${t.id})">${t.label}</div>`
-  ).join("");
-
-  const panels = TAFSIRS.map(t=>{
-    const txt = tafsirCache[t.id] || "";
-    const {short,full} = shortPreview(txt);
-
-    let inner = `<div class="tp-loading">لا يوجد نص متاح لهذا التفسير</div>`;
-    if(txt){
-      inner = full
-        ? `<span class="tp-short">${e(short)} <button class="btn-more" onclick="expandTp(this)">اقرأ المزيد ▼</button></span><span class="tp-full">${e(full)}</span>`
-        : `<span class="tp-short">${e(txt)}</span>`;
+  const firstId=TAFSIRS[0].id;
+const tabs=TAFSIRS.map(t=>`<div class="tt${t.id===firstId?' active':''}" onclick="swTab(${t.id},${sn},${an})">${t.label}</div>`).join("");
+  const panels=TAFSIRS.map(t=>{
+    const firstId=TAFSIRS[0].id;
+    if(t.id===firstId){
+      const txt=tafsirCache[firstId]||tafsirCache[169]||"";
+      const {short,full}=shortPreview(txt);
+      const inner=full
+        ?`<span class="tp-short">${e(short)} <button class="btn-more" onclick="expandTp(this)">اقرأ المزيد ▼</button></span><span class="tp-full">${e(full)}</span>`
+        :`<span class="tp-short">${e(txt)}</span>`;
+      return `<div class="tp active" id="tp-${t.id}">${inner}</div>`;
     }
-
-    return `<div class="tp${t.id===firstWithContent?' active':''}" id="tp-${t.id}">${inner}</div>`;
+    return `<div class="tp" id="tp-${t.id}"><div class="tp-loading">اضغط لتحميل هذا التفسير</div></div>`;
   }).join("");
-
-  return `<div class="tafsir-wrap"><div class="tafsir-tabs">${tabs}</div>${panels}</div>`;
+  return `<div><div class="tafsir-tabs">${tabs}</div>${panels}</div>`;
 }
-
-function swTabLocal(id){
-  document.querySelectorAll('.tafsir-tabs .tt').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.tafsir-wrap .tp').forEach(x=>x.classList.remove('active'));
-
-  const tabs = [...document.querySelectorAll('.tafsir-tabs .tt')];
-  const idx = TAFSIRS.findIndex(t => t.id === id);
-  if(idx >= 0 && tabs[idx]) tabs[idx].classList.add('active');
-
-  const panel = document.getElementById(`tp-${id}`);
-  if(panel) panel.classList.add('active');
-}
-
 
 function expandTp(btn){
   const panel=btn.closest(".tp");
   panel.classList.add("expanded");
 }
 
+
+// تحميل تفسير واحد — Worker GET endpoint
+async function fetchTafsirTab(id, sn, an) {
+  // استخدم Worker endpoint الجديد لكل التفاسير
+  return fetch(`${WORKER}?mode=tafsir&sn=${sn}&an=${an}&book=${id}`);
+}
+
+async function swTab(id,sn,an){
+  document.querySelectorAll(".tt").forEach(t=>t.classList.remove("active"));
+  document.querySelectorAll(".tp").forEach(p=>p.classList.remove("active"));
+  const tab=document.querySelector(`.tt[onclick*="swTab(${id},"]`);
+  const panel=document.getElementById(`tp-${id}`);
+  if(tab) tab.classList.add("active");
+  if(panel) panel.classList.add("active");
+  if(!tafsirCache[id]&&panel){
+    panel.innerHTML=`<div class="tp-loading">⏳ جارٍ تحميل التفسير...</div>`;
+    try{
+      const res=await fetchTafsirTab(id, sn, an);
+      const td=await res.json();
+      // Worker GET: {ok:true, content:"..."} — quran.com: {tafsir:{text:"..."}}
+      const raw=td?.content||td?.tafsir?.text||"";
+      const txt=stripH(raw);
+      tafsirCache[id]=txt;
+      const {short,full}=shortPreview(txt);
+      panel.innerHTML=full
+        ?`<span class="tp-short">${e(short)} <button class="btn-more" onclick="expandTp(this)">اقرأ المزيد ▼</button></span><span class="tp-full">${e(full)}</span>`
+        :`<span class="tp-short">${e(txt)}</span>`;
+    }catch(err){
+      panel.innerHTML=`<div class="tp-loading" style="color:#c00">تعذّر تحميل التفسير</div>`;
+    }
+  }
+}
 
 function stripH(h){
   if(!h)return"";
@@ -334,8 +389,8 @@ function buildBody(data,prev,next){
 </div>
 <h2 class="sec-h">🌅 مدخل يمسّ الإنسان</h2>
 <p class="sec-p">${e(a.question_hook)}</p>
-<h2>📚 التفسير — من كتب التراث</h2>
-${buildTafsirHTML(sn,an)}
+<h2 class="sec-h">📚 التفسير — من كتب التراث</h2>
+${buildTafsirHTML(tafsirCache,sn,an)}
 <h2 class="sec-h">🔤 المفردات والبلاغة</h2>
 <p class="sec-p">${e(a.mufradat)}</p>
 <h2 class="sec-h">📍 سبب النزول والسياق</h2>
@@ -384,11 +439,64 @@ ${buildTafsirHTML(sn,an)}
 }
 
 // ══ STANDALONE HTML ══
+// ══ For standalone HTML: embed tafsirs directly ══
+function buildEmbeddedTafsirHTML(classical, sn, an){
+  const nameToId = {
+    "ابن كثير":50,"القرطبي":45,"البغوي":33,"الجلالين":66,
+    "الآلوسي":84,"ابن سعدي":102,"ابن عاشور":105,"الشوكاني":82,
+    "في ظلال القرآن":104,"التفسير الميسر":121
+  };
+  // Build cache from classical_tafsirs
+  const cache = {};
+  if(classical) {
+    for(const [name,txt] of Object.entries(classical)) {
+      const id = nameToId[name];
+      if(id && txt) cache[id] = txt;
+    }
+  }
+  const firstId = (TAFSIRS.find(t => cache[t.id]) || TAFSIRS[0]).id;
+  const WORKER_URL = "https://nour-quran-worker.khayati1hafedh.workers.dev";
+
+  const tabs = TAFSIRS.map(t =>
+    `<div class="tt${t.id===firstId?" active":""}" onclick="swTabEmbed(${t.id})">${t.label}</div>`
+  ).join("");
+
+  const panels = TAFSIRS.map(t => {
+    const txt = cache[t.id] || "";
+    const short = txt.length > 220 ? txt.slice(0,txt.lastIndexOf(" ",220))+"..." : txt;
+    const full = txt.length > 220 ? txt : null;
+    let inner = txt
+      ? (full
+        ? `<span class="tp-short">${e(short)} <button class="btn-more" onclick="this.closest('.tp').classList.add('expanded')">اقرأ المزيد ▼</button></span><span class="tp-full">${e(full)}</span>`
+        : `<span>${e(txt)}</span>`)
+      : `<div class="tp-loading" id="tpl-${t.id}" data-id="${t.id}" data-sn="${sn}" data-an="${an}">⏳ انقر لتحميل هذا التفسير</div>`;
+    return `<div class="tp${t.id===firstId?" active":""}" id="tp-${t.id}">${inner}</div>`;
+  }).join("");
+
+  return `<div class="tafsir-wrap"><div class="tafsir-tabs">${tabs}</div>${panels}</div>`;
+}
+
 function buildStandalone(data){
   const a=data.article||{},sn=data.surah_number,an=data.ayah_number;
-  const SITE_BASE = `https://khayati-quran.github.io/ibar-for-all-verses`;
-  const prev = an > 1 ? `<a href="${SITE_BASE}/surah-${sn}-ayah-${an-1}g.html">→ الآية ${an-1}</a>` : `<a href="${SITE_BASE}/index.html">→ الرئيسية</a>`;
-  const next = `<a href="${SITE_BASE}/surah-${sn}-ayah-${an+1}g.html">الآية ${an+1} ←</a>`;
+  const prev=an>1?`<a href="surah-${sn}-ayah-${an-1}g.html">→ الآية ${an-1}</a>`:`<a href="../index.html">→ الرئيسية</a>`;
+  const next=`<a href="surah-${sn}-ayah-${an+1}g.html">الآية ${an+1} ←</a>`;
+  const tafsirIds=TAFSIRS.map(t=>t.id).join(",");
+  const tafsirLabels=JSON.stringify(TAFSIRS.reduce((o,t)=>{o[t.id]=t.label;return o},{}));
+
+  // Précharger TOUS les classical_tafsirs dans _TC
+  const nameToId = {
+    "ابن كثير":50,"القرطبي":45,"البغوي":33,"الجلالين":66,
+    "الآلوسي":84,"ابن سعدي":102,"ابن عاشور":105,"الشوكاني":82,
+    "في ظلال القرآن":104,"التفسير الميسر":121
+  };
+  const preloaded = {};
+  if (data.classical_tafsirs) {
+    for (const [name, text] of Object.entries(data.classical_tafsirs)) {
+      const id = nameToId[name];
+      if (id && text) preloaded[id] = text.replace(/\\/g,"\\\\").replace(/`/g,"\\`").replace(/\$/g,"\\$");
+    }
+  }
+  const tcInit = JSON.stringify(preloaded).replace(/"/g,"'").replace(/'(\d+)':/g,"$1:");
 
   return `<!DOCTYPE html><html lang="ar" dir="rtl"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -429,16 +537,12 @@ nav a{color:rgba(255,255,255,.85);text-decoration:none;font-size:.84em;padding:5
 .ayah-ref{font-size:.8em;color:var(--gold);font-weight:600;margin-top:8px;}
 h2{font-family:'Amiri',serif;color:var(--em);font-size:1.18em;margin:22px 0 9px;padding:8px 13px;background:rgba(10,61,46,.07);border-right:4px solid var(--gold);}
 p{line-height:2.1;color:#1a0e05;margin-bottom:12px;font-size:1em;}
-.tafsir-wrap{margin:14px 0;}
 .tafsir-tabs{display:flex;flex-wrap:wrap;gap:0;border-bottom:2px solid var(--gold2);}
 .tt{padding:6px 12px;font-size:.77em;font-family:'Cairo',sans-serif;font-weight:600;cursor:pointer;border:1px solid var(--gold2);border-bottom:none;margin-bottom:-2px;background:#faf8f0;color:var(--em);}
 .tt.active{background:white;border-bottom:2px solid white;font-weight:700;}
 .tp{background:linear-gradient(135deg,#f0f7f0,#eaf4ea);border:1px solid var(--gold2);border-top:none;padding:16px 18px;display:none;line-height:2.1;color:#1a2e1a;font-size:.96em;}
 .tp.active{display:block;}
-.tp-short{display:block;}
-.tp-full{display:none;}
-.tp.expanded .tp-short{display:none;}
-.tp.expanded .tp-full{display:block;}
+.tp-full{display:none;} .tp.exp .tp-short{display:none;} .tp.exp .tp-full{display:block;}
 .btn-more{color:var(--em2);font-size:.78em;cursor:pointer;border-bottom:1px dashed var(--em2);background:none;border-top:none;border-left:none;border-right:none;font-family:'Cairo',sans-serif;margin-top:6px;}
 .tl{color:#888;font-size:.86em;text-align:center;padding:12px;}
 .ibra-box{background:linear-gradient(135deg,#fefae0,#fdf2c0);border:2px solid var(--gold);padding:20px;margin:20px 0;}
@@ -459,20 +563,122 @@ p{line-height:2.1;color:#1a0e05;margin-bottom:12px;font-size:1em;}
 .divider{text-align:center;margin:22px 0;color:var(--gold2);font-size:1.2em;letter-spacing:8px;opacity:.6;}
 .nav-art{display:flex;justify-content:space-between;margin-top:22px;padding-top:13px;border-top:1px solid var(--gold2);flex-wrap:wrap;gap:7px;}
 .nav-art a{color:var(--em2);text-decoration:none;font-size:.8em;padding:5px 12px;border:1px solid var(--em2);}
-.bc{font-size:.76em;color:var(--gold);margin-bottom:12px;}.bc a{color:var(--em2);text-decoration:none;}
+.bc{font-size:.76em;color:var(--gold);margin-bottom:12px;}
+.bc a{color:var(--em2);text-decoration:none;}
 @media(max-width:600px){.art-body{padding:16px 13px;}.htop nav{display:none;}.art-title{font-size:1.4em;}.tt{font-size:.72em;padding:5px 8px;}}
-</style>
-</head><body>
+</style></head><body>
 <header class="site-header"><div class="hborder"></div><div class="htop">
 <div class="logo"><div class="logo-gem">🕌</div><div><h1>نور القرآن</h1><p>تفسير وعبر للإنسانية</p></div></div>
-<nav><a href="${SITE_BASE}/index.html">🏠</a><a href="${SITE_BASE}/articles.html">المقالات</a><a href="${SITE_BASE}/references.html">المراجع</a><a href="${SITE_BASE}/intro.html">عن المشروع</a></nav>
+<nav><a href="../index.html">🏠</a><a href="../articles.html">المقالات</a><a href="../references.html">المراجع</a><a href="../intro.html">عن المشروع</a></nav>
 </div></header>
-<div class="art-intro"><span class="bism">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span><div class="salah">أَحْمَدُكَ رَبِّي وَأَسْتَعِيْنُ بِكَ وَأُصَلِّي وَأُسَلِّمُ عَلَى خَيْرِ خَلْقِكَ سَيِّدِنَا مُحَمَّدٍ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ وَعَلَى آلِهِ وَصَحْبِهِ أَجْمَعِينَ إِلَى يَوْمِ الدِّينِ</div></div>
-<div class="wrap"><div class="bc"><a href="${SITE_BASE}/index.html">الرئيسية</a> ← <a href="${SITE_BASE}/articles.html">المقالات</a> ← تفسير سورة ${e(data.surah_name)} — الآية ${an}</div><div class="frame"><div class="ornament">✦ &nbsp; بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ &nbsp; ✦</div><div class="art-head"><div class="badge">سورة ${e(data.surah_name)} • الآية ${an}</div><div class="art-title">تفسير سورة ${e(data.surah_name)} — الآية ${an}</div><div class="art-meta">تفسير أصيل • الشعراوي • إعجاز علمي • عبرة • تطبيق معاصر</div></div><div class="art-body"><div class="ayah-box"><div class="ayah-text">${e(data.ayah_text || "")}</div><div class="ayah-ref">سورة ${e(data.surah_name)} — الآية ${an}</div></div><h2>🌅 مدخل يمسّ الإنسان</h2><p>${e(a.question_hook || "")}</p><h2>📚 التفسير — من كتب التراث</h2>${buildStaticStandaloneTafsir(data)}<h2>🔤 المفردات والبلاغة</h2><p>${e(a.mufradat || "")}</p><h2>📍 سبب النزول والسياق</h2><div class="sabab-box">${e(a.sabab_nuzul || "")}</div><h2>🎙️ خاطرة الشيخ الشعراوي رحمه الله</h2><p>${e(a.sharawi || "")}</p><div class="science-box"><div class="sci-title">🔬 الإعجاز — القرآن يثبت نفسه</div><p>${e(a.ijaz_ilmi || "")}</p></div><h2>💎 العبرة العميقة — ثلاثة مستويات</h2><div class="ibra-box"><div class="ibra-title">💎 العبرة الجوهرية :</div><p><strong>① المستوى العقدي :</strong> ${e(a.ibra_1 || "")}</p><p><strong>② المستوى النفسي :</strong> ${e(a.ibra_2 || "")}</p><p><strong>③ المستوى الحضاري :</strong> ${e(a.ibra_3 || "")}</p><p style="font-style:italic;color:#555;border-top:1px dashed #daa520;padding-top:10px;margin-top:10px">${e(a.ibra_question || "")}</p></div><h2>🌍 التطبيق في حياتنا اليوم</h2><p>${e(a.tatbiq || "")}</p><h2>🕌 القرآن رسالة لك أنت</h2><div class="cta-box"><h3>﴿ أَفَلَا يَتَدَبَّرُونَ الْقُرْآنَ ﴾</h3><p>تأمّل هذه الآية واجعلها منطلقاً للتغيير في حياتك اليومية.</p></div><div class="divider">❧ ✦ ❧</div><div class="sharawi-box"><div class="sh-head"><span style="font-size:1.3em">▶</span><div><div class="sh-title">الشيخ محمد متولي الشعراوي رحمه الله</div><div class="sh-sub">تفسير سورة ${e(data.surah_name)}</div></div></div><div class="sh-body"><p style="margin-bottom:10px;font-size:.84em;color:#555">استمع إلى الشيخ الشعراوي :</p><div class="yt-wrap"><iframe src="https://www.youtube.com/embed/videoseries?list=PLiJSlz8e4RlG7I_eLF3tQ0MMpPgV68FoK" title="الشعراوي" allowfullscreen loading="lazy"></iframe></div></div></div><div class="nav-art">${prev}<a href="${SITE_BASE}/articles.html">📚 المقالات</a>${next}</div></div></div></div>
-<footer class="site-footer"><div class="hborder" style="margin-bottom:16px"></div><div class="fayah">﴿ إِنَّا نَحْنُ نَزَّلْنَا الذِّكْرَ وَإِنَّا لَهُ لَحَافِظُونَ ﴾</div><p>سورة الحجر — الآية 9 | 🕌 موقع نور القرآن الكريم</p></footer>
+<div class="art-intro">
+  <span class="bism">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>
+  <div class="salah">أَحْمَدُكَ رَبِّي وَأَسْتَعِيْنُ بِكَ وَأُصَلِّي وَأُسَلِّمُ عَلَى خَيْرِ خَلْقِكَ سَيِّدِنَا مُحَمَّدٍ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ وَعَلَى آلِهِ وَصَحْبِهِ أَجْمَعِينَ إِلَى يَوْمِ الدِّينِ</div>
+</div>
+<div class="wrap">
+<div class="bc"><a href="../index.html">الرئيسية</a> ← <a href="../articles.html">المقالات</a> ← تفسير سورة ${data.surah_name} — الآية ${an}</div>
+<div class="frame">
+<div class="ornament">✦ &nbsp; بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ &nbsp; ✦</div>
+<div class="art-head"><div class="badge">سورة ${data.surah_name} • الآية ${an}</div>
+<div class="art-title">تفسير سورة ${data.surah_name} — الآية ${an}</div>
+<div class="art-meta">تفسير أصيل • الشعراوي • إعجاز علمي • عبرة • تطبيق معاصر</div></div>
+<div class="art-body">
+<div class="ayah-box"><div class="ayah-text">${data.ayah_text||""}</div><div class="ayah-ref">سورة ${data.surah_name} — الآية ${an}</div></div>
+<h2>🌅 مدخل يمسّ الإنسان</h2><p>${a.question_hook||""}</p>
+<h2>📚 التفسير — من كتب التراث</h2>
+${buildEmbeddedTafsirHTML(data.classical_tafsirs, sn, an)}
+<h2>🔤 المفردات والبلاغة</h2><p>${a.mufradat||""}</p>
+<h2>📍 سبب النزول والسياق</h2><div class="sabab-box">${a.sabab_nuzul||""}</div>
+<h2>🎙️ خاطرة الشيخ الشعراوي رحمه الله</h2><p>${a.sharawi||""}</p>
+<div class="science-box"><div class="sci-title">🔬 الإعجاز — القرآن يثبت نفسه</div><p>${a.ijaz_ilmi||""}</p></div>
+<h2>💎 العبرة العميقة — ثلاثة مستويات</h2>
+<div class="ibra-box"><div class="ibra-title">💎 العبرة الجوهرية :</div>
+<p><strong>① المستوى العقدي :</strong> ${a.ibra_1||""}</p>
+<p><strong>② المستوى النفسي :</strong> ${a.ibra_2||""}</p>
+<p><strong>③ المستوى الحضاري :</strong> ${a.ibra_3||""}</p>
+<p style="font-style:italic;color:#555;border-top:1px dashed #daa520;padding-top:10px;margin-top:10px">${a.ibra_question||""}</p>
+</div>
+<h2>🌍 التطبيق في حياتنا اليوم</h2><p>${a.tatbiq||""}</p>
+<h2>🕌 القرآن رسالة لك أنت</h2>
+<div class="cta-box"><h3>﴿ أَفَلَا يَتَدَبَّرُونَ الْقُرْآنَ ﴾</h3><p>تأمّل هذه الآية واجعلها منطلقاً للتغيير في حياتك اليومية.</p></div>
+<div class="divider">❧ ✦ ❧</div>
+<div class="sharawi-box">
+<div class="sh-head"><span style="font-size:1.3em">▶</span><div><div class="sh-title">الشيخ محمد متولي الشعراوي رحمه الله</div><div class="sh-sub">تفسير سورة ${data.surah_name}</div></div></div>
+<div class="sh-body"><p style="margin-bottom:10px;font-size:.84em;color:#555">استمع إلى الشيخ الشعراوي :</p>
+<div class="yt-wrap"><iframe src="https://www.youtube.com/embed/videoseries?list=PLiJSlz8e4RlG7I_eLF3tQ0MMpPgV68FoK" title="الشعراوي" allowfullscreen loading="lazy"></iframe></div>
+</div></div>
+<div class="nav-art">${prev}<a href="../articles.html">📚 المقالات</a>${next}</div>
+</div></div></div>
+<footer class="site-footer"><div class="hborder" style="margin-bottom:16px"></div>
+<div class="fayah">﴿ إِنَّا نَحْنُ نَزَّلْنَا الذِّكْرَ وَإِنَّا لَهُ لَحَافِظُونَ ﴾</div>
+<p>سورة الحجر — الآية 9 | 🕌 موقع نور القرآن الكريم</p>
+</footer>
 <script>
-function swStaticTab(id){document.querySelectorAll('.tt').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));const tabs=[...document.querySelectorAll('.tt')];const ids=${str([121,50,45,33,102,105,66,84,82,104])};const idx=ids.findIndex(x=>x===id);if(idx>=0&&tabs[idx])tabs[idx].classList.add('active');const panel=document.getElementById('sp-'+id);if(panel)panel.classList.add('active');}
-function expandStaticTp(btn){const panel=btn.closest('.tp');if(panel)panel.classList.add('expanded');}
+const _WORKER="https://nour-quran-worker.khayati1hafedh.workers.dev";
+function swTabEmbed(id){
+  document.querySelectorAll(".tafsir-tabs .tt").forEach(t=>t.classList.remove("active"));
+  document.querySelectorAll(".tafsir-wrap .tp").forEach(p=>p.classList.remove("active"));
+  const tab=document.querySelector(\`.tafsir-tabs .tt[onclick="swTabEmbed(\${id})"]\`);
+  const panel=document.getElementById("tp-"+id);
+  if(tab)tab.classList.add("active");
+  if(panel)panel.classList.add("active");
+  // Load if not yet loaded
+  const loader=document.getElementById("tpl-"+id);
+  if(loader){
+    const sn=loader.dataset.sn, an=loader.dataset.an;
+    loader.textContent="⏳ جارٍ التحميل...";
+    fetch(\`\${_WORKER}?mode=tafsir&sn=\${sn}&an=\${an}&book=\${id}\`)
+      .then(r=>r.json()).then(d=>{
+        const txt=d?.content||"";
+        if(txt) loader.closest(".tp").innerHTML=txt.length>220
+          ?(\`<span class="tp-short">\${txt.slice(0,220)}... <button class="btn-more" onclick="this.closest('.tp').classList.add('expanded')">اقرأ المزيد ▼</button></span><span class="tp-full">\${txt}</span>\`)
+          :\`<span>\${txt}</span>\`;
+        else loader.textContent="لا يوجد نص";
+      }).catch(()=>{loader.textContent="تعذّر التحميل";});
+  }
+}
+const _SN=${sn},_AN=${an};
+const _TL=${tafsirLabels};
+const _TID=[${tafsirIds}];
+const _TC=${tcInit};
+function _sh(t,ml){if(!t||t.length<=ml)return{s:t,f:null};const c=t.lastIndexOf(" ",ml)||ml;return{s:t.slice(0,c)+"...",f:t};}
+function _exp(btn){btn.closest(".tp").classList.add("exp");}
+function _ren(id,txt){
+  const p=document.getElementById("p"+id);if(!p)return;
+  const {s,f}=_sh(txt,200);
+  p.innerHTML=f?'<span class="tp-short">'+s+' <button class="btn-more" onclick="_exp(this)">اقرأ المزيد ▼</button></span><span class="tp-full">'+f+'</span>':'<span>'+s+'</span>';
+}
+function _sw(id){
+  document.querySelectorAll(".tt").forEach(t=>t.classList.remove("active"));
+  document.querySelectorAll(".tp").forEach(p=>p.classList.remove("active"));
+  const tb=document.getElementById("t"+id),p=document.getElementById("p"+id);
+  if(tb)tb.classList.add("active");if(p)p.classList.add("active");
+  if(!_TC[id]&&p){
+    p.innerHTML='<div class="tl">⏳ جارٍ التحميل...</div>';
+    fetch("https://nour-quran-worker.khayati1hafedh.workers.dev?mode=tafsir&sn="+_SN+"&an="+_AN+"&book="+id)
+    .then(r=>r.json()).then(d=>{
+      const raw=d?.content||d?.tafsir?.text||"";
+      const txt=raw.replace(/<br\s*\/?>/gi,"\n").replace(/<\/p>/gi,"\n\n").replace(/<[^>]+>/g,"").replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&nbsp;/g," ").trim();
+      _TC[id]=txt;_ren(id,txt);
+    }).catch(()=>{if(p)p.innerHTML='<div class="tl" style="color:#c00">تعذّر التحميل</div>';});
+  }
+}
+// Init tabs
+(function(){
+  const tb=document.getElementById("tabs"),pn=document.getElementById("panels");
+  _TID.forEach((id,i)=>{
+    const t=document.createElement("div");
+    t.className="tt"+(i===0?" active":""); t.id="t"+id;
+    t.textContent=_TL[id]; t.onclick=()=>_sw(id); tb.appendChild(t);
+    const p=document.createElement("div");
+    p.className="tp"+(i===0?" active":""); p.id="p"+id;
+    pn.appendChild(p);
+  });
+  // Show first tab that has content
+  const firstWithContent = _TID.find(id => _TC[id]);
+  if(firstWithContent) _ren(firstWithContent, _TC[firstWithContent]);
+  else if(_TC[121]) _ren(121,_TC[121]);
+})();
 <\/script>
 </body></html>`;
 }
@@ -533,6 +739,10 @@ function showJSON(){
   w.document.close();
 }
 
+function setStatus(msg){
+  document.getElementById("smsg").innerHTML=msg;
+  setTimeout(()=>{document.getElementById("smsg").innerHTML="";},8000);
+}
 </script>
 </body>
 </html>
