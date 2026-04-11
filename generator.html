@@ -354,7 +354,10 @@ function toText(v){
 function buildHadithHTML(a){
   const h=a.hadith||{};
   const text=toText(h.text);
-  if(!text) return "";
+  if(!text) return `<div class="hadith-box" style="opacity:.5;font-size:.85em">
+    <div class="hadith-source">🕌 الحديث النبوي الشريف</div>
+    <p style="color:#888">لم يُختر حديث مرتبط بهذه الآية — يمكن إضافته يدوياً.</p>
+  </div>`;
   const source=toText(h.source);
   const grade=toText(h.grade);
   const ref=toText(h.reference);
@@ -440,6 +443,7 @@ ${buildBalaghaHTML(a)}
 </div>
 <h2 class="sec-h">🌍 التطبيق في حياتنا اليوم</h2>
 <p class="sec-p">${e(toText(a.tatbiq))}</p>
+${buildHadithHTML(a)}
 <h2 class="sec-h">🕌 القرآن رسالة لك أنت</h2>
 <div class="cta-box">
   <h3>﴿ أَفَلَا يَتَدَبَّرُونَ الْقُرْآنَ ﴾</h3>
