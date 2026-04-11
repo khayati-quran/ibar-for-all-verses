@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>مولّد نور القرآن</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--em:#0a3d2e;--em2:#1a5c42;--gold:#b8860b;--gold2:#daa520;--gold3:#f0c040;--parch:#fdf6e3;--parch2:#f5ead0;--lapis:#1a2a5e;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Cairo',sans-serif;background:#0d1117;color:#e6e6e6;min-height:100vh;}
+.hborder{height:4px;background:repeating-linear-gradient(90deg,var(--gold) 0,var(--gold) 8px,var(--gold2) 8px,var(--gold2) 16px,var(--gold3) 16px,var(--gold3) 24px,var(--gold2) 24px,var(--gold2) 32px);}
+.gen-header{background:linear-gradient(180deg,#0a3d2e,#0d2b1f);border-bottom:3px solid var(--gold);padding:0 24px;}
+.htop{display:flex;align-items:center;justify-content:space-between;padding:10px 0;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-gem{width:40px;height:40px;border:2px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2em;}
+.logo h1{font-family:'Amiri',serif;font-size:1.2em;color:var(--gold3);}
+.logo p{font-size:.66em;color:rgba(255,255,255,.5);}
+.gen-nav a{color:rgba(255,255,255,.7);text-decoration:none;font-size:.76em;padding:5px 10px;border:1px solid rgba(184,134,11,.3);border-radius:3px;margin-right:5px;}
+.gen-nav a:hover{background:rgba(184,134,11,.12);color:var(--gold3);}
+.ctrl{background:#0f1f17;padding:16px 24px;border-bottom:1px solid rgba(184,134,11,.2);}
+.ctrl-row{display:flex;flex-wrap:wrap;gap:11px;align-items:flex-end;}
+.ctrl-field{display:flex;flex-direction:column;gap:4px;}
+.ctrl-field label{font-size:.7em;color:rgba(255,255,255,.45);}
+.ctrl-field select,.ctrl-field input{background:#0a2a1e;border:1px solid rgba(184,134,11,.35);color:#e6e6e6;padding:7px 11px;font-family:'Cairo',sans-serif;font-size:.87em;border-radius:3px;outline:none;direction:rtl;}
+.ctrl-field select:focus,.ctrl-field input:focus{border-color:var(--gold2);}
+.ctrl-field input[type=number]{width:74px;}
+.btn-gen{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a3d2e;border:none;padding:9px 22px;font-family:'Cairo',sans-serif;font-size:.93em;font-weight:700;cursor:pointer;border-radius:3px;transition:opacity .2s;}
+.btn-gen:hover{opacity:.86;}
+.btn-gen:disabled{opacity:.4;cursor:not-allowed;}
+.settings-bar{background:#0a1a0e;padding:9px 24px;border-bottom:1px solid rgba(0,255,0,.07);display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.settings-bar label{font-size:.7em;color:rgba(255,255,255,.35);}
+.settings-bar input{background:#0d2a15;border:1px solid rgba(0,255,100,.18);color:#8aff8a;padding:5px 10px;font-family:monospace;font-size:.73em;border-radius:3px;outline:none;width:220px;}
+.gh-info{font-size:.68em;color:rgba(255,255,255,.25);}
+.actions{display:none;flex-wrap:wrap;gap:8px;padding:11px 24px;background:#0d1a12;border-bottom:1px solid rgba(184,134,11,.12);align-items:center;}
+.actions.show{display:flex;}
+.btn-act{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;font-family:'Cairo',sans-serif;font-size:.78em;font-weight:600;cursor:pointer;border-radius:3px;border:none;transition:opacity .2s;}
+.btn-act:hover{opacity:.8;}
+.btn-dl{background:var(--em2);color:white;}
+.btn-pub{background:#1a3a6e;color:white;}
+.btn-pub.busy{opacity:.5;cursor:wait;}
+.btn-json{background:#2d1a0a;color:#f0c040;border:1px solid rgba(240,192,64,.25);}
+.status-msg{font-size:.76em;color:rgba(255,255,255,.45);}
+#preview-zone{max-width:960px;margin:0 auto;padding:24px 18px 60px;}
+.ph{text-align:center;padding:60px 20px;color:rgba(255,255,255,.15);}
+.ph-icon{font-size:3em;margin-bottom:10px;}
+.ph p{font-size:.86em;line-height:2.2;}
+.loading{text-align:center;padding:55px 20px;}
+.spinner{width:38px;height:38px;border:3px solid rgba(184,134,11,.12);border-top-color:var(--gold2);border-radius:50%;animation:spin .8s linear infinite;display:inline-block;margin-bottom:12px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading p{color:var(--gold3);font-size:.86em;line-height:2.2;}
+.error-box{background:#2a0e0e;border:1px solid #8b2020;padding:18px;border-radius:3px;color:#ff9090;font-size:.84em;line-height:2;}
+
+/* ── ARTICLE ── */
+.art-wrap{background:var(--parch);color:#1a0e05;border:1px solid var(--gold2);box-shadow:0 0 0 5px var(--parch2),0 0 0 6px var(--gold2),8px 8px 28px rgba(0,0,0,.4);font-family:'Cairo',sans-serif;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 0L60 30L30 60L0 30Z' fill='none' stroke='%23b8860b' stroke-width='0.5' opacity='0.2'/%3E%3Ccircle cx='30' cy='30' r='15' fill='none' stroke='%23b8860b' stroke-width='0.5' opacity='0.2'/%3E%3C/svg%3E");background-size:60px 60px;}
+
+/* مقدمة الصفحة */
+.art-intro{background:linear-gradient(160deg,#0a3d2e,#0d2b1f);padding:22px 28px;text-align:center;border-bottom:2px solid var(--gold2);}
+.art-intro .bism{font-family:'Amiri',serif;font-size:1.1em;color:var(--gold3);display:block;margin-bottom:6px;}
+.art-intro .salah{font-size:.78em;color:rgba(255,255,255,.6);line-height:1.9;}
+
+.art-ornament{background:var(--em);padding:5px;text-align:center;color:var(--gold3);font-size:.8em;letter-spacing:4px;}
+.art-head{background:linear-gradient(160deg,var(--em),var(--em2),#2e8b5e);padding:28px 22px;text-align:center;}
+.art-badge{display:inline-block;background:var(--gold);color:var(--em);padding:4px 16px;font-size:.78em;font-weight:700;letter-spacing:2px;margin-bottom:8px;}
+.art-htitle{font-family:'Amiri',serif;font-size:1.75em;color:white;text-shadow:0 2px 8px rgba(0,0,0,.3);}
+.art-meta{font-size:.76em;color:rgba(255,255,255,.6);margin-top:4px;}
+.art-body{padding:32px 44px;background:white;}
+.ayah-box{background:linear-gradient(135deg,var(--parch),var(--parch2));border:2px solid var(--gold2);margin:20px 0;padding:26px;text-align:center;position:relative;}
+.ayah-box::before,.ayah-box::after{content:"❧";position:absolute;top:8px;color:var(--gold2);}
+.ayah-box::before{right:10px;}.ayah-box::after{left:10px;}
+.ayah-text{font-family:'Amiri Quran',serif;font-size:1.88em;color:var(--em);line-height:2.2;}
+.ayah-ref{font-size:.8em;color:var(--gold);font-weight:700;margin-top:8px;}
+.sec-h{font-family:'Amiri',serif;color:var(--em);font-size:1.18em;margin:22px 0 9px;padding:8px 13px;background:rgba(10,61,46,.07);border-right:4px solid var(--gold);}
+.sec-p{line-height:2.1;color:#1a0e05;margin-bottom:11px;font-size:1em;}
+
+/* ── ACCORDION TAFSIR ── */
+.tafsir-wrap{margin:14px 0;}
+.tafsir-tabs{display:flex;flex-wrap:wrap;gap:0;border-bottom:2px solid var(--gold2);}
+.tt{padding:6px 13px;font-size:.78em;font-family:'Cairo',sans-serif;font-weight:600;cursor:pointer;border:1px solid var(--gold2);border-bottom:none;margin-bottom:-2px;background:#faf8f0;color:var(--em);transition:background .15s;white-space:nowrap;}
+.tt:hover{background:var(--parch2);}
+.tt.active{background:white;border-bottom:2px solid white;font-weight:700;}
+.tp{background:linear-gradient(135deg,#f0f7f0,#eaf4ea);border:1px solid var(--gold2);border-top:none;padding:18px 20px;display:none;line-height:2.15;color:#1a2e1a;font-size:.97em;}
+.tp.active{display:block;}
+.tp-loading{color:#888;font-size:.86em;text-align:center;padding:14px;}
+/* Aperçu court + bouton "اقرأ المزيد" */
+.tp-short{display:block;}
+.tp-full{display:none;}
+.tp.expanded .tp-short{display:none;}
+.tp.expanded .tp-full{display:block;}
+.btn-more{display:inline-block;margin-top:8px;color:var(--em2);font-size:.8em;cursor:pointer;border-bottom:1px dashed var(--em2);background:none;border-top:none;border-left:none;border-right:none;font-family:'Cairo',sans-serif;padding:0;}
+
+/* ── IBRA ── */
+.ibra-box{background:linear-gradient(135deg,#fefae0,#fdf2c0);border:2px solid var(--gold);padding:20px;margin:20px 0;}
+.ibra-title{color:var(--gold);font-weight:700;font-size:.96em;margin-bottom:10px;font-family:'Amiri',serif;}
+.ibra-item{margin-bottom:9px;line-height:2;color:#1a0e05;font-size:1em;}
+.ibra-q{font-style:italic;color:#555;margin-top:10px;font-size:.91em;border-top:1px dashed var(--gold2);padding-top:9px;}
+.science-box{background:linear-gradient(135deg,#e8f0fe,#e3f2fd);border-right:5px solid var(--lapis);padding:16px;margin:16px 0;}
+.sci-title{color:var(--lapis);font-weight:700;margin-bottom:7px;font-size:.91em;}
+.sabab-box{background:#f9f6f0;border-right:5px solid var(--gold2);padding:14px 17px;margin:16px 0;font-size:.91em;color:#3a2a10;line-height:2;}
+.cta-box{background:linear-gradient(160deg,var(--em),var(--em2));color:white;padding:24px;margin-top:22px;text-align:center;border:2px solid var(--gold2);}
+.cta-box h3{color:var(--gold3);font-family:'Amiri',serif;font-size:1.18em;margin-bottom:7px;}
+.cta-box p{color:rgba(255,255,255,.87);margin:0;line-height:2;}
+.sharawi-box{margin:22px 0;border:2px solid var(--gold2);}
+.sh-head{background:var(--em);color:white;padding:9px 15px;display:flex;align-items:center;gap:9px;}
+.sh-title{font-family:'Amiri',serif;font-size:1.03em;color:var(--gold3);}
+.sh-sub{font-size:.74em;opacity:.7;}
+.sh-body{padding:13px 15px;background:white;}
+.yt-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;background:#000;}
+.yt-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;}
+.divider{text-align:center;margin:22px 0;color:var(--gold2);font-size:1.2em;letter-spacing:8px;opacity:.55;}
+.nav-art{display:flex;justify-content:space-between;margin-top:22px;padding-top:13px;border-top:1px solid var(--gold2);flex-wrap:wrap;gap:7px;}
+.nav-art a{color:var(--em2);text-decoration:none;font-size:.8em;padding:5px 12px;border:1px solid var(--em2);}
+.art-footer{background:var(--em);color:rgba(255,255,255,.7);padding:20px;text-align:center;border-top:3px solid var(--gold);}
+.art-footer .fayah{font-family:'Amiri',serif;font-size:1.18em;color:var(--gold3);margin-bottom:4px;}
+@media(max-width:640px){.art-body{padding:16px 13px;}.ctrl-row{flex-direction:column;}.btn-gen{width:100%;}.tt{font-size:.72em;padding:5px 8px;}}
+</style>
+</head>
+<body>
+
+<header class="gen-header">
+  <div class="hborder"></div>
+  <div class="htop">
+    <div class="logo">
+      <div class="logo-gem">🕌</div>
+      <div><h1>مولّد نور القرآن</h1><p>تفسير أصيل + تأمل + نشر مباشر</p></div>
+    </div>
+    <nav class="gen-nav">
+      <a href="index.html">🏠 الرئيسية</a>
+      <a href="intro.html">📖 عن المشروع</a>
+      <a href="articles.html">📚 المقالات</a>
+    </nav>
+  </div>
+</header>
+
+<div class="ctrl">
+  <div class="ctrl-row">
+    <div class="ctrl-field"><label>السورة</label><select id="sel-surah"></select></div>
+    <div class="ctrl-field"><label>رقم الآية</label><input type="number" id="inp-ayah" value="1" min="1" max="286"></div>
+    <button class="btn-gen" id="btn-gen" onclick="generate()">⚡ توليد المقال</button>
+  </div>
+</div>
+
+<div class="settings-bar">
+  <label>🔑 GitHub Token :</label>
+  <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx" oninput="localStorage.setItem('gh_token',this.value)">
+  <span class="gh-info">khayati-quran / ibar-for-all-verses</span>
+  <span class="gh-info" style="margin-right:16px;color:rgba(240,192,64,.4)">⚡ tafasir.online — أضف TAFASIR_API_KEY في Cloudflare Secrets بعد التسجيل</span>
+</div>
+
+<div class="actions" id="actions">
+  <button class="btn-act btn-dl" onclick="downloadHTML()">⬇ تحميل HTML</button>
+  <button class="btn-act btn-pub" id="btn-pub" onclick="publishGH()">🚀 نشر على GitHub</button>
+  <button class="btn-act btn-json" onclick="showJSON()">{ } JSON</button>
+  <span class="status-msg" id="smsg"></span>
+</div>
+
+<div id="preview-zone">
+  <div class="ph"><div class="ph-icon">📖</div>
+  <p>اختر السورة ورقم الآية<br>ثم اضغط <strong>توليد المقال</strong></p></div>
+</div>
+
+<script>
+const SURAHS=[{n:1,name:"الفاتحة",ayat:7},{n:2,name:"البقرة",ayat:286},{n:3,name:"آل عمران",ayat:200},{n:4,name:"النساء",ayat:176},{n:5,name:"المائدة",ayat:120},{n:6,name:"الأنعام",ayat:165},{n:7,name:"الأعراف",ayat:206},{n:8,name:"الأنفال",ayat:75},{n:9,name:"التوبة",ayat:129},{n:10,name:"يونس",ayat:109},{n:11,name:"هود",ayat:123},{n:12,name:"يوسف",ayat:111},{n:13,name:"الرعد",ayat:43},{n:14,name:"إبراهيم",ayat:52},{n:15,name:"الحجر",ayat:99},{n:16,name:"النحل",ayat:128},{n:17,name:"الإسراء",ayat:111},{n:18,name:"الكهف",ayat:110},{n:19,name:"مريم",ayat:98},{n:20,name:"طه",ayat:135},{n:21,name:"الأنبياء",ayat:112},{n:22,name:"الحج",ayat:78},{n:23,name:"المؤمنون",ayat:118},{n:24,name:"النور",ayat:64},{n:25,name:"الفرقان",ayat:77},{n:26,name:"الشعراء",ayat:227},{n:27,name:"النمل",ayat:93},{n:28,name:"القصص",ayat:88},{n:29,name:"العنكبوت",ayat:69},{n:30,name:"الروم",ayat:60},{n:31,name:"لقمان",ayat:34},{n:32,name:"السجدة",ayat:30},{n:33,name:"الأحزاب",ayat:73},{n:34,name:"سبأ",ayat:54},{n:35,name:"فاطر",ayat:45},{n:36,name:"يس",ayat:83},{n:37,name:"الصافات",ayat:182},{n:38,name:"ص",ayat:88},{n:39,name:"الزمر",ayat:75},{n:40,name:"غافر",ayat:85},{n:41,name:"فصلت",ayat:54},{n:42,name:"الشورى",ayat:53},{n:43,name:"الزخرف",ayat:89},{n:44,name:"الدخان",ayat:59},{n:45,name:"الجاثية",ayat:37},{n:46,name:"الأحقاف",ayat:35},{n:47,name:"محمد",ayat:38},{n:48,name:"الفتح",ayat:29},{n:49,name:"الحجرات",ayat:18},{n:50,name:"ق",ayat:45},{n:51,name:"الذاريات",ayat:60},{n:52,name:"الطور",ayat:49},{n:53,name:"النجم",ayat:62},{n:54,name:"القمر",ayat:55},{n:55,name:"الرحمن",ayat:78},{n:56,name:"الواقعة",ayat:96},{n:57,name:"الحديد",ayat:29},{n:58,name:"المجادلة",ayat:22},{n:59,name:"الحشر",ayat:24},{n:60,name:"الممتحنة",ayat:13},{n:61,name:"الصف",ayat:14},{n:62,name:"الجمعة",ayat:11},{n:63,name:"المنافقون",ayat:11},{n:64,name:"التغابن",ayat:18},{n:65,name:"الطلاق",ayat:12},{n:66,name:"التحريم",ayat:12},{n:67,name:"الملك",ayat:30},{n:68,name:"القلم",ayat:52},{n:69,name:"الحاقة",ayat:52},{n:70,name:"المعارج",ayat:44},{n:71,name:"نوح",ayat:28},{n:72,name:"الجن",ayat:28},{n:73,name:"المزمل",ayat:20},{n:74,name:"المدثر",ayat:56},{n:75,name:"القيامة",ayat:40},{n:76,name:"الإنسان",ayat:31},{n:77,name:"المرسلات",ayat:50},{n:78,name:"النبأ",ayat:40},{n:79,name:"النازعات",ayat:46},{n:80,name:"عبس",ayat:42},{n:81,name:"التكوير",ayat:29},{n:82,name:"الانفطار",ayat:19},{n:83,name:"المطففين",ayat:36},{n:84,name:"الانشقاق",ayat:25},{n:85,name:"البروج",ayat:22},{n:86,name:"الطارق",ayat:17},{n:87,name:"الأعلى",ayat:19},{n:88,name:"الغاشية",ayat:26},{n:89,name:"الفجر",ayat:30},{n:90,name:"البلد",ayat:20},{n:91,name:"الشمس",ayat:15},{n:92,name:"الليل",ayat:21},{n:93,name:"الضحى",ayat:11},{n:94,name:"الشرح",ayat:8},{n:95,name:"التين",ayat:8},{n:96,name:"العلق",ayat:19},{n:97,name:"القدر",ayat:5},{n:98,name:"البينة",ayat:8},{n:99,name:"الزلزلة",ayat:8},{n:100,name:"العاديات",ayat:11},{n:101,name:"القارعة",ayat:11},{n:102,name:"التكاثر",ayat:8},{n:103,name:"العصر",ayat:3},{n:104,name:"الهمزة",ayat:9},{n:105,name:"الفيل",ayat:5},{n:106,name:"قريش",ayat:4},{n:107,name:"الماعون",ayat:7},{n:108,name:"الكوثر",ayat:3},{n:109,name:"الكافرون",ayat:6},{n:110,name:"النصر",ayat:3},{n:111,name:"المسد",ayat:5},{n:112,name:"الإخلاص",ayat:4},{n:113,name:"الفلق",ayat:5},{n:114,name:"الناس",ayat:6}];
+
+// IDs quran.com — tous arabes
+// التفاسير من tafasir.online API
+const TAFSIRS=[
+  {id:121, label:"الميسر", src:"tafasir"},
+  {id:50,  label:"ابن كثير", src:"tafasir"},
+  {id:45,  label:"القرطبي", src:"tafasir"},
+  {id:33,  label:"البغوي", src:"tafasir"},
+  {id:102, label:"ابن سعدي", src:"tafasir"},
+  {id:105, label:"ابن عاشور", src:"tafasir"},
+  {id:66,  label:"الجلالين", src:"tafasir"},
+  {id:84,  label:"الآلوسي", src:"tafasir"},
+  {id:82,  label:"الشوكاني", src:"tafasir"},
+  {id:35,  label:"ابن عطية", src:"tafasir"},
+  {id:54,  label:"أبو حيان", src:"tafasir"},
+  {id:68,  label:"الدر المنثور", src:"tafasir"},
+  {id:176, label:"مكي بن أبي طالب", src:"tafasir"},
+  {id:167, label:"الشافعي", src:"tafasir"},
+  {id:165, label:"مالك", src:"tafasir"},
+  {id:106, label:"الشنقيطي", src:"tafasir"},
+  {id:104, label:"ظلال القرآن", src:"tafasir"}
+];
+
+const WORKER="https://nour-quran-worker.khayati1hafedh.workers.dev";
+const GH_OWNER="khayati-quran", GH_REPO="ibar-for-all-verses";
+let currentData=null, tafsirCache={};
+
+// Init
+(function(){
+  const sel=document.getElementById("sel-surah");
+  SURAHS.forEach(s=>{
+    const o=document.createElement("option");
+    o.value=s.n; o.textContent=`${s.n}. ${s.name} (${s.ayat} آية)`;
+    sel.appendChild(o);
+  });
+  sel.addEventListener("change",()=>{
+    const s=SURAHS[sel.value-1];
+    document.getElementById("inp-ayah").max=s.ayat;
+    document.getElementById("inp-ayah").value=1;
+  });
+  const tok=localStorage.getItem("gh_token");
+  if(tok) document.getElementById("gh-token").value=tok;
+})();
+
+async function generate(){
+  const sn=parseInt(document.getElementById("sel-surah").value);
+  const an=parseInt(document.getElementById("inp-ayah").value);
+  const surah=SURAHS[sn-1];
+  if(an<1||an>surah.ayat){alert(`سورة ${surah.name} لها ${surah.ayat} آية فقط`);return;}
+  tafsirCache={};
+  const btn=document.getElementById("btn-gen");
+  btn.disabled=true; btn.textContent="⏳ جارٍ التوليد...";
+  document.getElementById("actions").classList.remove("show");
+  currentData=null;
+  document.getElementById("preview-zone").innerHTML=`
+    <div class="loading"><div class="spinner"></div>
+    <p>استرجاع النص من quran.com...<br>توليد المحتوى...<br>
+    <small style="opacity:.45">10 إلى 20 ثانية</small></p></div>`;
+  try{
+    const res=await fetch(WORKER,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({surah_name:surah.name,surah_number:sn,ayah_number:an})});
+    const data=await res.json();
+    btn.disabled=false; btn.textContent="⚡ توليد المقال";
+    if(!res.ok||!data.ok){
+      document.getElementById("preview-zone").innerHTML=
+        `<div class="error-box">خطأ:<br><pre>${JSON.stringify(data,null,2)}</pre></div>`;
+      return;
+    }
+    currentData=data;
+    tafsirCache[121]=data.tafsir_muyassar; tafsirCache[169]=data.tafsir_muyassar;
+    // Pré-charger les tafasirs depuis tafasir.online (fournis par le Worker)
+    if(data.classical_tafsirs && typeof data.classical_tafsirs === 'object') {
+      const nameToId = {
+        "ابن كثير":50,"القرطبي":45,"البغوي":33,"الجلالين":66,
+        "الآلوسي":84,"ابن سعدي":102,"ابن عاشور":105,"الشوكاني":82,
+        "في ظلال القرآن":104,"التفسير الميسر":121
+      };
+      for(const [name, text] of Object.entries(data.classical_tafsirs)) {
+        const id = nameToId[name];
+        if(id && text) tafsirCache[id] = text;
+      }
+    }
+    renderArticle(data);
+    document.getElementById("actions").classList.add("show");
+    setStatus(`✅ سورة ${data.surah_name} — الآية ${data.ayah_number}`);
+  }catch(e){
+    btn.disabled=false; btn.textContent="⚡ توليد المقال";
+    document.getElementById("preview-zone").innerHTML=`<div class="error-box">خطأ: ${e.message}</div>`;
+  }
+}
+
+function renderArticle(data){
+  const sn=data.surah_number,an=data.ayah_number;
+  const prev=an>1?`<a href="surah-${sn}-ayah-${an-1}g.html">→ الآية ${an-1}</a>`:`<a href="../index.html">→ الرئيسية</a>`;
+  const next=`<a href="surah-${sn}-ayah-${an+1}g.html">الآية ${an+1} ←</a>`;
+  document.getElementById("preview-zone").innerHTML=
+    `<div class="art-wrap">${buildBody(data,prev,next)}</div>`;
+  // Activer premier onglet
+  document.querySelector(".tt.active") && null;
+}
+
+function shortPreview(text,maxChars=180){
+  if(!text||text.length<=maxChars) return {short:text,full:null};
+  const cut=text.lastIndexOf(" ",maxChars)||maxChars;
+  return {short:text.slice(0,cut)+"...", full:text};
+}
+
+function buildTafsirHTML(sn,an){
+  const firstWithContent = TAFSIRS.find(t => tafsirCache[t.id])?.id || TAFSIRS[0].id;
+
+  const tabs = TAFSIRS.map(t =>
+    `<div class="tt${t.id===firstWithContent?' active':''}" onclick="swTabLocal(${t.id})">${t.label}</div>`
+  ).join("");
+
+  const panels = TAFSIRS.map(t=>{
+    const txt = tafsirCache[t.id] || "";
+    const {short,full} = shortPreview(txt);
+
+    let inner = `<div class="tp-loading">لا يوجد نص متاح لهذا التفسير</div>`;
+    if(txt){
+      inner = full
+        ? `<span class="tp-short">${e(short)} <button class="btn-more" onclick="expandTp(this)">اقرأ المزيد ▼</button></span><span class="tp-full">${e(full)}</span>`
+        : `<span class="tp-short">${e(txt)}</span>`;
+    }
+
+    return `<div class="tp${t.id===firstWithContent?' active':''}" id="tp-${t.id}">${inner}</div>`;
+  }).join("");
+
+  return `<div class="tafsir-wrap"><div class="tafsir-tabs">${tabs}</div>${panels}</div>`;
+}
+
+function swTabLocal(id){
+  document.querySelectorAll('.tafsir-tabs .tt').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.tafsir-wrap .tp').forEach(x=>x.classList.remove('active'));
+
+  const tabs = [...document.querySelectorAll('.tafsir-tabs .tt')];
+  const idx = TAFSIRS.findIndex(t => t.id === id);
+  if(idx >= 0 && tabs[idx]) tabs[idx].classList.add('active');
+
+  const panel = document.getElementById(`tp-${id}`);
+  if(panel) panel.classList.add('active');
+}
+
+
+function expandTp(btn){
+  const panel=btn.closest(".tp");
+  panel.classList.add("expanded");
+}
+
+
+function stripH(h){
+  if(!h)return"";
+  return h.replace(/<br\s*\/?>/gi,"\n").replace(/<\/p>/gi,"\n\n")
+    .replace(/<[^>]+>/g,"").replace(/&amp;/g,"&").replace(/&lt;/g,"<")
+    .replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&nbsp;/g," ")
+    .replace(/\n{3,}/g,"\n\n").trim();
+}
+
+function e(s){if(!s)return"";return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+function buildBody(data,prev,next){
+  const a=data.article||{},sn=data.surah_number,an=data.ayah_number;
+  return `
+<div class="art-intro">
+  <span class="bism">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>
+  <div class="salah">أَحْمَدُكَ رَبِّي وَأَسْتَعِيْنُ بِكَ وَأُصَلِّي وَأُسَلِّمُ عَلَى خَيْرِ خَلْقِكَ سَيِّدِنَا مُحَمَّدٍ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ وَعَلَى آلِهِ وَصَحْبِهِ أَجْمَعِينَ إِلَى يَوْمِ الدِّينِ</div>
+</div>
+<div class="art-ornament">✦ &nbsp; بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ &nbsp; ✦</div>
+<div class="art-head">
+  <div class="art-badge">سورة ${data.surah_name} • الآية ${an}</div>
+  <div class="art-htitle">تفسير سورة ${data.surah_name} — الآية ${an}</div>
+  <div class="art-meta">تفسير أصيل • الشعراوي • إعجاز علمي • عبرة • تطبيق معاصر</div>
+</div>
+<div class="art-body">
+<div class="ayah-box">
+  <div class="ayah-text">${data.ayah_text||""}</div>
+  <div class="ayah-ref">سورة ${data.surah_name} — الآية ${an}</div>
+</div>
+<h2 class="sec-h">🌅 مدخل يمسّ الإنسان</h2>
+<p class="sec-p">${e(a.question_hook)}</p>
+<h2>📚 التفسير — من كتب التراث</h2>
+${buildTafsirHTML(sn,an)}
+<h2 class="sec-h">🔤 المفردات والبلاغة</h2>
+<p class="sec-p">${e(a.mufradat)}</p>
+<h2 class="sec-h">📍 سبب النزول والسياق</h2>
+<div class="sabab-box">${e(a.sabab_nuzul)}</div>
+<h2 class="sec-h">🎙️ خاطرة الشيخ الشعراوي رحمه الله</h2>
+<p class="sec-p">${e(a.sharawi)}</p>
+<div class="science-box">
+  <div class="sci-title">🔬 الإعجاز — القرآن يثبت نفسه</div>
+  <p class="sec-p" style="margin:0">${e(a.ijaz_ilmi)}</p>
+</div>
+<h2 class="sec-h">💎 العبرة العميقة — ثلاثة مستويات</h2>
+<div class="ibra-box">
+  <div class="ibra-title">💎 العبرة الجوهرية :</div>
+  <div class="ibra-item"><strong>① المستوى العقدي :</strong> ${e(a.ibra_1)}</div>
+  <div class="ibra-item"><strong>② المستوى النفسي :</strong> ${e(a.ibra_2)}</div>
+  <div class="ibra-item"><strong>③ المستوى الحضاري :</strong> ${e(a.ibra_3)}</div>
+  <div class="ibra-q"><em>${e(a.ibra_question)}</em></div>
+</div>
+<h2 class="sec-h">🌍 التطبيق في حياتنا اليوم</h2>
+<p class="sec-p">${e(a.tatbiq)}</p>
+<h2 class="sec-h">🕌 القرآن رسالة لك أنت</h2>
+<div class="cta-box">
+  <h3>﴿ أَفَلَا يَتَدَبَّرُونَ الْقُرْآنَ ﴾</h3>
+  <p>تأمّل هذه الآية واجعلها منطلقاً للتغيير في حياتك اليومية.</p>
+</div>
+<div class="divider">❧ ✦ ❧</div>
+<div class="sharawi-box">
+  <div class="sh-head"><span style="font-size:1.3em">▶</span>
+    <div><div class="sh-title">الشيخ محمد متولي الشعراوي رحمه الله</div>
+    <div class="sh-sub">تفسير سورة ${data.surah_name}</div></div>
+  </div>
+  <div class="sh-body">
+    <p style="margin-bottom:10px;font-size:.84em;color:#555">استمع إلى الشيخ الشعراوي :</p>
+    <div class="yt-wrap">
+      <iframe src="https://www.youtube.com/embed/videoseries?list=PLiJSlz8e4RlG7I_eLF3tQ0MMpPgV68FoK"
+        title="الشعراوي" allowfullscreen loading="lazy"></iframe>
+    </div>
+  </div>
+</div>
+<div class="nav-art">${prev}<a href="../articles.html">📚 المقالات</a>${next}</div>
+</div>
+<div class="art-footer">
+  <div class="fayah">﴿ إِنَّا نَحْنُ نَزَّلْنَا الذِّكْرَ وَإِنَّا لَهُ لَحَافِظُونَ ﴾</div>
+  <p>سورة الحجر — الآية 9 | 🕌 موقع نور القرآن الكريم</p>
+</div>`;
+}
+
+// ══ STANDALONE HTML ══
+function buildStandalone(data){
+  const a=data.article||{},sn=data.surah_number,an=data.ayah_number;
+  const SITE_BASE = `https://khayati-quran.github.io/ibar-for-all-verses`;
+  const prev = an > 1 ? `<a href="${SITE_BASE}/surah-${sn}-ayah-${an-1}g.html">→ الآية ${an-1}</a>` : `<a href="${SITE_BASE}/index.html">→ الرئيسية</a>`;
+  const next = `<a href="${SITE_BASE}/surah-${sn}-ayah-${an+1}g.html">الآية ${an+1} ←</a>`;
+
+  return `<!DOCTYPE html><html lang="ar" dir="rtl"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="تفسير سورة ${data.surah_name} الآية ${an} — تفسير أصيل من كتب التراث وعبرة وإعجاز | نور القرآن">
+<meta property="og:title" content="تفسير سورة ${data.surah_name} — الآية ${an} | نور القرآن">
+<meta property="og:type" content="article">
+<title>تفسير سورة ${data.surah_name} — الآية ${an} | نور القرآن</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&display=swap');
+:root{--em:#0a3d2e;--em2:#1a5c42;--gold:#b8860b;--gold2:#daa520;--gold3:#f0c040;--parch:#fdf6e3;--parch2:#f5ead0;--lapis:#1a2a5e;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Cairo',sans-serif;background:var(--parch);color:#1a0e05;direction:rtl;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 0L60 30L30 60L0 30Z' fill='none' stroke='%23b8860b' stroke-width='0.5' opacity='0.25'/%3E%3Ccircle cx='30' cy='30' r='15' fill='none' stroke='%23b8860b' stroke-width='0.5' opacity='0.25'/%3E%3C/svg%3E");background-size:60px 60px;}
+.site-header{background:linear-gradient(180deg,var(--em),var(--em2));color:white;border-bottom:3px solid var(--gold);}
+.hborder{height:5px;background:repeating-linear-gradient(90deg,var(--gold) 0,var(--gold) 8px,var(--gold2) 8px,var(--gold2) 16px,var(--gold3) 16px,var(--gold3) 24px,var(--gold2) 24px,var(--gold2) 32px);}
+.htop{display:flex;align-items:center;justify-content:space-between;padding:12px 22px;}
+.logo{display:flex;align-items:center;gap:12px;}
+.logo-gem{width:46px;height:46px;border:2px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4em;background:rgba(184,134,11,0.1);}
+.logo h1{font-family:'Amiri',serif;font-size:1.4em;color:var(--gold3);}
+.logo p{font-size:.72em;opacity:.75;}
+nav a{color:rgba(255,255,255,.85);text-decoration:none;font-size:.84em;padding:5px 12px;border:1px solid rgba(184,134,11,.3);margin-right:4px;}
+.site-footer{background:var(--em);color:rgba(255,255,255,.7);padding:36px 20px;text-align:center;border-top:3px solid var(--gold);}
+.fayah{font-family:'Amiri',serif;font-size:1.35em;color:var(--gold3);margin-bottom:6px;}
+.art-intro{background:linear-gradient(160deg,#0a3d2e,#0d2b1f);padding:18px 24px;text-align:center;border-bottom:2px solid var(--gold2);}
+.art-intro .bism{font-family:'Amiri',serif;font-size:1.08em;color:var(--gold3);display:block;margin-bottom:5px;}
+.art-intro .salah{font-size:.76em;color:rgba(255,255,255,.55);line-height:1.9;}
+.wrap{max-width:900px;margin:0 auto;padding:26px 16px;}
+.frame{background:white;border:1px solid var(--gold2);box-shadow:0 0 0 5px var(--parch2),0 0 0 6px var(--gold2),6px 6px 22px rgba(0,0,0,.12);}
+.ornament{background:var(--em);padding:5px;text-align:center;color:var(--gold3);font-size:.8em;letter-spacing:4px;}
+.art-head{background:linear-gradient(160deg,var(--em),var(--em2),#2e8b5e);padding:28px;text-align:center;}
+.badge{display:inline-block;background:var(--gold);color:var(--em);padding:4px 16px;font-size:.78em;font-weight:700;letter-spacing:2px;margin-bottom:8px;}
+.art-title{font-family:'Amiri',serif;font-size:1.75em;color:white;text-shadow:0 2px 8px rgba(0,0,0,.3);}
+.art-meta{font-size:.76em;color:rgba(255,255,255,.65);margin-top:4px;}
+.art-body{padding:32px 44px;background:white;}
+.ayah-box{background:linear-gradient(135deg,var(--parch),var(--parch2));border:2px solid var(--gold2);margin:20px 0;padding:24px;text-align:center;position:relative;}
+.ayah-box::before,.ayah-box::after{content:"❧";position:absolute;top:8px;color:var(--gold2);}
+.ayah-box::before{right:10px;}.ayah-box::after{left:10px;}
+.ayah-text{font-family:'Amiri Quran',serif;font-size:1.85em;color:var(--em);line-height:2.2;}
+.ayah-ref{font-size:.8em;color:var(--gold);font-weight:600;margin-top:8px;}
+h2{font-family:'Amiri',serif;color:var(--em);font-size:1.18em;margin:22px 0 9px;padding:8px 13px;background:rgba(10,61,46,.07);border-right:4px solid var(--gold);}
+p{line-height:2.1;color:#1a0e05;margin-bottom:12px;font-size:1em;}
+.tafsir-wrap{margin:14px 0;}
+.tafsir-tabs{display:flex;flex-wrap:wrap;gap:0;border-bottom:2px solid var(--gold2);}
+.tt{padding:6px 12px;font-size:.77em;font-family:'Cairo',sans-serif;font-weight:600;cursor:pointer;border:1px solid var(--gold2);border-bottom:none;margin-bottom:-2px;background:#faf8f0;color:var(--em);}
+.tt.active{background:white;border-bottom:2px solid white;font-weight:700;}
+.tp{background:linear-gradient(135deg,#f0f7f0,#eaf4ea);border:1px solid var(--gold2);border-top:none;padding:16px 18px;display:none;line-height:2.1;color:#1a2e1a;font-size:.96em;}
+.tp.active{display:block;}
+.tp-short{display:block;}
+.tp-full{display:none;}
+.tp.expanded .tp-short{display:none;}
+.tp.expanded .tp-full{display:block;}
+.btn-more{color:var(--em2);font-size:.78em;cursor:pointer;border-bottom:1px dashed var(--em2);background:none;border-top:none;border-left:none;border-right:none;font-family:'Cairo',sans-serif;margin-top:6px;}
+.tl{color:#888;font-size:.86em;text-align:center;padding:12px;}
+.ibra-box{background:linear-gradient(135deg,#fefae0,#fdf2c0);border:2px solid var(--gold);padding:20px;margin:20px 0;}
+.ibra-title{color:var(--gold);font-weight:700;font-size:.96em;margin-bottom:10px;font-family:'Amiri',serif;}
+.science-box{background:linear-gradient(135deg,#e8f0fe,#e3f2fd);border-right:5px solid var(--lapis);padding:16px;margin:16px 0;}
+.sci-title{color:var(--lapis);font-weight:700;margin-bottom:7px;}
+.sabab-box{background:#f9f6f0;border-right:5px solid var(--gold2);padding:14px 17px;margin:16px 0;font-size:.91em;color:#3a2a10;line-height:2;}
+.cta-box{background:linear-gradient(160deg,var(--em),var(--em2));color:white;padding:24px;margin-top:22px;text-align:center;border:2px solid var(--gold2);}
+.cta-box h3{color:var(--gold3);font-family:'Amiri',serif;font-size:1.18em;margin-bottom:7px;}
+.cta-box p{color:rgba(255,255,255,.88);margin:0;}
+.sharawi-box{margin:22px 0;border:2px solid var(--gold2);}
+.sh-head{background:var(--em);color:white;padding:9px 15px;display:flex;align-items:center;gap:9px;}
+.sh-title{font-family:'Amiri',serif;font-size:1.03em;color:var(--gold3);}
+.sh-sub{font-size:.74em;opacity:.7;}
+.sh-body{padding:13px 15px;background:white;}
+.yt-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;background:#000;}
+.yt-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;}
+.divider{text-align:center;margin:22px 0;color:var(--gold2);font-size:1.2em;letter-spacing:8px;opacity:.6;}
+.nav-art{display:flex;justify-content:space-between;margin-top:22px;padding-top:13px;border-top:1px solid var(--gold2);flex-wrap:wrap;gap:7px;}
+.nav-art a{color:var(--em2);text-decoration:none;font-size:.8em;padding:5px 12px;border:1px solid var(--em2);}
+.bc{font-size:.76em;color:var(--gold);margin-bottom:12px;}.bc a{color:var(--em2);text-decoration:none;}
+@media(max-width:600px){.art-body{padding:16px 13px;}.htop nav{display:none;}.art-title{font-size:1.4em;}.tt{font-size:.72em;padding:5px 8px;}}
+</style>
+</head><body>
+<header class="site-header"><div class="hborder"></div><div class="htop">
+<div class="logo"><div class="logo-gem">🕌</div><div><h1>نور القرآن</h1><p>تفسير وعبر للإنسانية</p></div></div>
+<nav><a href="${SITE_BASE}/index.html">🏠</a><a href="${SITE_BASE}/articles.html">المقالات</a><a href="${SITE_BASE}/references.html">المراجع</a><a href="${SITE_BASE}/intro.html">عن المشروع</a></nav>
+</div></header>
+<div class="art-intro"><span class="bism">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span><div class="salah">أَحْمَدُكَ رَبِّي وَأَسْتَعِيْنُ بِكَ وَأُصَلِّي وَأُسَلِّمُ عَلَى خَيْرِ خَلْقِكَ سَيِّدِنَا مُحَمَّدٍ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ وَعَلَى آلِهِ وَصَحْبِهِ أَجْمَعِينَ إِلَى يَوْمِ الدِّينِ</div></div>
+<div class="wrap"><div class="bc"><a href="${SITE_BASE}/index.html">الرئيسية</a> ← <a href="${SITE_BASE}/articles.html">المقالات</a> ← تفسير سورة ${e(data.surah_name)} — الآية ${an}</div><div class="frame"><div class="ornament">✦ &nbsp; بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ &nbsp; ✦</div><div class="art-head"><div class="badge">سورة ${e(data.surah_name)} • الآية ${an}</div><div class="art-title">تفسير سورة ${e(data.surah_name)} — الآية ${an}</div><div class="art-meta">تفسير أصيل • الشعراوي • إعجاز علمي • عبرة • تطبيق معاصر</div></div><div class="art-body"><div class="ayah-box"><div class="ayah-text">${e(data.ayah_text || "")}</div><div class="ayah-ref">سورة ${e(data.surah_name)} — الآية ${an}</div></div><h2>🌅 مدخل يمسّ الإنسان</h2><p>${e(a.question_hook || "")}</p><h2>📚 التفسير — من كتب التراث</h2>${buildStaticStandaloneTafsir(data)}<h2>🔤 المفردات والبلاغة</h2><p>${e(a.mufradat || "")}</p><h2>📍 سبب النزول والسياق</h2><div class="sabab-box">${e(a.sabab_nuzul || "")}</div><h2>🎙️ خاطرة الشيخ الشعراوي رحمه الله</h2><p>${e(a.sharawi || "")}</p><div class="science-box"><div class="sci-title">🔬 الإعجاز — القرآن يثبت نفسه</div><p>${e(a.ijaz_ilmi || "")}</p></div><h2>💎 العبرة العميقة — ثلاثة مستويات</h2><div class="ibra-box"><div class="ibra-title">💎 العبرة الجوهرية :</div><p><strong>① المستوى العقائدي :</strong> ${e(a.ibra_1 || "")}</p><p><strong>② المستوى النفسي :</strong> ${e(a.ibra_2 || "")}</p><p><strong>③ المستوى الحضاري :</strong> ${e(a.ibra_3 || "")}</p><p style="font-style:italic;color:#555;border-top:1px dashed #daa520;padding-top:10px;margin-top:10px">${e(a.ibra_question || "")}</p></div><h2>🌍 التطبيق في حياتنا اليوم</h2><p>${e(a.tatbiq || "")}</p><h2>🕌 القرآن رسالة لك أنت</h2><div class="cta-box"><h3>﴿ أَفَلَا يَتَدَبَّرُونَ الْقُرْآنَ ﴾</h3><p>تأمّل هذه الآية واجعلها منطلقاً للتغيير في حياتك اليومية.</p></div><div class="divider">❧ ✦ ❧</div><div class="sharawi-box"><div class="sh-head"><span style="font-size:1.3em">▶</span><div><div class="sh-title">الشيخ محمد متولي الشعراوي رحمه الله</div><div class="sh-sub">تفسير سورة ${e(data.surah_name)}</div></div></div><div class="sh-body"><p style="margin-bottom:10px;font-size:.84em;color:#555">استمع إلى الشيخ الشعراوي :</p><div class="yt-wrap"><iframe src="https://www.youtube.com/embed/videoseries?list=PLiJSlz8e4RlG7I_eLF3tQ0MMpPgV68FoK" title="الشعراوي" allowfullscreen loading="lazy"></iframe></div></div></div><div class="nav-art">${prev}<a href="${SITE_BASE}/articles.html">📚 المقالات</a>${next}</div></div></div></div>
+<footer class="site-footer"><div class="hborder" style="margin-bottom:16px"></div><div class="fayah">﴿ إِنَّا نَحْنُ نَزَّلْنَا الذِّكْرَ وَإِنَّا لَهُ لَحَافِظُونَ ﴾</div><p>سورة الحجر — الآية 9 | 🕌 موقع نور القرآن الكريم</p></footer>
+<script>
+function swStaticTab(id){document.querySelectorAll('.tt').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));const tabs=[...document.querySelectorAll('.tt')];const ids=${JSON.stringify(TAFSIRS.map(t => t.id))};const idx=ids.findIndex(x=>x===id);if(idx>=0&&tabs[idx])tabs[idx].classList.add('active');const panel=document.getElementById('sp-'+id);if(panel)panel.classList.add('active');}
+function expandStaticTp(btn){const panel=btn.closest('.tp');if(panel)panel.classList.add('expanded');}
+<\/script>
+</body></html>`;
+}
+
+// ══ DOWNLOAD ══
+function downloadHTML(){
+  if(!currentData)return;
+  const html=buildStandalone(currentData);
+  const fn=`surah-${currentData.surah_number}-ayah-${currentData.ayah_number}g.html`;
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([html],{type:"text/html;charset=utf-8"}));
+  a.download=fn; a.click(); URL.revokeObjectURL(a.href);
+  setStatus(`✅ ${fn}`);
+}
+
+// ══ PUBLISH GITHUB ══
+async function publishGH(){
+  if(!currentData)return;
+  const token=document.getElementById("gh-token").value.trim();
+  if(!token){alert("أدخل GitHub Token");return;}
+  const sn=currentData.surah_number,an=currentData.ayah_number;
+  const fn=`surah-${sn}-ayah-${an}g.html`;
+  const html=buildStandalone(currentData);
+  const btn=document.getElementById("btn-pub");
+  btn.classList.add("busy"); btn.textContent="⏳ جارٍ النشر...";
+  try{
+    let sha=null;
+    const ck=await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${fn}`,
+      {headers:{"Authorization":`token ${token}`,"Accept":"application/vnd.github.v3+json"}});
+    if(ck.ok){sha=(await ck.json()).sha;}
+    const b64=btoa(unescape(encodeURIComponent(html)));
+    const put=await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${fn}`,{
+      method:"PUT",
+      headers:{"Authorization":`token ${token}`,"Accept":"application/vnd.github.v3+json","Content-Type":"application/json"},
+      body:JSON.stringify({message:`نشر تفسير سورة ${currentData.surah_name} — الآية ${an}`,content:b64,...(sha?{sha}:{})})
+    });
+    const res=await put.json();
+    btn.classList.remove("busy");
+    if(put.ok){
+      btn.textContent="✅ تم!";
+      const url=`https://khayati-quran.github.io/${GH_REPO}/${fn}`;
+      setStatus(`✅ <a href="${url}" target="_blank" style="color:var(--gold3)">${url}</a>`);
+    }else{
+      btn.textContent="🚀 نشر على GitHub";
+      setStatus(`❌ ${res.message||put.status}`);
+    }
+  }catch(err){
+    btn.classList.remove("busy"); btn.textContent="🚀 نشر على GitHub";
+    setStatus(`❌ ${err.message}`);
+  }
+  setTimeout(()=>{document.getElementById("btn-pub").textContent="🚀 نشر على GitHub";},5000);
+}
+
+function showJSON(){
+  if(!currentData)return;
+  const w=window.open("","_blank");
+  w.document.write(`<pre style="font-family:monospace;direction:ltr;padding:20px;background:#0d1117;color:#7ee787;font-size:13px">${JSON.stringify(currentData,null,2)}</pre>`);
+  w.document.close();
+}
+
+function setStatus(msg){
+  document.getElementById("smsg").innerHTML=msg;
+  setTimeout(()=>{document.getElementById("smsg").innerHTML="";},8000);
+}
+
+</script>
+</body>
+</html>
