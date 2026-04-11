@@ -526,16 +526,16 @@ async function publishGH(){
   setTimeout(()=>{document.getElementById("btn-pub").textContent="🚀 نشر على GitHub";},5000);
 }
 
-function setStatus(msg){
-  document.getElementById("smsg").innerHTML=msg;
-  setTimeout(()=>{document.getElementById("smsg").innerHTML="";},8000);
-}
-
 function showJSON(){
   if(!currentData)return;
   const w=window.open("","_blank");
   w.document.write(`<pre style="font-family:monospace;direction:ltr;padding:20px;background:#0d1117;color:#7ee787;font-size:13px">${JSON.stringify(currentData,null,2)}</pre>`);
   w.document.close();
+}
+
+function setStatus(msg){
+  document.getElementById("smsg").innerHTML=msg;
+  setTimeout(()=>{document.getElementById("smsg").innerHTML="";},8000);
 }
 
 </script>
