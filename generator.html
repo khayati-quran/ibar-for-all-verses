@@ -586,7 +586,7 @@ p{line-height:2.1;color:#1a0e05;margin-bottom:12px;font-size:1em;}
 <div class="ayah-box"><div class="ayah-text">${data.ayah_text||""}</div><div class="ayah-ref">سورة ${data.surah_name} — الآية ${an}</div></div>
 <h2>🌅 مدخل يمسّ الإنسان</h2><p>${a.question_hook||""}</p>
 <h2>📚 التفسير — من كتب التراث</h2>
-${buildTafsirHTML(sn,an)}
+${buildEmbeddedTafsirHTML(data.classical_tafsirs, sn, an)}
 <h2>🔤 المفردات والبلاغة</h2><p>${a.mufradat||""}</p>
 <h2>📍 سبب النزول والسياق</h2><div class="sabab-box">${a.sabab_nuzul||""}</div>
 <h2>🎙️ خاطرة الشيخ الشعراوي رحمه الله</h2><p>${a.sharawi||""}</p>
@@ -743,8 +743,6 @@ function setStatus(msg){
   document.getElementById("smsg").innerHTML=msg;
   setTimeout(()=>{document.getElementById("smsg").innerHTML="";},8000);
 }
-
-
 </script>
 </body>
 </html>
