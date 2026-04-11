@@ -591,12 +591,21 @@ function expandStaticTp(btn){const panel=btn.closest('.tp');if(panel)panel.class
 // ══ DOWNLOAD ══
 function downloadHTML(){
   if(!currentData)return;
-  const html=buildStandalone(currentData);
-  const fn=`surah-${currentData.surah_number}-ayah-${currentData.ayah_number}g.html`;
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([html],{type:"text/html;charset=utf-8"}));
-  a.download=fn; a.click(); URL.revokeObjectURL(a.href);
-  setStatus(`✅ ${fn}`);
+  try{
+    const html=buildStandalone(currentData);
+    const fn=`surah-${currentData.surah_number}-ayah-${currentData.ayah_number}g.html`;
+    const url=URL.createObjectURL(new Blob([html],{type:"text/html;charset=utf-8"}));
+    const a=document.createElement("a");
+    a.href=url;
+    a.download=fn;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+    setStatus(`✅ تم تنزيل ${fn}`);
+  }catch(e){
+    setStatus(`❌ فشل التنزيل: ${e.message}`);
+  }
 }
 
 // ══ PUBLISH GITHUB ══
@@ -775,7 +784,7 @@ function showJSON(){
 
 function setStatus(msg){
   document.getElementById("smsg").innerHTML=msg;
-  setTimeout(()=>{document.getElementById("smsg").innerHTML="";},8000);
+  setTimeout(()=>{document.getElementById("smsg").innerHTML="";},15000);
 }
 
 </script>
