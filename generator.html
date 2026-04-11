@@ -581,7 +581,7 @@ nav a{color:rgba(255,255,255,.85);text-decoration:none;font-size:.84em;padding:5
 </div></header>
 <div class="wrap"><div class="bc"><a href="${SITE_BASE}/index.html">الرئيسية</a> ← <a href="${SITE_BASE}/articles.html">المقالات</a> ← تفسير سورة ${data.surah_name} — الآية ${an}</div><div class="frame">${articleHtml}</div></div>
 <footer class="site-footer"><div class="hborder" style="margin-bottom:16px"></div><div class="fayah">﴿ إِنَّا نَحْنُ نَزَّلْنَا الذِّكْرَ وَإِنَّا لَهُ لَحَافِظُونَ ﴾</div><p>سورة الحجر — الآية 9 | 🕌 موقع نور القرآن الكريم</p></footer>
-
+<script>
 function swStaticTab(id){document.querySelectorAll('.tt').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));const tabs=[...document.querySelectorAll('.tt')];const ids=${JSON.stringify([121,50,45,33,102,105,66,84,82,35,54,68,176,167,165,106,104])};const idx=ids.findIndex(x=>x===id);if(idx>=0&&tabs[idx])tabs[idx].classList.add('active');const panel=document.getElementById('sp-'+id);if(panel)panel.classList.add('active');}
 function expandStaticTp(btn){const panel=btn.closest('.tp');if(panel)panel.classList.add('expanded');}
 <\/script>
