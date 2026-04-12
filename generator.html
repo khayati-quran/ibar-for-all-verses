@@ -269,6 +269,8 @@ async function generate(){
 }
 
 function renderArticle(data){
+  // Store hadith candidates globally for display
+  window._hadithCandidates = data.hadith_candidates || [];
   const sn=data.surah_number,an=data.ayah_number;
   const prev=an>1?`<a href="surah-${sn}-ayah-${an-1}g.html">→ الآية ${an-1}</a>`:`<a href="../index.html">→ الرئيسية</a>`;
   const next=`<a href="surah-${sn}-ayah-${an+1}g.html">الآية ${an+1} ←</a>`;
@@ -353,31 +355,42 @@ function toText(v){
 }
 
 function buildHadithHTML(a){
-  const h=a.hadith||{};
-  const text=toText(h.text);
-  if(!text) return `<div class="hadith-box" style="opacity:.5;font-size:.85em">
-    <div class="hadith-source">🕌 الحديث النبوي الشريف</div>
-    <p style="color:#888">لم يُختر حديث مرتبط بهذه الآية — يمكن إضافته يدوياً.</p>
-  </div>`;
-  const source=toText(h.source);
-  const grade=toText(h.grade);
-  const ref=toText(h.reference);
-  const explanation=toText(h.explanation);
-  const words=toText(h.words_meanings);
-  const hints=toText(h.hints);
-  const linkReason=toText(h.link_reason);
+  // Show selected hadith (from article.hadith) + all candidates
+  const h = a.hadith || {};
+  const candidates = window._hadithCandidates || [];
+  const text = toText(h.text);
 
-  return `
-<h2 class="sec-h">📜 الحديث النبوي المرتبط بالآية</h2>
-<div class="hadith-box">
-  <div class="hadith-source">${e(source || "حديث من موسوعة الحديث")}</div>
-  ${(grade || ref) ? `<div class="hadith-grade">${e([grade ? `الدرجة: ${grade}` : "", ref ? `المرجع: ${ref}` : ""].filter(Boolean).join(" | "))}</div>` : ""}
-  <p class="hadith-text">${e(text)}</p>
-  ${linkReason ? `<p class="hadith-link"><strong>وجه الارتباط بالآية:</strong> ${e(linkReason)}</p>` : ""}
-  ${explanation ? `<div class="hadith-extra"><strong>شرح الحديث:</strong> ${e(explanation)}</div>` : ""}
-  ${words ? `<div class="hadith-extra"><strong>معاني الكلمات:</strong> ${e(words)}</div>` : ""}
-  ${hints ? `<div class="hadith-extra"><strong>فوائد:</strong> ${e(hints)}</div>` : ""}
-</div>`;
+  let html = '<h2 class="sec-h">📜 الحديث النبوي المرتبط بالآية</h2>';
+
+  if (!text && candidates.length === 0) {
+    return html + '<div class="hadith-box" style="opacity:.5"><p style="color:#888">لا يوجد حديث محدد لهذه الآية.</p></div>';
+  }
+
+  // Selected hadith (AI choice)
+  if (text) {
+    html += '<div class="hadith-box">';
+    html += '<div class="hadith-source">' + e(toText(h.source)) + '</div>';
+    if (h.grade) html += '<div class="hadith-grade">الدرجة: ' + e(toText(h.grade)) + '</div>';
+    html += '<p class="hadith-text">' + e(text) + '</p>';
+    if (h.link_reason) html += '<p class="hadith-link"><strong>وجه الارتباط:</strong> ' + e(toText(h.link_reason)) + '</p>';
+    if (h.explanation) html += '<details><summary style="cursor:pointer;color:var(--em2)">شرح الحديث ▼</summary><p>' + e(toText(h.explanation)) + '</p></details>';
+    html += '</div>';
+  }
+
+  // Other candidates with "read more"
+  if (candidates.length > 0) {
+    html += '<details><summary style="cursor:pointer;padding:8px;background:rgba(10,61,46,.07);margin-top:8px;font-size:.88em">📚 أحاديث أخرى ذات صلة (' + candidates.length + ')</summary>';
+    for (const hd of candidates) {
+      if (hd.text === text) continue; // skip already shown
+      html += '<div class="hadith-box" style="margin-top:8px;opacity:.85">';
+      html += '<div class="hadith-source">' + e(hd.source||"") + '</div>';
+      if (hd.grade) html += '<div class="hadith-grade">الدرجة: ' + e(hd.grade) + '</div>';
+      html += '<p class="hadith-text">' + e(hd.text||"") + '</p>';
+      html += '</div>';
+    }
+    html += '</details>';
+  }
+  return html;
 }
 
 function buildBalaghaHTML(a){
@@ -442,9 +455,9 @@ ${buildBalaghaHTML(a)}
   <div class="ibra-item"><strong>③ المستوى الحضاري :</strong> ${e(toText(a.ibra_3))}</div>
   <div class="ibra-q"><em>${e(toText(a.ibra_question))}</em></div>
 </div>
+${a.surah_name_reason ? '<h2 class="sec-h">📖 لماذا سُمّيت السورة بهذا الاسم؟</h2><p class="sec-p">' + e(toText(a.surah_name_reason)) + '</p>' : ''}
 <h2 class="sec-h">🌍 التطبيق في حياتنا اليوم</h2>
 <p class="sec-p">${e(toText(a.tatbiq))}</p>
-${buildHadithHTML(a)}
 <h2 class="sec-h">🕌 القرآن رسالة لك أنت</h2>
 <div class="cta-box">
   <h3>﴿ أَفَلَا يَتَدَبَّرُونَ الْقُرْآنَ ﴾</h3>
