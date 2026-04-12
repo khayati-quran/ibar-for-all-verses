@@ -196,7 +196,8 @@ const TAFSIRS=[
   {id:167, label:"الشافعي", src:"tafasir"},
   {id:165, label:"مالك", src:"tafasir"},
   {id:106, label:"الشنقيطي", src:"tafasir"},
-  {id:104, label:"ظلال القرآن", src:"tafasir"}
+  {id:104, label:"ظلال القرآن", src:"tafasir"},
+  {id:131, label:"الشعراوي",    src:"tafasir"}
 ];
 
 const WORKER="https://nour-quran-worker.khayati1hafedh.workers.dev";
@@ -251,7 +252,7 @@ async function generate(){
       const nameToId = {
         "ابن كثير":50,"القرطبي":45,"البغوي":33,"الجلالين":66,
         "الآلوسي":84,"ابن سعدي":102,"ابن عاشور":105,"الشوكاني":82,
-        "في ظلال القرآن":104,"التفسير الميسر":121
+        "في ظلال القرآن":104,"التفسير الميسر":121,"الشعراوي":131
       };
       for(const [name, text] of Object.entries(data.classical_tafsirs)) {
         const id = nameToId[name];
