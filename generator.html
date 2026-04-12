@@ -269,8 +269,10 @@ async function generate(){
 }
 
 function renderArticle(data){
-  // Store hadith candidates globally for display
+  // Store globally for display
   window._hadithCandidates = data.hadith_candidates || [];
+  window._shaaraawiFull = data.sharaawi_full || "";
+  window._surrahIntro = data.surrah_intro || "";
   const sn=data.surah_number,an=data.ayah_number;
   const prev=an>1?`<a href="surah-${sn}-ayah-${an-1}g.html">→ الآية ${an-1}</a>`:`<a href="../index.html">→ الرئيسية</a>`;
   const next=`<a href="surah-${sn}-ayah-${an+1}g.html">الآية ${an+1} ←</a>`;
@@ -352,6 +354,29 @@ function toText(v){
     return Object.values(v).map(toText).filter(Boolean).join(" | ");
   }
   return String(v);
+}
+
+function buildShaarawiHTML(a) {
+  const full = window._shaaraawiFull || "";
+  const intro = toText(a.sharawi) || "";
+
+  if (!full) {
+    // No Sharaawi text from API — show AI-generated intro
+    return intro ? `<p class="sec-p">${e(intro)}</p>` : '<p class="sec-p" style="color:#888">لا يتوفر نص للشعراوي لهذه الآية.</p>';
+  }
+
+  // Show intro sentence + full text with "read more"
+  const preview = full.slice(0, 600);
+  const rest = full.slice(600);
+
+  return `
+<p class="sec-p" style="font-style:italic;color:var(--em2);margin-bottom:8px">${e(intro)}</p>
+<div class="sharawi-full">
+  <p class="sec-p">${e(preview)}${rest ? '...' : ''}</p>
+  ${rest ? `<details><summary style="cursor:pointer;color:var(--em2);font-size:.88em;padding:6px 0">اقرأ النص الكامل للشعراوي ▼ (${Math.ceil(full.length/250)} دقيقة)</summary>
+  <p class="sec-p" style="margin-top:8px">${e(rest)}</p>
+  </details>` : ''}
+</div>`;
 }
 
 function buildHadithHTML(a){
@@ -442,7 +467,7 @@ ${buildBalaghaHTML(a)}
 <h2 class="sec-h">📍 سبب النزول والسياق</h2>
 <div class="sabab-box">${e(toText(a.sabab_nuzul))}</div>
 <h2 class="sec-h">🎙️ خاطرة الشيخ الشعراوي رحمه الله</h2>
-<p class="sec-p">${e(toText(a.sharawi))}</p>
+${buildShaarawiHTML(a)}
 <div class="science-box">
   <div class="sci-title">🔬 الإعجاز — البيان والدلالة</div>
   <p class="sec-p" style="margin:0">${e(toText(a.ijaz_ilmi))}</p>
@@ -455,7 +480,7 @@ ${buildBalaghaHTML(a)}
   <div class="ibra-item"><strong>③ المستوى الحضاري :</strong> ${e(toText(a.ibra_3))}</div>
   <div class="ibra-q"><em>${e(toText(a.ibra_question))}</em></div>
 </div>
-${a.surah_name_reason ? '<h2 class="sec-h">📖 لماذا سُمّيت السورة بهذا الاسم؟</h2><p class="sec-p">' + e(toText(a.surah_name_reason)) + '</p>' : ''}
+${(window._surrahIntro || a.surah_name_reason) ? '<h2 class="sec-h">📖 مقدمة السورة</h2><p class="sec-p">' + e(window._surrahIntro || toText(a.surah_name_reason)) + '</p>' : ''}
 <h2 class="sec-h">🌍 التطبيق في حياتنا اليوم</h2>
 <p class="sec-p">${e(toText(a.tatbiq))}</p>
 <h2 class="sec-h">🕌 القرآن رسالة لك أنت</h2>
