@@ -282,7 +282,7 @@ function renderArticle(data){
   document.querySelector(".tt.active") && null;
 }
 
-function shortPreview(text,maxChars=180){
+function shortPreview(text,maxChars=500){
   if(!text||text.length<=maxChars) return {short:text,full:null};
   const cut=text.lastIndexOf(" ",maxChars)||maxChars;
   return {short:text.slice(0,cut)+"...", full:text};
@@ -361,21 +361,27 @@ function buildShaarawiHTML(a) {
   const intro = toText(a.sharawi) || "";
 
   if (!full) {
-    // No Sharaawi text from API — show AI-generated intro
-    return intro ? `<p class="sec-p">${e(intro)}</p>` : '<p class="sec-p" style="color:#888">لا يتوفر نص للشعراوي لهذه الآية.</p>';
+    return intro
+      ? `<p class="sec-p">${e(intro)}</p><p class="sec-p" style="color:#888;font-size:.88em">⚠️ نص الشعراوي غير متوفر من المصدر لهذه الآية.</p>`
+      : '<p class="sec-p" style="color:#888">لا يتوفر نص للشعراوي لهذه الآية.</p>';
   }
 
-  // Show intro sentence + full text with "read more"
-  const preview = full.slice(0, 600);
-  const rest = full.slice(600);
+  const PREVIEW_LEN = 1200;
+  const preview = full.slice(0, PREVIEW_LEN);
+  const rest    = full.slice(PREVIEW_LEN);
+  const estMins = Math.ceil(full.length / 250);
+  const uid     = "_sh_" + Math.random().toString(36).slice(2,8);
 
   return `
-<p class="sec-p" style="font-style:italic;color:var(--em2);margin-bottom:8px">${e(intro)}</p>
-<div class="sharawi-full">
-  <p class="sec-p">${e(preview)}${rest ? '...' : ''}</p>
-  ${rest ? `<details><summary style="cursor:pointer;color:var(--em2);font-size:.88em;padding:6px 0">اقرأ النص الكامل للشعراوي ▼ (${Math.ceil(full.length/250)} دقيقة)</summary>
-  <p class="sec-p" style="margin-top:8px">${e(rest)}</p>
-  </details>` : ''}
+<p class="sec-p" style="font-style:italic;color:var(--em2);margin-bottom:10px">${e(intro)}</p>
+<div style="background:#fafdf7;border:1px solid #c5e8c5;border-right:5px solid var(--em2);padding:18px 20px;margin:8px 0;border-radius:0 4px 4px 0;line-height:2.15">
+  <p class="sec-p" style="margin:0">${e(preview)}${rest ? '…' : ''}</p>
+  ${rest ? `
+  <div id="${uid}_rest" style="display:none"><p class="sec-p" style="margin:8px 0 0">${e(rest)}</p></div>
+  <button onclick="document.getElementById('${uid}_rest').style.display='block';this.style.display='none';"
+    style="margin-top:14px;width:100%;background:none;border:1px dashed var(--em2);color:var(--em2);padding:7px 14px;font-family:'Cairo',sans-serif;font-size:.85em;cursor:pointer;border-radius:3px">
+    ▼ &nbsp; اقرأ النص الكامل للشعراوي &nbsp;(${estMins} دقائق قراءة — ${full.length} حرف)
+  </button>` : ''}
 </div>`;
 }
 
@@ -625,7 +631,7 @@ nav a{color:rgba(255,255,255,.85);text-decoration:none;font-size:.84em;padding:5
 <div class="wrap"><div class="bc"><a href="${SITE_BASE}/index.html">الرئيسية</a> ← <a href="${SITE_BASE}/articles.html">المقالات</a> ← تفسير سورة ${data.surah_name} — الآية ${an}</div><div class="frame">${articleHtml}</div></div>
 <footer class="site-footer"><div class="hborder" style="margin-bottom:16px"></div><div class="fayah">﴿ إِنَّا نَحْنُ نَزَّلْنَا الذِّكْرَ وَإِنَّا لَهُ لَحَافِظُونَ ﴾</div><p>سورة الحجر — الآية 9 | 🕌 موقع نور القرآن الكريم</p></footer>
 <script>
-function swStaticTab(id){document.querySelectorAll('.tt').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));const tabs=[...document.querySelectorAll('.tt')];const ids=${JSON.stringify([121,50,45,33,102,105,66,84,82,35,54,68,176,167,165,106,104])};const idx=ids.findIndex(x=>x===id);if(idx>=0&&tabs[idx])tabs[idx].classList.add('active');const panel=document.getElementById('sp-'+id);if(panel)panel.classList.add('active');}
+function swStaticTab(id){document.querySelectorAll('.tt').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));const tabs=[...document.querySelectorAll('.tt')];const ids=${JSON.stringify([121,50,45,33,102,105,66,84,82,35,54,68,176,167,165,106,104,131])};const idx=ids.findIndex(x=>x===id);if(idx>=0&&tabs[idx])tabs[idx].classList.add('active');const panel=document.getElementById('sp-'+id);if(panel)panel.classList.add('active');}
 function expandStaticTp(btn){const panel=btn.closest('.tp');if(panel)panel.classList.add('expanded');}
 <\/script>
 </body></html>`;
