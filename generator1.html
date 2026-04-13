@@ -462,76 +462,15 @@ function buildBalaghaHTML(a){
 </div>`;
 }
 
-function buildArticleSections(data, prev, next, useStaticTafsir = false) {
-  var a = data.article || {}, sn = data.surah_number, an = data.ayah_number;
-  var tafsirHtml = useStaticTafsir ? buildStaticStandaloneTafsir(data) : buildTafsirHTML(sn, an);
-
-  function rm(text, limit) {
-    if (!text) return "";
-    limit = limit || 150;
-    var words = text.split(" ");
-    if (words.length <= limit) return "<p class=\"sec-p\">" + e(text) + "</p>";
-    var preview = words.slice(0, limit).join(" ");
-    var rest = words.slice(limit).join(" ");
-    return "<div class=\"sec-p\">" + e(preview) + "... <details><summary style=\"cursor:pointer;color:#1a5c42;font-size:.88em;padding:4px 0;display:block\">اقرأ المزيد ▼</summary><div style=\"padding-top:8px\">" + e(rest) + "</div></details></div>";
-  }
-
-  var html = "";
-  html += "<div class=\"art-intro\">";
-  html += "<span class=\"bism\">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>";
-  html += "<div class=\"salah\">أَحْمَدُكَ رَبِّي وَأَسْتَعِيْنُ بِكَ وَأُصَلِّي وَأُسَلِّمُ عَلَى خَيْرِ خَلْقِكَ سَيِّدِنَا مُحَمَّدٍ ﷺ</div>";
-  html += "</div>";
-  html += "<div class=\"wrap\"><div class=\"frame\">";
-  html += "<div class=\"ornament\">✦ ✦ ✦</div>";
-  html += "<div class=\"art-head\">";
-  html += "<div class=\"badge\">سورة " + e(data.surah_name) + " • الآية " + an + "</div>";
-  html += "<div class=\"art-title\">تفسير سورة " + e(data.surah_name) + " — الآية " + an + "</div>";
-  html += "<div class=\"art-meta\">تفسير أصيل • الشعراوي • إعجاز • عبرة</div>";
-  html += "</div>";
-  html += "<div class=\"art-body\">";
-  html += "<div class=\"ayah-box\">";
-  html += "<div class=\"ayah-text\">" + e(data.ayah_text || "") + "</div>";
-  html += "<div class=\"ayah-ref\">سورة " + e(data.surah_name) + " — الآية " + an + "</div>";
-  html += "</div>";
-
-  // ========== القسم الجديد: وبعد نبدأ بفضل الله + إعادة الآية + تقديم ==========
-  const isFirst = (sn === 1 && an === 1);
-  const prevAyah = getPrevAyahNumber(prev);
-  let openingPhrase = '';
-  if (isFirst) {
-    const subject = a.subject || 'تفسير الآية الكريمة';
-    openingPhrase = `وبعد — نبدأ بفضل الله مع الآية الكريمة : الآية ${an} من سورة ${data.surah_name} (ذكر الموضوع: ${subject})`;
-  } else {
-    openingPhrase = `نواصل بفضل الله ما بدأناه بعد الآية ${prevAyah || ''} — والآن مع الآية ${an} من سورة ${data.surah_name}`;
-  }
-  const ayahIntroText = toText(a.ayah_intro) || (isFirst ? 'هذه هي أول آية في القرآن الكريم، ولكنها ليست أول آية نزلت؛ إذ نزلت أولاً سورة العلق. البسملة آية كريمة افتتح بها الله كتابه، وهي تعليم من الله لعباده كيف يستفتحون أعمالهم باسمه الرحمن الرحيم.' : '');
-  html += `
-  <div class="taqdim-box" style="margin: 20px 0; background: linear-gradient(135deg, #fff8e7, #fff2dc); border: 2px solid var(--gold2); border-radius: 12px; padding: 20px; text-align: center;">
-    <div class="taqdim-begin" style="font-size: 1.1em; color: var(--em); margin-bottom: 10px;">${e(openingPhrase)}</div>
-    <div class="ayah-repris" style="font-family: 'Amiri Quran', serif; font-size: 1.6em; color: var(--em); background: rgba(218,165,32,0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border-right: 6px solid var(--gold2);">
-      ${e(data.ayah_text)}
-    </div>
-    <div class="ayah-intro" style="line-height: 1.9; font-size: 0.95em; color: #2c2b28; background: rgba(255,255,240,0.8); padding: 10px; border-radius: 6px;">
-      📖 ${e(ayahIntroText)}
-    </div>
-  </div>`;
-
-  // باقي الأقسام كما هي (مدخل، مقدمة السورة، التفسير، الحديث، المفردات، سبب النزول، الشعراوي، الإعجاز، العبر، التطبيق، الخاتمة)
-  // ... (أبقِ باقي الكود كما هو من النسخة الأصلية)
-
-  html += "<h2 class=\"sec-h\">🌅 مدخل يمسّ الإنسان</h2>";
-  html += rm(toText(a.question_hook), 120);
-  // ... أكمل باقي الأقسام تماماً كما في الكود الأصلي (لا تغير شيئاً بعد هذا)
-  
-  // ثم في النهاية:
-  html += "</div></div></div>";
-  return html;
-}
-
+// أضف بعد دالة toText (حوالي السطر 480)
 function getPrevAyahNumber(prevLinkHtml) {
   const match = prevLinkHtml.match(/ayah-(\d+)g\.html/);
   return match ? parseInt(match[1]) : null;
 }
+
+function buildArticleSections(data, prev, next, useStaticTafsir=false){
+  var a=data.article||{}, sn=data.surah_number, an=data.ayah_number;
+  var tafsirHtml = useStaticTafsir ? buildStaticStandaloneTafsir(data) : buildTafsirHTML(sn,an);
 
   function rm(text, limit) {
     if (!text) return "";
@@ -561,19 +500,27 @@ function getPrevAyahNumber(prevLinkHtml) {
   html += "<div class=\"ayah-ref\">سورة " + e(data.surah_name) + " — الآية " + an + "</div>";
   html += "</div>";
 
-  // === الفقرة الافتتاحية ===
-  var isFirst = (sn === 1 && an === 1);  // هل هي الآية الأولى في المشروع كله؟
-  html += "<div class=\"taqdim-box\">";
+  // ===== القسم الجديد: وبعد نبدأ بفضل الله + إعادة الآية + تقديم =====
+  const isFirst = (sn === 1 && an === 1);
+  const prevAyah = getPrevAyahNumber(prev);
+  let openingPhrase = '';
   if (isFirst) {
-    html += "<div class=\"taqdim-basmala\">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>";
-    html += "<div class=\"taqdim-salah\">أَحْمَدُكَ رَبِّي وَأَسْتَعِيْنُ بِكَ وَأُصَلِّي وَأُسَلِّمُ عَلَى خَيْرِ خَلْقِكَ سَيِّدِنَا مُحَمَّدٍ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ وَعَلَى آلِهِ وَصَحْبِهِ أَجْمَعِينَ إِلَى يَوْمِ الدِّينِ</div>";
-    html += "<div class=\"taqdim-intro\">رحلة آية بآية عبر 6236 آية — يطوّرها <strong>سليم عبّار</strong> و<strong>حافظ الخياطي</strong> — مساهمة بسيطة عسى أن تفتح العيون حتى نرجع إلى الله</div>";
-    html += "<div class=\"taqdim-tags\"><span>☆ تفسير أصيل</span><span>☆ الشعراوي</span><span>☆ إعجاز علمي</span><span>☆ عبرة</span></div>";
-    html += "<div class=\"taqdim-begin\">وبعد — نبدأ بفضل الله مع الآية الكريمة :</div>";
+    const subject = a.subject || 'تفسير الآية الكريمة';
+    openingPhrase = `وبعد — نبدأ بفضل الله مع الآية الكريمة : الآية ${an} من سورة ${data.surah_name} (ذكر الموضوع: ${subject})`;
   } else {
-    html += "<div class=\"taqdim-continue\">نواصل بفضل الله ما بدأناه — رحلة آية بآية عبر القرآن الكريم — مع الآية الكريمة :</div>";
+    openingPhrase = `نواصل بفضل الله ما بدأناه بعد الآية ${prevAyah || ''} — والآن مع الآية ${an} من سورة ${data.surah_name}`;
   }
-  html += "</div>";
+  const ayahIntroText = toText(a.ayah_intro) || (isFirst ? 'هذه هي أول آية في القرآن الكريم، ولكنها ليست أول آية نزلت؛ إذ نزلت أولاً سورة العلق. البسملة آية كريمة افتتح بها الله كتابه، وهي تعليم من الله لعباده كيف يستفتحون أعمالهم باسمه الرحمن الرحيم.' : '');
+  html += `
+  <div class="taqdim-box" style="margin: 20px 0; background: linear-gradient(135deg, #fff8e7, #fff2dc); border: 2px solid var(--gold2); border-radius: 12px; padding: 20px; text-align: center;">
+    <div class="taqdim-begin" style="font-size: 1.1em; color: var(--em); margin-bottom: 10px;">${e(openingPhrase)}</div>
+    <div class="ayah-repris" style="font-family: 'Amiri Quran', serif; font-size: 1.6em; color: var(--em); background: rgba(218,165,32,0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border-right: 6px solid var(--gold2);">
+      ${e(data.ayah_text)}
+    </div>
+    <div class="ayah-intro" style="line-height: 1.9; font-size: 0.95em; color: #2c2b28; background: rgba(255,255,240,0.8); padding: 10px; border-radius: 6px;">
+      📖 ${e(ayahIntroText)}
+    </div>
+  </div>`;
 
   // 1. مدخل
   html += "<h2 class=\"sec-h\">🌅 مدخل يمسّ الإنسان</h2>";
@@ -594,7 +541,7 @@ function getPrevAyahNumber(prevLinkHtml) {
   html += buildHadithHTML(a);
 
   // 5. المفردات
-   html += buildBalaghaHTML(a);
+  html += buildBalaghaHTML(a);
 
   // 6. سبب النزول
   html += "<h2 class=\"sec-h\">📍 سبب النزول والسياق</h2>";
