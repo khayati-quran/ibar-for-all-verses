@@ -450,9 +450,11 @@ function buildBalaghaHTML(a){
 </div>`;
   }
   return `
-<h2 class="sec-h">🔤 المفردات والبلاغة</h2>
+<h2 class="sec-h">🔤 المفردات</h2>
 <div class="balagha-box">
-  <p><strong>المفردات والبلاغة:</strong><br>${e(toText(m))}</p>
+  <p><strong>المفردات:</strong><br>${e(words)}</p>
+  <p><strong>اللمسة البلاغية:</strong><br>${e(balagha)}</p>
+  <p><strong>أثرها في المعنى:</strong><br>${e(impact)}</p>
 </div>`;
 }
 
@@ -507,9 +509,7 @@ function buildArticleSections(data,prev,next,useStaticTafsir=false){
   html += buildHadithHTML(a);
 
   // 5. المفردات
-  html += "<h2 class=\"sec-h\">🔤 المفردات والبلاغة</h2>";
-  html += buildBalaghaHTML(a);
-  html += rm(toText(a.mufradat), 150);
+  html += buildBalaghaHTML(a);, 150);
 
   // 6. سبب النزول
   html += "<h2 class=\"sec-h\">📍 سبب النزول والسياق</h2>";
