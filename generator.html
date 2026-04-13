@@ -197,7 +197,11 @@ const TAFSIRS=[
   {id:165, label:"مالك", src:"tafasir"},
   {id:106, label:"الشنقيطي", src:"tafasir"},
   {id:104, label:"ظلال القرآن", src:"tafasir"},
-  {id:131, label:"الشعراوي",    src:"tafasir"}
+  {id:131, label:"الشعراوي",    src:"tafasir"},
+  {id:34,  label:"الزمخشري",    src:"tafasir"},
+  {id:41,  label:"الرازي",      src:"tafasir"},
+  {id:46,  label:"البيضاوي",    src:"tafasir"},
+  {id:47,  label:"النسفي",      src:"tafasir"}
 ];
 
 const WORKER="https://nour-quran-worker.khayati1hafedh.workers.dev";
@@ -464,7 +468,7 @@ function buildArticleSections(data,prev,next,useStaticTafsir=false){
     if (words.length <= limit) return "<p class=\"sec-p\">" + e(text) + "</p>";
     var preview = words.slice(0, limit).join(" ");
     var rest = words.slice(limit).join(" ");
-    return "<p class=\"sec-p\">" + e(preview) + "... <details style=\"display:inline\"><summary style=\"display:inline;cursor:pointer;color:#1a5c42;font-size:.88em\">اقرأ المزيد ▼</summary> " + e(rest) + "</details></p>";
+    return "<div class=\"sec-p\">" + e(preview) + "... <details><summary style=\"cursor:pointer;color:#1a5c42;font-size:.88em;padding:4px 0;display:block\">اقرأ المزيد ▼</summary><div style=\"padding-top:8px\">" + e(rest) + "</div></details></div>";
   }
 
   var html = "";
