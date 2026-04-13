@@ -454,103 +454,99 @@ function buildBalaghaHTML(a){
 }
 
 function buildArticleSections(data,prev,next,useStaticTafsir=false){
-  const a=data.article||{}, sn=data.surah_number, an=data.ayah_number;
-  const tafsirHtml = useStaticTafsir ? buildStaticStandaloneTafsir(data) : buildTafsirHTML(sn,an);
+  var a=data.article||{}, sn=data.surah_number, an=data.ayah_number;
+  var tafsirHtml = useStaticTafsir ? buildStaticStandaloneTafsir(data) : buildTafsirHTML(sn,an);
 
-  function readMore(text, limit=150) {
+  function rm(text, limit) {
     if (!text) return "";
-    const words = text.split(" ");
-    if (words.length <= limit) return `<p class="sec-p">${e(text)}</p>`;
-    const preview = words.slice(0, limit).join(" ");
-    const rest = words.slice(limit).join(" ");
-    return `<p class="sec-p">${e(preview)}... <details style="display:inline"><summary style="display:inline;cursor:pointer;color:var(--em2);font-size:.88em">اقرأ المزيد ▼</summary> ${e(rest)}</details></p>`;
+    limit = limit || 150;
+    var words = text.split(" ");
+    if (words.length <= limit) return "<p class=\"sec-p\">" + e(text) + "</p>";
+    var preview = words.slice(0, limit).join(" ");
+    var rest = words.slice(limit).join(" ");
+    return "<p class=\"sec-p\">" + e(preview) + "... <details style=\"display:inline\"><summary style=\"display:inline;cursor:pointer;color:#1a5c42;font-size:.88em\">اقرأ المزيد ▼</summary> " + e(rest) + "</details></p>";
   }
 
-  return `
-<div class="art-intro">
-  <span class="bism">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>
-  <div class="salah">أَحْمَدُكَ رَبِّي وَأَسْتَعِيْنُ بِكَ وَأُصَلِّي وَأُسَلِّمُ عَلَى خَيْرِ خَلْقِكَ سَيِّدِنَا مُحَمَّدٍ ﷺ</div>
-</div>
-<div class="wrap"><div class="frame">
-<div class="ornament">✦ ✦ ✦</div>
-<div class="art-head">
-  <div class="badge">سورة \${e(data.surah_name)} • الآية \${an}</div>
-  <div class="art-title">تفسير سورة \${e(data.surah_name)} — الآية \${an}</div>
-  <div class="art-meta">تفسير أصيل • الشعراوي • إعجاز • عبرة</div>
-</div>
-<div class="art-body">
-  <div class="ayah-box">
-    <div class="ayah-text">\${e(data.ayah_text||"")}</div>
-    <div class="ayah-ref">سورة \${e(data.surah_name)} — الآية \${an}</div>
-  </div>
+  var html = "";
+  html += "<div class=\"art-intro\">";
+  html += "<span class=\"bism\">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>";
+  html += "<div class=\"salah\">أَحْمَدُكَ رَبِّي وَأَسْتَعِيْنُ بِكَ وَأُصَلِّي وَأُسَلِّمُ عَلَى خَيْرِ خَلْقِكَ سَيِّدِنَا مُحَمَّدٍ ﷺ</div>";
+  html += "</div>";
+  html += "<div class=\"wrap\"><div class=\"frame\">";
+  html += "<div class=\"ornament\">✦ ✦ ✦</div>";
+  html += "<div class=\"art-head\">";
+  html += "<div class=\"badge\">سورة " + e(data.surah_name) + " • الآية " + an + "</div>";
+  html += "<div class=\"art-title\">تفسير سورة " + e(data.surah_name) + " — الآية " + an + "</div>";
+  html += "<div class=\"art-meta\">تفسير أصيل • الشعراوي • إعجاز • عبرة</div>";
+  html += "</div>";
+  html += "<div class=\"art-body\">";
+  html += "<div class=\"ayah-box\">";
+  html += "<div class=\"ayah-text\">" + e(data.ayah_text||"") + "</div>";
+  html += "<div class=\"ayah-ref\">سورة " + e(data.surah_name) + " — الآية " + an + "</div>";
+  html += "</div>";
 
-  <!-- 1. مدخل يمسّ الإنسان -->
-  <h2 class="sec-h">🌅 مدخل يمسّ الإنسان</h2>
-  \${readMore(toText(a.question_hook), 120)}
+  // 1. مدخل
+  html += "<h2 class=\"sec-h\">🌅 مدخل يمسّ الإنسان</h2>";
+  html += rm(toText(a.question_hook), 120);
 
-  <!-- 2. مقدمة السورة -->
-  \${(window._surrahIntro || a.surah_name_reason) ? \`
-  <h2 class="sec-h">📖 مقدمة السورة</h2>
-  \${readMore(window._surrahIntro || toText(a.surah_name_reason), 150)}
-  \` : ""}
+  // 2. مقدمة السورة
+  var intro = window._surrahIntro || toText(a.surah_name_reason) || "";
+  if (intro) {
+    html += "<h2 class=\"sec-h\">📖 مقدمة السورة</h2>";
+    html += rm(intro, 150);
+  }
 
-  <!-- 3. التفسير من كتب التراث -->
-  <h2 class="sec-h">📚 التفسير — من كتب التراث</h2>
-  \${tafsirHtml}
+  // 3. التفسير
+  html += "<h2 class=\"sec-h\">📚 التفسير — من كتب التراث</h2>";
+  html += tafsirHtml;
 
-  <!-- 4. الحديث النبوي -->
-  \${buildHadithHTML(a)}
+  // 4. الحديث
+  html += buildHadithHTML(a);
 
-  <!-- 5. المفردات والبلاغة -->
-  <h2 class="sec-h">🔤 المفردات والبلاغة</h2>
-  \${buildBalaghaHTML(a)}
-  \${readMore(toText(a.mufradat), 150)}
+  // 5. المفردات
+  html += "<h2 class=\"sec-h\">🔤 المفردات والبلاغة</h2>";
+  html += buildBalaghaHTML(a);
+  html += rm(toText(a.mufradat), 150);
 
-  <!-- 6. سبب النزول والسياق -->
-  <h2 class="sec-h">📍 سبب النزول والسياق</h2>
-  \${readMore(toText(a.sabab_nuzul), 150)}
+  // 6. سبب النزول
+  html += "<h2 class=\"sec-h\">📍 سبب النزول والسياق</h2>";
+  html += rm(toText(a.sabab_nuzul), 150);
 
-  <!-- 7. خاطرة الشعراوي -->
-  <h2 class="sec-h">🎙️ خاطرة الشيخ الشعراوي رحمه الله</h2>
-  \${buildShaarawiHTML(a)}
+  // 7. خاطرة الشعراوي
+  html += "<h2 class=\"sec-h\">🎙️ خاطرة الشيخ الشعراوي رحمه الله</h2>";
+  html += buildShaarawiHTML(a);
 
-  <!-- 8. الإعجاز والبيان -->
-  \${toText(a.ijaz_ilmi) ? \`
-  <h2 class="sec-h">🔬 الإعجاز والبيان والبلاغة</h2>
-  \${readMore(toText(a.ijaz_ilmi), 150)}
-  \` : ""}
+  // 8. الإعجاز
+  if (toText(a.ijaz_ilmi)) {
+    html += "<h2 class=\"sec-h\">🔬 الإعجاز والبيان والبلاغة</h2>";
+    html += rm(toText(a.ijaz_ilmi), 150);
+  }
 
-  <!-- 9. العبرة العميقة -->
-  <h2 class="sec-h">💎 العبرة العميقة — ثلاثة مستويات</h2>
-  <div class="ibra-box">
-    <div class="ibra-title">💎 العبرة الجوهرية :</div>
-    <p><strong>① المستوى العقدي :</strong> \${e(toText(a.ibra_1)||"")}</p>
-    <p><strong>② المستوى النفسي :</strong> \${e(toText(a.ibra_2)||"")}</p>
-    <p><strong>③ المستوى الحضاري :</strong> \${e(toText(a.ibra_3)||"")}</p>
-    \${a.ibra_question ? \`<p style="font-style:italic;color:#555;border-top:1px dashed #daa520;padding-top:10px;margin-top:10px">\${e(toText(a.ibra_question))}</p>\` : ""}
-  </div>
+  // 9. العبرة
+  html += "<h2 class=\"sec-h\">💎 العبرة العميقة — ثلاثة مستويات</h2>";
+  html += "<div class=\"ibra-box\">";
+  html += "<div class=\"ibra-title\">💎 العبرة الجوهرية :</div>";
+  html += "<p><strong>① المستوى العقدي :</strong> " + e(toText(a.ibra_1)||"") + "</p>";
+  html += "<p><strong>② المستوى النفسي :</strong> " + e(toText(a.ibra_2)||"") + "</p>";
+  html += "<p><strong>③ المستوى الحضاري :</strong> " + e(toText(a.ibra_3)||"") + "</p>";
+  if (a.ibra_question) {
+    html += "<p style=\"font-style:italic;color:#555;border-top:1px dashed #daa520;padding-top:10px;margin-top:10px\">" + e(toText(a.ibra_question)) + "</p>";
+  }
+  html += "</div>";
 
-  <!-- 10. التطبيق -->
-  <h2 class="sec-h">🌍 التطبيق في حياتنا اليوم</h2>
-  <p class="sec-p">\${e(toText(a.tatbiq))}</p>
+  // 10. التطبيق
+  html += "<h2 class=\"sec-h\">🌍 التطبيق في حياتنا اليوم</h2>";
+  html += "<p class=\"sec-p\">" + e(toText(a.tatbiq)) + "</p>";
 
-  <h2 class="sec-h">🕌 القرآن رسالة لك أنت</h2>
-  <div class="cta-box">
-    <h3>﴿ أَفَلَا يَتَدَبَّرُونَ الْقُرْآنَ ﴾</h3>
-    <p>تأمّل هذه الآية واجعلها منطلقاً للتغيير في حياتك اليومية.</p>
-  </div>
-  <div class="divider">❧ ✦ ❧</div>
-  <div class="sharawi-box">
-    <div class="sh-head"><span style="font-size:1.3em">▶</span>
-      <div><div class="sh-title">الشيخ محمد متولي الشعراوي رحمه الله</div>
-      <div class="sh-sub">تفسير سورة \${e(data.surah_name)}</div></div>
-    </div>
-    <div class="sh-body"><p style="margin-bottom:10px;font-size:.84em;color:#555">استمع إلى الشيخ الشعراوي :</p>
-      <div class="yt-wrap"><iframe src="https://www.youtube.com/embed/videoseries?list=PLiJSlz8e4RlG7I_eLF3tQ0MMpPgV68FoK" title="الشعراوي" allowfullscreen loading="lazy"></iframe></div>
-    </div>
-  </div>
-  <div class="nav-art">\${prev}<a href="https://khayati-quran.github.io/ibar-for-all-verses/articles.html">📚 المقالات</a>\${next}</div>
-</div></div></div>\`;
+  html += "<h2 class=\"sec-h\">🕌 القرآن رسالة لك أنت</h2>";
+  html += "<div class=\"cta-box\"><h3>﴿ أَفَلَا يَتَدَبَّرُونَ الْقُرْآنَ ﴾</h3><p>تأمّل هذه الآية واجعلها منطلقاً للتغيير في حياتك اليومية.</p></div>";
+  html += "<div class=\"divider\">❧ ✦ ❧</div>";
+  html += "<div class=\"sharawi-box\"><div class=\"sh-head\"><span style=\"font-size:1.3em\">▶</span><div><div class=\"sh-title\">الشيخ محمد متولي الشعراوي رحمه الله</div><div class=\"sh-sub\">تفسير سورة " + e(data.surah_name) + "</div></div></div>";
+  html += "<div class=\"sh-body\"><p style=\"margin-bottom:10px;font-size:.84em;color:#555\">استمع إلى الشيخ الشعراوي :</p>";
+  html += "<div class=\"yt-wrap\"><iframe src=\"https://www.youtube.com/embed/videoseries?list=PLiJSlz8e4RlG7I_eLF3tQ0MMpPgV68FoK\" title=\"الشعراوي\" allowfullscreen loading=\"lazy\"></iframe></div></div></div>";
+  html += "<div class=\"nav-art\">" + prev + "<a href=\"https://khayati-quran.github.io/ibar-for-all-verses/articles.html\">📚 المقالات</a>" + next + "</div>";
+  html += "</div></div></div>";
+  return html;
 }
 
 
