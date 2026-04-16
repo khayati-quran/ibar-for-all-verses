@@ -65,9 +65,15 @@ body{font-family:'Cairo',sans-serif;background:#0d1117;color:#e6e6e6;min-height:
 .art-body{padding:28px 40px;background:white;}
 
 /* ══ ARABESQUE ══ */
-.ayah-frame-outer{position:relative;padding:18px;margin:24px 0;border:2px solid var(--gold);border-radius:8px;background:linear-gradient(170deg,#fffdf6,#f9f2e4);box-shadow:0 8px 28px rgba(0,0,0,.1),inset 0 0 0 6px rgba(218,165,32,.08);}
-.ayah-frame-inner{position:relative;padding:30px 22px;border:1px solid rgba(184,134,11,.45);border-radius:6px;text-align:center;background:#fffef8;box-shadow:inset 0 0 0 1px rgba(184,134,11,.18);}
+.ayah-frame-outer{position:relative;padding:18px;margin:26px 0;border:2px solid var(--gold);border-radius:8px;background:linear-gradient(170deg,#fffdf6,#f9f2e4);box-shadow:0 8px 28px rgba(0,0,0,.1),inset 0 0 0 6px rgba(218,165,32,.08);}
+.ayah-frame-inner{position:relative;padding:34px 22px 30px;border:1px solid rgba(184,134,11,.45);border-radius:6px;text-align:center;background:#fffef8;box-shadow:inset 0 0 0 1px rgba(184,134,11,.18);}
 .ayah-only-frame{background-image:linear-gradient(170deg,#fffdf6,#f9f2e4),repeating-linear-gradient(45deg,rgba(184,134,11,.18) 0 2px,transparent 2px 10px);background-origin:border-box;background-clip:padding-box,border-box;}
+.ayah-surah-plaque{position:relative;margin:0 auto 22px;width:min(100%,820px);min-height:74px;border:2px solid rgba(132,82,35,.82);border-radius:7px;background:#fff8ec;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 6px rgba(132,82,35,.06);}
+.ayah-surah-plaque::before,.ayah-surah-plaque::after{content:"۞ ۞ ۞";position:absolute;top:50%;transform:translateY(-50%);width:190px;height:52px;border:1px solid rgba(132,82,35,.55);display:flex;align-items:center;justify-content:center;color:rgba(132,82,35,.85);font-size:18px;letter-spacing:8px;background:linear-gradient(90deg,transparent,rgba(218,165,32,.08),transparent);}
+.ayah-surah-plaque::before{right:14px;}
+.ayah-surah-plaque::after{left:14px;}
+.ayah-surah-name{font-family:'Amiri Quran','Amiri',serif;font-size:2.1em;color:#1a0e05;line-height:1.4;background:#fff8ec;padding:0 24px;z-index:1;}
+.ayah-inner-medallion{width:42px;height:42px;margin:0 auto 8px;border:1px solid rgba(132,82,35,.55);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);font-family:'Amiri',serif;font-size:.9em;}
 /* corner ornaments — all four corners */
 .ayah-frame-outer::before{content:"۞";position:absolute;top:8px;right:12px;color:var(--gold);font-size:20px;opacity:.75;}
 .ayah-frame-outer::after{content:"۞";position:absolute;top:8px;left:12px;color:var(--gold);font-size:20px;opacity:.75;}
@@ -514,8 +520,10 @@ function buildBody(d,prev,next,standalone){
 
   h+=`<div class="ayah-frame-outer ayah-only-frame" aria-label="إطار الآية">
     <span class="vsep-r">۞</span><span class="vsep-l">۞</span>
+    <div class="ayah-surah-plaque"><div class="ayah-surah-name">سورة ${e(sName)}</div></div>
     <div class="ayah-frame-inner">
-      <div class="ayah-surah-label">سورة ${e(sName)} — الآية ${an}</div>
+      <div class="ayah-inner-medallion">${an}</div>
+      <div class="ayah-surah-label">الآية ${an}</div>
       <div class="ayah-main-text">${e(ayahTxt)||'<span style="color:#ccc;font-size:.5em">جلب النص...</span>'}</div>
       <div class="ayah-follow">تأمّل هذه الآية — ففيها من المعنى ما يكفي لقلب حياتك.</div>
     </div>
@@ -736,6 +744,7 @@ function buildSharawi(d,a){
 }
 function buildSharawiIframe(d){
   const idx=Math.max((parseInt(d.ayah_number||1,10)||1)-1,0);
+  const localVideo = d.sharawi_video_url || "";
   return `<div class="sharawi-box sharawi-audio-box">
     <div class="sh-head"><span style="font-size:1.2em">▶</span>
       <div><div class="sh-title">الاستماع إلى الشيخ محمد متولي الشعراوي رحمه الله</div>
@@ -743,21 +752,24 @@ function buildSharawiIframe(d){
     </div>
     <div class="sh-body">
       <p style="margin-bottom:10px;font-size:.84em;color:#555">استمع إلى خلاصة مناسبة بعد التأمل في التطبيق العملي للآية:</p>
-      <div class="yt-wrap"><iframe src="https://www.youtube.com/embed/videoseries?list=PLiJSlz8e4RlG7I_eLF3tQ0MMpPgV68FoK&index=${idx}" title="تفسير الشعراوي للآية" allowfullscreen loading="lazy"></iframe></div>
+      <div class="yt-wrap">${localVideo
+        ? `<video src="${e(localVideo)}" controls preload="metadata" playsinline></video>`
+        : `<iframe src="https://www.youtube.com/embed/videoseries?list=PLiJSlz8e4RlG7I_eLF3tQ0MMpPgV68FoK&index=${idx}" title="تفسير الشعراوي للآية" allowfullscreen loading="lazy"></iframe>`}</div>
     </div>
   </div>`;
 }
 function buildIjazIlmi(a){
   const txt=gt(a.ijaz_ilmi);
   const topic=gt(a.ijaz_ilmi_topic);
+  const noScientificFace = !txt || /لا\s+(?:يوجد|يظهر)|وجه\s+علمي\s+مباشر|تجريبي\s+مباشر/.test(`${topic} ${txt}`);
   let h=`<div class="ijaz-ilmi-box">
     <div class="ijaz-ilmi-title">🔬 الإعجاز العلمي — المصادر المعتمدة</div>
     <p style="font-size:.86em;color:#555;margin-bottom:8px">نربط هنا بين الإشارة العلمية المنضبطة وبين المصادر المعتمدة، مع التحفّظ الكامل إذا لم يكن في الآية وجه علمي تجريبي مباشر.</p>`;
-  if(txt){
+  if(!noScientificFace){
     h+=`<div class="ijaz-ilmi-text">${topic?`<div class="ijaz-ilmi-topic">${e(topic)}</div>`:""}<p class="sec-p" style="margin:0">${e(txt)}</p></div>`;
     h+=`<div class="src-tag-line"><span class="src-tag">مصادر الإعجاز العلمي المعتمدة</span><span class="src-tag">أ.د. زغلول النجار</span><span class="src-tag">موسوعة الإعجاز العلمي</span><span class="src-tag">مركز الإعجاز العلمي</span></div>`;
   }else{
-    h+=`<div class="ijaz-pending-note">لا يظهر في هذه الآية وجه إعجاز علمي تجريبي مباشر.</div>`;
+    h+=`<div class="ijaz-ilmi-text"><div class="ijaz-ilmi-topic">لا يوجد وجه علمي مباشر.</div><p class="sec-p" style="margin:0">لا يظهر في هذه الآية وجه إعجاز علمي تجريبي مباشر، وإنما تتجلى عظمتها في باب الهداية والعبودية ومعرفة الله.</p></div>`;
   }
   h+=`</div>`;
   return h;
@@ -838,9 +850,15 @@ nav a{color:rgba(255,255,255,.8);text-decoration:none;font-size:.82em;padding:5p
 .art-htitle{font-family:'Amiri',serif;font-size:1.68em;color:white;text-shadow:0 2px 8px rgba(0,0,0,.3);}
 .art-meta{font-size:.73em;color:rgba(255,255,255,.58);margin-top:4px;}
 .art-body{padding:28px 38px;background:white;}
-.ayah-frame-outer{position:relative;padding:18px;margin:24px 0;border:2px solid var(--gold);border-radius:8px;background:linear-gradient(170deg,#fffdf6,#f9f2e4);box-shadow:0 8px 28px rgba(0,0,0,.1),inset 0 0 0 6px rgba(218,165,32,.08);}
-.ayah-frame-inner{position:relative;padding:30px 22px;border:1px solid rgba(184,134,11,.45);border-radius:6px;text-align:center;background:#fffef8;box-shadow:inset 0 0 0 1px rgba(184,134,11,.18);}
+.ayah-frame-outer{position:relative;padding:18px;margin:26px 0;border:2px solid var(--gold);border-radius:8px;background:linear-gradient(170deg,#fffdf6,#f9f2e4);box-shadow:0 8px 28px rgba(0,0,0,.1),inset 0 0 0 6px rgba(218,165,32,.08);}
+.ayah-frame-inner{position:relative;padding:34px 22px 30px;border:1px solid rgba(184,134,11,.45);border-radius:6px;text-align:center;background:#fffef8;box-shadow:inset 0 0 0 1px rgba(184,134,11,.18);}
 .ayah-only-frame{background-image:linear-gradient(170deg,#fffdf6,#f9f2e4),repeating-linear-gradient(45deg,rgba(184,134,11,.18) 0 2px,transparent 2px 10px);background-origin:border-box;background-clip:padding-box,border-box;}
+.ayah-surah-plaque{position:relative;margin:0 auto 22px;width:min(100%,820px);min-height:74px;border:2px solid rgba(132,82,35,.82);border-radius:7px;background:#fff8ec;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 6px rgba(132,82,35,.06);}
+.ayah-surah-plaque::before,.ayah-surah-plaque::after{content:"۞ ۞ ۞";position:absolute;top:50%;transform:translateY(-50%);width:190px;height:52px;border:1px solid rgba(132,82,35,.55);display:flex;align-items:center;justify-content:center;color:rgba(132,82,35,.85);font-size:18px;letter-spacing:8px;background:linear-gradient(90deg,transparent,rgba(218,165,32,.08),transparent);}
+.ayah-surah-plaque::before{right:14px;}
+.ayah-surah-plaque::after{left:14px;}
+.ayah-surah-name{font-family:'Amiri Quran','Amiri',serif;font-size:2.1em;color:#1a0e05;line-height:1.4;background:#fff8ec;padding:0 24px;z-index:1;}
+.ayah-inner-medallion{width:42px;height:42px;margin:0 auto 8px;border:1px solid rgba(132,82,35,.55);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);font-family:'Amiri',serif;font-size:.9em;}
 .ayah-frame-outer::before{content:"۞";position:absolute;top:8px;right:12px;color:var(--gold);font-size:20px;opacity:.75;}
 .ayah-frame-outer::after{content:"۞";position:absolute;top:8px;left:12px;color:var(--gold);font-size:20px;opacity:.75;}
 .ayah-frame-inner::before{content:"✦";position:absolute;bottom:9px;right:14px;color:var(--gold2);font-size:16px;opacity:.6;}
@@ -910,16 +928,16 @@ nav a{color:rgba(255,255,255,.8);text-decoration:none;font-size:.82em;padding:5p
 .cta-box h3{color:var(--gold3);font-family:'Amiri',serif;font-size:1.13em;margin-bottom:7px;}
 .cta-box p{color:rgba(255,255,255,.87);margin:0;line-height:1.9;}
 .divider{text-align:center;margin:20px 0;color:var(--gold2);font-size:1.1em;letter-spacing:8px;opacity:.45;}
-.yt-wrap{position:relative;width:100%;max-width:100%;aspect-ratio:16/9;overflow:hidden;background:#000;border-radius:8px;box-shadow:0 10px 26px rgba(0,0,0,.18);}
-.yt-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:none;}
+.yt-wrap{position:relative;width:100%;max-width:100%;height:clamp(260px,52vw,520px);overflow:hidden;background:#000;border-radius:8px;box-shadow:0 10px 26px rgba(0,0,0,.18);}
+.yt-wrap iframe,.yt-wrap video{position:absolute;inset:0;width:100%;height:100%;border:none;display:block;}
 .sharawi-audio-box .sh-body{padding:14px;}
-.sharawi-audio-box .yt-wrap{width:100%;}
+.sharawi-audio-box .yt-wrap{width:100%;margin:0;}
 .divider{text-align:center;margin:22px 0;color:var(--gold2);font-size:1.2em;letter-spacing:8px;opacity:.6;}
 .nav-art{display:flex;justify-content:space-between;margin-top:20px;padding-top:12px;border-top:1px solid var(--gold2);flex-wrap:wrap;gap:7px;}
 .nav-art a{color:var(--em2);text-decoration:none;font-size:.78em;padding:5px 12px;border:1px solid var(--em2);}
 .src-tag-line{margin:3px 0 7px;}
 .src-tag{font-size:.6em;padding:2px 6px;border-radius:2px;background:rgba(10,61,46,.06);color:var(--em2);border:1px solid rgba(10,61,46,.11);display:inline-block;margin:1px;}
-@media(max-width:600px){.art-body{padding:14px 11px;}.htop nav{display:none;}.art-htitle{font-size:1.4em;}.tt,.ht{font-size:.68em;padding:4px 7px;}.ayah-main-text{font-size:24px;}}
+@media(max-width:600px){.art-body{padding:14px 11px;}.htop nav{display:none;}.art-htitle{font-size:1.4em;}.tt,.ht{font-size:.68em;padding:4px 7px;}.ayah-main-text{font-size:24px;}.ayah-surah-plaque::before,.ayah-surah-plaque::after{display:none;}.ayah-surah-name{font-size:1.6em;}.yt-wrap{height:260px;}}
 </style></head><body>
 <header class="site-header"><div class="hborder"></div><div class="htop">
   <div class="logo"><div class="logo-gem">📖</div><div><h1>نور القرآن</h1><p>تفسير وعبر للإنسانية</p></div></div>
