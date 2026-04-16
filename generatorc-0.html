@@ -213,12 +213,12 @@ body{font-family:'Cairo',sans-serif;background:#0d1117;color:#e6e6e6;min-height:
 
 <div class="src-bar">
   <span class="src-label">📚 مصادر:</span>
-  <span class="sb p">tafasir.online ★</span>
-  <span class="sb b">altafsir.com ↑</span>
-  <span class="sb b">tafsir.app ↑</span>
-  <span class="sb p">HadeethEnc ★</span>
-  <span class="sb p">sunnah.com ★</span>
-  <span class="sb p">QAC/quran.com ★</span>
+  <span class="sb p">موسوعة التفاسير ★</span>
+  <span class="sb b">التفسير الموثق ↑</span>
+  <span class="sb b">جامع التفاسير ↑</span>
+  <span class="sb p">موسوعة الحديث ★</span>
+  <span class="sb p">مصادر السنة ★</span>
+  <span class="sb p">مدونة القرآن اللغوية ★</span>
   <span class="sb b">كتب الإعراب ↑</span>
   <span class="sb p">النجار + مراكز الإعجاز ★</span>
 </div>
@@ -472,7 +472,7 @@ function renderPreview(){
 function buildCompBar(comp){
   if(!comp||!comp.sections_complete)return"";
   const sc=comp.sections_complete;
-  const labels={ayah_intro:"مقدمة",question_hook:"مدخل",mufradat_words:"مفردات",mufradat_nahw:"نحو",mufradat_balagha:"بلاغة",sabab_nuzul:"سبب النزول",surah_name_reason:"اسم السورة",sharawi:"الشعراوي",ijaz_bayani:"إعجاز بياني",ijaz_ilmi:"إعجاز علمي",ibra_1:"عبرة١",ibra_2:"عبرة٢",ibra_3:"عبرة٣",tatbiq:"تطبيق",hadith:"حديث",qac_words:"QAC"};
+  const labels={ayah_intro:"مقدمة",question_hook:"مدخل",mufradat_words:"مفردات",mufradat_nahw:"نحو",mufradat_balagha:"بلاغة",sabab_nuzul:"سبب النزول",surah_name_reason:"اسم السورة",sharawi:"الشعراوي",ijaz_bayani:"إعجاز بياني",ijaz_ilmi:"إعجاز علمي",ibra_1:"عبرة١",ibra_2:"عبرة٢",ibra_3:"عبرة٣",tatbiq:"تطبيق",hadith:"حديث",qac_words:"مدونة لغوية"};
   const keys=Object.keys(sc);
   const done=keys.filter(k=>sc[k]).length;
   const pct=Math.round(done/keys.length*100);
@@ -533,25 +533,25 @@ function buildBody(d,prev,next,standalone){
   if(a.ayah_intro){
     h+=`<div class="ayah-intro-box"><div class="intro-label">📖 مقدمة الآية</div>
       <p class="sec-p" style="margin:0;text-align:center">${e(a.ayah_intro)}</p></div>
-    <div class="src-tag-line"><span class="src-tag">tafasir.online — ابن كثير + ابن سعدي</span></div>`;
+    <div class="src-tag-line"><span class="src-tag">مصادر التفسير — ابن كثير وابن سعدي</span></div>`;
   }
 
   if(a.question_hook){
     h+=`<h2 class="sec-h">🌅 مدخل يمسّ الإنسان</h2>`;
     h+=rm(a.question_hook,130);
-    h+=`<div class="src-tag-line"><span class="src-tag">tafasir.online — ابن سعدي + ابن كثير</span></div>`;
+    h+=`<div class="src-tag-line"><span class="src-tag">مصادر التفسير — ابن سعدي وابن كثير</span></div>`;
   }
 
   const si=d.surrah_intro||a.surah_name_reason||"";
   if(si){
     h+=`<h2 class="sec-h">📖 مقدمة السورة</h2>`;
     h+=rm(si,200);
-    h+=`<div class="src-tag-line"><span class="src-tag">tafasir.online</span></div>`;
+    h+=`<div class="src-tag-line"><span class="src-tag">مصادر التفسير المعتمدة</span></div>`;
   }
 
   h+=`<h2 class="sec-h">📚 التفسير — من كتب التراث</h2>`;
   h+=standalone?buildStaticTafsir():buildDynTafsir();
-  h+=`<div class="src-tag-line"><span class="src-tag">tafasir.online ★</span><span class="src-tag">altafsir.com ↑</span><span class="src-tag">tafsir.app ↑ (الطبري)</span></div>`;
+  h+=`<div class="src-tag-line"><span class="src-tag">موسوعة التفاسير</span><span class="src-tag">التفسير الموثق</span><span class="src-tag">جامع التفاسير — الطبري</span></div>`;
 
   h+=buildHadithSection(d,standalone);
 
@@ -571,11 +571,11 @@ function buildBody(d,prev,next,standalone){
 
   h+=`<h2 class="sec-h">📍 سبب النزول والسياق</h2>`;
   h+=`<div class="sabab-box">${e(a.sabab_nuzul||"لم يرد سبب نزول خاص بهذه الآية في المصادر المقدمة.")}</div>`;
-  h+=`<div class="src-tag-line"><span class="src-tag">tafasir.online — ابن كثير + القرطبي</span></div>`;
+  h+=`<div class="src-tag-line"><span class="src-tag">مصادر التفسير — ابن كثير والقرطبي</span></div>`;
 
   h+=`<h2 class="sec-h">🎙️ خاطرة الشيخ الشعراوي رحمه الله</h2>`;
   h+=buildSharawi(d,a);
-  h+=`<div class="src-tag-line"><span class="src-tag">tafasir.online — الشعراوي (نص كامل)</span></div>`;
+  h+=`<div class="src-tag-line"><span class="src-tag">مصدر التفسير — الشعراوي</span><span class="src-tag">خلاصة مختصرة</span></div>`;
 
   const ijazB=a.ijaz_bayani||a.ijaz_ilmi||"";
   if(ijazB){
@@ -651,7 +651,7 @@ function buildHadithSection(d,standalone){
   const htabs=groups.map((g,i)=>`<div class="ht${i===0?" active":""}" onclick="swH('${pfx}',${i})">${e(g.label)} (${g.items.length})</div>`).join("");
   const hpanels=groups.map((g,i)=>`<div class="hp${i===0?" active":""}" id="${pfx}-hp-${i}">${g.items.map(hd=>buildHCard(hd)).join("")}</div>`).join("");
   h+=`<div class="hadith-tabs" id="${pfx}-htabs">${htabs}</div>${hpanels}`;
-  h+=`<div class="src-tag-line"><span class="src-tag">HadeethEnc ★</span><span class="src-tag">sunnah.com ★ — البخاري + مسلم + سنن + الموطأ + المسند</span></div>`;
+  h+=`<div class="src-tag-line"><span class="src-tag">موسوعة الحديث</span><span class="src-tag">مصادر السنة — البخاري ومسلم والسنن والموطأ والمسند</span></div>`;
   return h;
 }
 function groupHadithBySource(list){
@@ -720,24 +720,17 @@ function buildMufBox(a,qac){
 function buildSharawi(d,a){
   const full=d.sharaawi_full||"";
   const intro=a.sharawi||"";
+  const fallbackSummary = full ? full.split(/\s+/).slice(0, 85).join(" ") + (full.split(/\s+/).length>85 ? "..." : "") : "";
+  const summary = intro || fallbackSummary;
   let h=`<div class="sharawi-box"><div class="sh-head">
     <span style="font-size:1.2em">▶</span>
     <div><div class="sh-title">الشيخ محمد متولي الشعراوي رحمه الله</div>
-    <div class="sh-sub">خاطرته في تفسير سورة ${e(d.surah_name)}</div></div>
+    <div class="sh-sub">خلاصة موجزة مرتبطة بالآية، والنص المطول مكانه في قسم التفسير</div></div>
   </div><div class="sh-body">`;
-  if(intro) h+=`<div style="background:rgba(10,61,46,.05);border-right:4px solid var(--gold);padding:12px;margin-bottom:12px"><p class="sec-p" style="margin:0">${e(intro)}</p></div>`;
-  if(!full){
-    h+=`<p class="sec-p" style="color:#888">النص الكامل غير متوفر لهذه الآية من المصدر الحالي.</p>`;
+  if(summary){
+    h+=`<div style="background:rgba(10,61,46,.05);border-right:4px solid var(--gold);padding:12px"><p class="sec-p" style="margin:0">${e(summary)}</p></div>`;
   } else {
-    const wds=full.split(" "), first=wds.slice(0,150).join(" "), rest=wds.slice(150).join(" ");
-    h+=`<p class="sec-p">${e(first)}${rest?"...":""}</p>`;
-    if(rest){
-      h+=`<details><summary style="cursor:pointer;color:var(--em2);font-size:.85em;padding:5px 0">📖 النص الكامل ▼ (~${Math.ceil(wds.length/200)} دقيقة)</summary>
-        <div style="margin-top:8px;border-top:1px dashed var(--gold2);padding-top:8px">`;
-      const rw=rest.split(" ");
-      for(let i=0;i<rw.length;i+=150) h+=`<p class="sec-p">${e(rw.slice(i,i+150).join(" "))}</p>`;
-      h+=`</div></details>`;
-    }
+    h+=`<p class="sec-p" style="color:#888">لم تصل خلاصة موثوقة لهذه الآية من المصدر الحالي.</p>`;
   }
   h+=`</div></div>`;
   return h;
@@ -751,10 +744,10 @@ function buildSharawiIframe(d){
       <div class="sh-sub">مقطع السورة مرتبط بالآية رقم ${e(String(d.ayah_number||""))}</div></div>
     </div>
     <div class="sh-body">
-      <p style="margin-bottom:10px;font-size:.84em;color:#555">استمع إلى خلاصة مناسبة بعد التأمل في التطبيق العملي للآية:</p>
+      <div class="sh-video-note">استمع إلى مقطع الشعراوي المرتبط بهذه الآية بعد التأمل في التطبيق العملي:</div>
       <div class="yt-wrap">${localVideo
         ? `<video src="${e(localVideo)}" controls preload="metadata" playsinline></video>`
-        : `<iframe src="https://www.youtube.com/embed/videoseries?list=PLiJSlz8e4RlG7I_eLF3tQ0MMpPgV68FoK&index=${idx}" title="تفسير الشعراوي للآية" allowfullscreen loading="lazy"></iframe>`}</div>
+        : `<iframe src="https://www.youtube.com/embed/videoseries?list=PLiJSlz8e4RlG7I_eLF3tQ0MMpPgV68FoK&index=${idx}&rel=0" title="تفسير الشعراوي للآية" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>`}</div>
     </div>
   </div>`;
 }
@@ -928,16 +921,17 @@ nav a{color:rgba(255,255,255,.8);text-decoration:none;font-size:.82em;padding:5p
 .cta-box h3{color:var(--gold3);font-family:'Amiri',serif;font-size:1.13em;margin-bottom:7px;}
 .cta-box p{color:rgba(255,255,255,.87);margin:0;line-height:1.9;}
 .divider{text-align:center;margin:20px 0;color:var(--gold2);font-size:1.1em;letter-spacing:8px;opacity:.45;}
-.yt-wrap{position:relative;width:100%;max-width:100%;height:clamp(260px,52vw,520px);overflow:hidden;background:#000;border-radius:8px;box-shadow:0 10px 26px rgba(0,0,0,.18);}
-.yt-wrap iframe,.yt-wrap video{position:absolute;inset:0;width:100%;height:100%;border:none;display:block;}
-.sharawi-audio-box .sh-body{padding:14px;}
+.yt-wrap{position:relative;width:100%;max-width:100%;height:clamp(340px,56vw,620px);overflow:hidden;background:#000;border-radius:0;box-shadow:0 10px 26px rgba(0,0,0,.18);}
+.yt-wrap iframe,.yt-wrap video{position:absolute;inset:0;width:100%;height:100%;min-height:100%;border:none;display:block;background:#000;}
+.sharawi-audio-box .sh-body{padding:0;background:#000;}
 .sharawi-audio-box .yt-wrap{width:100%;margin:0;}
+.sh-video-note{padding:12px 14px;background:#fff;color:#555;font-size:.84em;}
 .divider{text-align:center;margin:22px 0;color:var(--gold2);font-size:1.2em;letter-spacing:8px;opacity:.6;}
 .nav-art{display:flex;justify-content:space-between;margin-top:20px;padding-top:12px;border-top:1px solid var(--gold2);flex-wrap:wrap;gap:7px;}
 .nav-art a{color:var(--em2);text-decoration:none;font-size:.78em;padding:5px 12px;border:1px solid var(--em2);}
 .src-tag-line{margin:3px 0 7px;}
 .src-tag{font-size:.6em;padding:2px 6px;border-radius:2px;background:rgba(10,61,46,.06);color:var(--em2);border:1px solid rgba(10,61,46,.11);display:inline-block;margin:1px;}
-@media(max-width:600px){.art-body{padding:14px 11px;}.htop nav{display:none;}.art-htitle{font-size:1.4em;}.tt,.ht{font-size:.68em;padding:4px 7px;}.ayah-main-text{font-size:24px;}.ayah-surah-plaque::before,.ayah-surah-plaque::after{display:none;}.ayah-surah-name{font-size:1.6em;}.yt-wrap{height:260px;}}
+@media(max-width:600px){.art-body{padding:14px 11px;}.htop nav{display:none;}.art-htitle{font-size:1.4em;}.tt,.ht{font-size:.68em;padding:4px 7px;}.ayah-main-text{font-size:24px;}.ayah-surah-plaque::before,.ayah-surah-plaque::after{display:none;}.ayah-surah-name{font-size:1.6em;}.yt-wrap{height:300px;}}
 </style></head><body>
 <header class="site-header"><div class="hborder"></div><div class="htop">
   <div class="logo"><div class="logo-gem">📖</div><div><h1>نور القرآن</h1><p>تفسير وعبر للإنسانية</p></div></div>
