@@ -75,6 +75,12 @@ nav a:hover{background:rgba(184,134,11,.2);color:var(--gold3);}
 
 /* ── ARTICLES ── */
 .art-empty{text-align:center;padding:46px;background:white;border:1px solid #e8d5a0;}
+.art-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:13px;margin-top:16px;text-align:right;}
+.art-card{background:white;border:1px solid #e8d5a0;border-right:4px solid var(--gold);padding:14px;text-decoration:none;color:#1a0e05;display:block;transition:.2s ease;}
+.art-card:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(0,0,0,.08);}
+.art-card h3{font-family:'Amiri',serif;color:var(--em);font-size:1.02em;margin:0 0 8px;}
+.art-card p{font-size:.82em;color:#555;line-height:1.8;margin:0;}
+.art-card span{display:inline-block;margin-top:10px;color:var(--gold);font-size:.78em;font-weight:700;}
 .sa{text-align:center;margin-top:20px;}
 .sa a{display:inline-block;background:var(--em);color:white;padding:9px 26px;text-decoration:none;font-size:.88em;}
 
@@ -215,7 +221,7 @@ nav a:hover{background:rgba(184,134,11,.2);color:var(--gold3);}
       <div class="tag">مكتبة التفسير</div>
       <h2>📚 أحدث المقالات</h2>
     </div>
-    <div class="art-empty">
+    <div class="art-empty" id="home-articles">
       <div style="font-size:3em">⏳</div>
       <p style="margin-top:10px;color:#888">المقالات تُضاف تدريجياً — ابدأ من الفاتحة</p>
     </div>
@@ -259,4 +265,20 @@ nav a:hover{background:rgba(184,134,11,.2);color:var(--gold3);}
   <p style="margin-top:8px;font-size:.74em;opacity:.5">سليم عبّار وحافظ الخياطي — بفضل الله</p>
 </footer>
 
+<script>
+(async function(){
+  const box=document.getElementById("home-articles");
+  const count=document.getElementById("art-count");
+  if(!box)return;
+  try{
+    const r=await fetch("articles.json?ts="+Date.now(),{cache:"no-store"});
+    const articles=await r.json();
+    const list=Array.isArray(articles)?articles.slice(0,6):[];
+    if(count)count.textContent=String(Array.isArray(articles)?articles.length:0);
+    if(!list.length)return;
+    box.className="art-grid";
+    box.innerHTML=list.map(a=>`<a class="art-card" href="${a.file||"#"}"><h3>${a.title||"تفسير آية"}</h3><p>سورة ${a.surah_name||""} — الآية ${a.ayah_number||""}</p><span>فتح المقال ←</span></a>`).join("");
+  }catch(e){}
+})();
+</script>
 </body></html>
