@@ -570,7 +570,7 @@ function buildBody(d,prev,next,standalone){
   }
 
   h+=`<h2 class="sec-h">📍 سبب النزول والسياق</h2>`;
-  h+=`<div class="sabab-box">${e(a.sabab_nuzul||"لم يرد سبب نزول خاص بهذه الآية في المصادر المقدمة.")}</div>`;
+  h+=buildSababBox(d,a);
   h+=`<div class="src-tag-line"><span class="src-tag">مصادر التفسير — ابن كثير والقرطبي</span></div>`;
 
   h+=`<h2 class="sec-h">🎙️ خاطرة الشيخ الشعراوي رحمه الله</h2>`;
@@ -598,15 +598,28 @@ function buildBody(d,prev,next,standalone){
 
   h+=`<h2 class="sec-h">🌍 التطبيق في حياتنا اليوم</h2>`;
   h+=`<p class="sec-p">${e(a.tatbiq||"")}</p>`;
-  <h2 class="sec-h">🕌 القرآن رسالة لك أنت</h2>
   h+=buildSharawiIframe(d);
-   
+
+  h+=`<h2 class="sec-h">🕌 القرآن رسالة لك أنت</h2>`;
   h+=`<div class="cta-box"><h3>﴿ أَفَلَا يَتَدَبَّرُونَ الْقُرْآنَ ﴾</h3>
     <p>تأمّل هذه الآية واجعلها منطلقاً للتغيير في حياتك اليومية.</p></div>`;
   h+=`<div class="divider">❧ ✦ ❧</div>`;
   h+=`<div class="nav-art">${prev}<a href="https://khayati-quran.github.io/ibar-for-all-verses/articles.html">📚 المقالات</a>${next}</div>`;
   h+=`</div>`;
   return h;
+}
+function buildSababBox(d,a){
+  const txt=String(a.sabab_nuzul||"").trim();
+  const ayah=String(d.ayah_text||"");
+  const isFatihaStart=Number(d.surah_number)===1 && Number(d.ayah_number)===1;
+  const saysNone=/لا\s+(?:يوجد|يرد|يثبت)|لم\s+(?:يرد|يثبت)|لا\s+سبب/.test(txt);
+  if(isFatihaStart && (!txt || saysNone)){
+    return `<div class="sabab-box">لا يثبت للبسملة في أول الفاتحة سبب نزول خاص مستقل على طريقة أسباب النزول المباشرة، وهذا لا يعني أنها جاءت بلا حكمة؛ فالقرآن كله منزل بعلم الله وحكمته. وإنما يظهر سياقها في تعليم الأمة أن تفتتح القراءة والعمل باسم الله، وأن تدخل إلى القرآن من باب التعظيم والرحمة والاستعانة. وقد ذكرت بعض كتب التفسير آثاراً في أوائل نزول الفاتحة وتعليم النبي صلى الله عليه وسلم الحمد والثناء والدعاء، لكنها تذكر في باب السياق والآثار لا على أنها سبب نزول قطعي مستقل.</div>`;
+  }
+  if(!txt){
+    return `<div class="sabab-box">لم يثبت في المصادر المقدمة سبب نزول خاص مستقل لهذه الآية، لكن ذلك لا ينفي الحكمة؛ فكل آية نزلت بعلم الله وهدايته، ويُفهم سياقها من موضعها في السورة ومن بيان المفسرين.</div>`;
+  }
+  return `<div class="sabab-box">${e(txt)}</div>`;
 }
 function buildDynTafsir(){
   const fid=(TAFSIRS.find(t=>TC[t.id])||TAFSIRS[0]).id;
