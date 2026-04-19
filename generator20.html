@@ -648,6 +648,12 @@ function buildBody(d,prev,next,standalone){
    الأولوية: ayah_intro → question_hook → ibra_1 → tatbiq
    smartSignal يبقى كاحتياط فقط إذا رجع الذكاء الاصطناعي فارغاً
 ════════════════════════════════════ */
+/* ── ينظّف القيمة — يرفض [ ] والفراغ والقيم القصيرة جداً ── */
+function cleanSmart(val){
+  const s=String(val||"").trim();
+  if(!s||s==="[ ]"||s==="[]"||s==="..."||s.length<25)return"";
+  return s;
+}
 /* ── يأخذ أول n جمل — يقطع عند . ؟ ! فقط، لا عند الفاصلة ── */
 function firstSentences(text,n){
   if(!text)return"";
