@@ -25,6 +25,9 @@ body{font-family:'Cairo',sans-serif;background:var(--parch);color:#1a0e05;direct
 .logo p{font-size:.72em;opacity:.75;}
 nav a{color:rgba(255,255,255,.85);text-decoration:none;font-size:.84em;padding:5px 12px;border:1px solid rgba(184,134,11,.3);margin-right:4px;}
 nav a:hover{background:rgba(184,134,11,.2);color:var(--gold3);}
+.page-switch{background:#fff8ec;border-bottom:1px solid var(--gold2);padding:8px 12px;text-align:center;display:flex;justify-content:center;gap:7px;flex-wrap:wrap;}
+.page-switch a{color:var(--em);text-decoration:none;font-size:.82em;font-weight:700;border:1px solid rgba(184,134,11,.45);padding:5px 12px;background:white;}
+.page-switch a.active{background:var(--em);color:var(--gold3);}
 
 /* ── BISMILLAH BAR ── */
 .bism-bar{background:linear-gradient(160deg,#071f17,#0a3d2e);padding:14px 20px;text-align:center;border-bottom:2px solid rgba(184,134,11,.4);}
@@ -75,12 +78,6 @@ nav a:hover{background:rgba(184,134,11,.2);color:var(--gold3);}
 
 /* ── ARTICLES ── */
 .art-empty{text-align:center;padding:46px;background:white;border:1px solid #e8d5a0;}
-.art-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:13px;margin-top:16px;text-align:right;}
-.art-card{background:white;border:1px solid #e8d5a0;border-right:4px solid var(--gold);padding:14px;text-decoration:none;color:#1a0e05;display:block;transition:.2s ease;}
-.art-card:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(0,0,0,.08);}
-.art-card h3{font-family:'Amiri',serif;color:var(--em);font-size:1.02em;margin:0 0 8px;}
-.art-card p{font-size:.82em;color:#555;line-height:1.8;margin:0;}
-.art-card span{display:inline-block;margin-top:10px;color:var(--gold);font-size:.78em;font-weight:700;}
 .sa{text-align:center;margin-top:20px;}
 .sa a{display:inline-block;background:var(--em);color:white;padding:9px 26px;text-decoration:none;font-size:.88em;}
 
@@ -120,13 +117,20 @@ nav a:hover{background:rgba(184,134,11,.2);color:var(--gold3);}
       <div><h1>نور القرآن</h1><p>تفسير وعبر للإنسانية</p></div>
     </div>
     <nav>
-      <a href="index.html">🏠</a>
+      <a href="index-c2.html">🏠</a>
       <a href="articles.html">المقالات</a>
       <a href="references.html">المراجع</a>
-      <a href="intro.html">عن المشروع</a>
+      <a href="intro-c2.html">عن المشروع</a>
     </nav>
   </div>
 </header>
+
+<div class="page-switch" aria-label="روابط الصفحات الأساسية">
+  <a class="active" href="index-c2.html">الرئيسية</a>
+  <a href="intro-c2.html">عن المشروع</a>
+  <a href="articles.html">المقالات</a>
+  <a href="references.html">المراجع</a>
+</div>
 
 <!-- BISMILLAH + SALAH -->
 <div class="bism-bar">
@@ -221,7 +225,7 @@ nav a:hover{background:rgba(184,134,11,.2);color:var(--gold3);}
       <div class="tag">مكتبة التفسير</div>
       <h2>📚 أحدث المقالات</h2>
     </div>
-    <div class="art-empty" id="home-articles">
+    <div class="art-empty">
       <div style="font-size:3em">⏳</div>
       <p style="margin-top:10px;color:#888">المقالات تُضاف تدريجياً — ابدأ من الفاتحة</p>
     </div>
@@ -265,20 +269,4 @@ nav a:hover{background:rgba(184,134,11,.2);color:var(--gold3);}
   <p style="margin-top:8px;font-size:.74em;opacity:.5">سليم عبّار وحافظ الخياطي — بفضل الله</p>
 </footer>
 
-<script>
-(async function(){
-  const box=document.getElementById("home-articles");
-  const count=document.getElementById("art-count");
-  if(!box)return;
-  try{
-    const r=await fetch("articles.json?ts="+Date.now(),{cache:"no-store"});
-    const articles=await r.json();
-    const list=Array.isArray(articles)?articles.slice(0,6):[];
-    if(count)count.textContent=String(Array.isArray(articles)?articles.length:0);
-    if(!list.length)return;
-    box.className="art-grid";
-    box.innerHTML=list.map(a=>`<a class="art-card" href="${a.file||"#"}"><h3>${a.title||"تفسير آية"}</h3><p>سورة ${a.surah_name||""} — الآية ${a.ayah_number||""}</p><span>فتح المقال ←</span></a>`).join("");
-  }catch(e){}
-})();
-</script>
 </body></html>
