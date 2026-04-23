@@ -1,260 +1,637 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-<meta http-equiv="Pragma" content="no-cache" />
-<meta http-equiv="Expires" content="0" />
-<title>عبر لجميع الآيات — V2 Minimal</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>عامل نور القرآن — لوحة التشغيل</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 <style>
-body{font-family:Arial,sans-serif;background:#f5ead0;margin:0;color:#1e1e1e}
-header{background:#0a3d2e;color:#fff;padding:18px 20px;border-bottom:3px solid #b8860b}
-header h1{margin:0;font-size:28px;color:#f0c040}
-header p{margin:6px 0 0;font-size:13px;opacity:.9}
-main{max-width:1000px;margin:20px auto;padding:0 14px}
-.card{background:#fff;border:1px solid #e8d5a0;padding:16px;margin-bottom:14px}
-label{display:block;font-weight:bold;margin:10px 0 6px}
-input,select,textarea{width:100%;padding:10px;border:1px solid #d8c9a0;box-sizing:border-box;font-size:14px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-button{background:#0a3d2e;color:#fff;border:none;padding:10px 16px;cursor:pointer;font-weight:bold}
-button.secondary{background:#b8860b;color:#222}
-button:disabled{background:#999;cursor:not-allowed}
-#log{padding:10px 12px;background:#eef6ff;border:1px solid #b9d8ff;margin-bottom:14px;white-space:pre-wrap}
-.preview{background:#fff;border:1px solid #e8d5a0;padding:20px;line-height:1.9}
-.preview h1{color:#0a3d2e;font-size:28px}
-.preview h2{color:#0a3d2e;font-size:20px;border-right:4px solid #b8860b;padding-right:8px;margin-top:24px}
-.ayah{background:#fdf6e3;border:2px solid #b8860b;padding:18px;text-align:center;margin:16px 0}
-.ibra{background:#fff8db;border:2px solid #b8860b;padding:14px;margin:18px 0}
-.small{font-size:12px;color:#666}
-@media(max-width:700px){.grid{grid-template-columns:1fr}}
+:root{
+  --em:#0a3d2e; --em2:#1a6b4a; --gold:#b8860b; --gold2:#daa520; --gold3:#fff8dc;
+  --bg:#0d1f18; --bg2:#112b1e; --bg3:#1a3d2b; --surface:#0f2419;
+  --txt:#e8dcc8; --txt2:#c4b896; --red:#c0392b; --grn:#27ae60; --warn:#e67e22;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;min-height:100vh}
+
+/* ── LOGIN ── */
+#login-screen{
+  position:fixed;inset:0;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;z-index:999;
+}
+.login-box{
+  background:var(--bg2);border:2px solid var(--gold);border-radius:16px;
+  padding:40px;width:min(360px,90vw);text-align:center;
+}
+.login-box h1{font-family:'Amiri',serif;color:var(--gold2);font-size:1.8em;margin-bottom:8px}
+.login-box p{color:var(--txt2);font-size:.85em;margin-bottom:24px}
+.pin-input{
+  display:flex;gap:10px;justify-content:center;margin-bottom:20px;
+}
+.pin-input input{
+  width:52px;height:60px;text-align:center;font-size:1.6em;font-weight:700;
+  background:var(--bg3);border:2px solid rgba(184,134,11,.3);border-radius:8px;
+  color:var(--gold2);outline:none;
+}
+.pin-input input:focus{border-color:var(--gold)}
+.btn-login{
+  width:100%;padding:12px;background:var(--gold);color:var(--bg);
+  border:none;border-radius:8px;font-family:'Cairo',sans-serif;
+  font-size:1em;font-weight:700;cursor:pointer;
+}
+.btn-login:hover{background:var(--gold2)}
+.login-err{color:#e74c3c;font-size:.85em;margin-top:10px;min-height:20px}
+
+/* ── MAIN LAYOUT ── */
+#app{display:none}
+.header{
+  background:var(--bg2);border-bottom:2px solid rgba(184,134,11,.3);
+  padding:14px 24px;display:flex;align-items:center;justify-content:space-between;
+}
+.header-title{font-family:'Amiri',serif;color:var(--gold2);font-size:1.3em}
+.header-sub{font-size:.75em;color:var(--txt2)}
+.header-status{display:flex;gap:8px;align-items:center}
+.status-dot{width:10px;height:10px;border-radius:50%;background:#666}
+.status-dot.ok{background:var(--grn);box-shadow:0 0 8px var(--grn)}
+.status-dot.err{background:var(--red)}
+
+.main{display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 60px)}
+
+/* ── SIDEBAR ── */
+.sidebar{background:var(--surface);border-left:1px solid rgba(184,134,11,.2);padding:20px;overflow-y:auto;max-height:calc(100vh - 60px)}
+.sidebar h2{font-size:.8em;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(184,134,11,.2)}
+
+.config-group{margin-bottom:18px}
+.config-label{font-size:.75em;color:var(--txt2);margin-bottom:5px;display:block}
+.config-input{
+  width:100%;padding:8px 10px;background:var(--bg3);border:1px solid rgba(184,134,11,.25);
+  border-radius:6px;color:var(--txt);font-family:'Cairo',sans-serif;font-size:.85em;outline:none;
+}
+.config-input:focus{border-color:var(--gold)}
+.config-input[type=password]{letter-spacing:.15em}
+
+.btn{
+  display:block;width:100%;padding:9px;border:none;border-radius:6px;
+  font-family:'Cairo',sans-serif;font-size:.85em;font-weight:700;cursor:pointer;margin-bottom:8px;
+}
+.btn-primary{background:var(--gold);color:var(--bg)}
+.btn-primary:hover{background:var(--gold2)}
+.btn-secondary{background:var(--bg3);color:var(--txt);border:1px solid rgba(184,134,11,.3)}
+.btn-secondary:hover{background:var(--bg2)}
+.btn-danger{background:rgba(192,57,43,.2);color:#e74c3c;border:1px solid rgba(192,57,43,.3)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+.stat-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.82em}
+.stat-val{color:var(--gold2);font-weight:700}
+
+/* ── QUEUE ── */
+.content{padding:20px;overflow-y:auto;max-height:calc(100vh - 60px)}
+.content h2{font-family:'Amiri',serif;color:var(--gold2);font-size:1.3em;margin-bottom:16px}
+
+.progress-bar{background:var(--bg3);border-radius:4px;height:8px;margin-bottom:20px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--em2),var(--gold));border-radius:4px;transition:width .4s}
+
+.queue-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:20px}
+.q-card{
+  background:var(--bg2);border:1px solid rgba(184,134,11,.2);border-radius:8px;
+  padding:12px 14px;position:relative;transition:border-color .2s;
+}
+.q-card.selected{border-color:var(--gold);background:var(--bg3)}
+.q-card.done{border-color:var(--grn);opacity:.7}
+.q-card.running{border-color:var(--gold2);animation:pulse 1s infinite}
+.q-card.error{border-color:var(--red)}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(218,165,32,.4)}50%{box-shadow:0 0 0 6px rgba(218,165,32,0)}}
+
+.q-key{font-size:.72em;color:var(--gold);font-weight:700;margin-bottom:3px}
+.q-type{
+  display:inline-block;padding:2px 7px;border-radius:999px;font-size:.68em;font-weight:700;
+  margin-bottom:5px;
+}
+.q-type.tawhid{background:rgba(184,134,11,.2);color:var(--gold2)}
+.q-type.hidaya{background:rgba(26,107,74,.3);color:#5dff9f}
+.q-type.ibada{background:rgba(52,152,219,.2);color:#7ec8e3}
+.q-type.waeid{background:rgba(192,57,43,.2);color:#ff8080}
+.q-type.akhlaqi{background:rgba(155,89,182,.2);color:#c39bd3}
+.q-type.qissa{background:rgba(230,126,34,.2);color:#f0a500}
+.q-type.waad{background:rgba(39,174,96,.2);color:#82e0aa}
+.q-type.kawni{background:rgba(41,128,185,.2);color:#85c1e9}
+.q-type.duaa{background:rgba(243,156,18,.2);color:#f9ca74}
+.q-type.tashri3{background:rgba(127,140,141,.2);color:#aab7b8}
+.q-status{font-size:.7em;color:var(--txt2)}
+.q-status.done{color:var(--grn)}
+.q-status.error{color:var(--red)}
+.q-status.running{color:var(--gold2)}
+.q-check{position:absolute;top:10px;left:10px}
+.q-check input{accent-color:var(--gold)}
+
+/* ── LOG ── */
+.log-box{
+  background:var(--bg3);border:1px solid rgba(184,134,11,.2);border-radius:8px;
+  padding:14px;font-size:.78em;font-family:monospace;color:var(--txt2);
+  max-height:200px;overflow-y:auto;direction:ltr;text-align:left;
+}
+.log-line{padding:2px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.log-line.ok{color:var(--grn)}
+.log-line.err{color:var(--red)}
+.log-line.warn{color:var(--warn)}
+.log-line.info{color:#5dade2}
+
+/* ── BATCH CONTROLS ── */
+.batch-bar{
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  background:var(--bg2);border:1px solid rgba(184,134,11,.2);
+  border-radius:8px;padding:12px 16px;margin-bottom:16px;
+}
+.batch-bar label{font-size:.8em;color:var(--txt2)}
+.batch-bar select,.batch-bar input[type=number]{
+  background:var(--bg3);border:1px solid rgba(184,134,11,.25);
+  border-radius:4px;color:var(--txt);padding:5px 8px;
+  font-family:'Cairo',sans-serif;font-size:.82em;
+}
+.batch-btn{
+  padding:7px 16px;border:none;border-radius:6px;
+  font-family:'Cairo',sans-serif;font-size:.82em;font-weight:700;cursor:pointer;
+}
+.batch-btn.go{background:var(--gold);color:var(--bg)}
+.batch-btn.go:hover{background:var(--gold2)}
+.batch-btn.stop{background:rgba(192,57,43,.3);color:#e74c3c;border:1px solid rgba(192,57,43,.4)}
+.batch-btn.stop:disabled{opacity:.4}
 </style>
 </head>
 <body>
-<header>
-  <h1>🕌 عبر لجميع الآيات</h1>
-  <p>نسخة اختبار سريعة. JSON أولًا، معاينة ثم نشر يدوي.</p>
-</header>
-<main>
-  <div id="log">جاهز.</div>
 
-  <div class="card">
-    <div class="grid">
-      <div>
-        <label>Groq API Key</label>
-        <input id="groqKey" type="password" placeholder="gsk_..." />
-      </div>
-      <div>
-        <label>GitHub Token</label>
-        <input id="ghToken" type="password" placeholder="ghp_... / github_pat_..." />
-      </div>
-      <div>
-        <label>GitHub User</label>
-        <input id="ghUser" type="text" value="khayati-quran" />
-      </div>
-      <div>
-        <label>Repo</label>
-        <input id="ghRepo" type="text" value="ibar-for-all-verses" />
-      </div>
-      <div>
-        <label>السورة</label>
-        <select id="surah"></select>
-      </div>
-      <div>
-        <label>الآية</label>
-        <select id="ayah"></select>
-      </div>
+<!-- ══ LOGIN ══ -->
+<div id="login-screen">
+  <div class="login-box">
+    <h1>🔒 نور القرآن</h1>
+    <p>لوحة التشغيل — للمسؤول فقط</p>
+    <div class="pin-input">
+      <input type="password" maxlength="1" id="p0" oninput="pinNext(0)">
+      <input type="password" maxlength="1" id="p1" oninput="pinNext(1)">
+      <input type="password" maxlength="1" id="p2" oninput="pinNext(2)">
+      <input type="password" maxlength="1" id="p3" oninput="pinNext(3)">
     </div>
-    <div class="row">
-      <button onclick="testGithub()">اختبار GitHub</button>
-      <button class="secondary" onclick="generateArticle()">توليد</button>
-      <button id="publishBtn" onclick="publishAll()" disabled>نشر</button>
+    <button class="btn-login" onclick="checkPin()">دخول</button>
+    <div class="login-err" id="pin-err"></div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <div class="header">
+    <div>
+      <div class="header-title">⚡ عامل نور القرآن v1.0</div>
+      <div class="header-sub">توليد ونشر تلقائي — <span id="hdr-count">0</span> آية مصنفة</div>
     </div>
-    <div class="small" style="margin-top:10px">مهم: هذه النسخة لا تعيد المحاولة. طلب واحد فقط لكل مقال.</div>
+    <div class="header-status">
+      <div class="status-dot" id="gh-dot"></div>
+      <span style="font-size:.75em;color:var(--txt2)" id="gh-lbl">GitHub</span>
+      <div class="status-dot" id="api-dot" style="margin-right:8px"></div>
+      <span style="font-size:.75em;color:var(--txt2)" id="api-lbl">Workers</span>
+    </div>
   </div>
 
-  <div class="card">
-    <strong>Raw JSON</strong>
-    <textarea id="rawJson" rows="16" placeholder="سيظهر JSON هنا بعد التوليد"></textarea>
-  </div>
+  <div class="main">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <h2>الإعدادات</h2>
 
-  <div class="preview" id="preview">لا توجد معاينة بعد.</div>
-</main>
+      <div class="config-group">
+        <label class="config-label">🔑 GitHub Token</label>
+        <input class="config-input" type="password" id="cfg-token" placeholder="ghp_xxxxxxxxxxxx"
+          oninput="localStorage.setItem('nq_token',this.value)">
+      </div>
+
+      <div class="config-group">
+        <label class="config-label">⏱ تأخير بين الآيات (ثانية)</label>
+        <input class="config-input" type="number" id="cfg-delay" value="8" min="3" max="60"
+          oninput="localStorage.setItem('nq_delay',this.value)">
+      </div>
+
+      <button class="btn btn-secondary" onclick="testConnections()">🔍 اختبار الاتصال</button>
+      <button class="btn btn-secondary" onclick="syncStatus()">🔄 مزامنة الحالة</button>
+
+      <br>
+      <h2>إحصائيات</h2>
+      <div class="stat-row"><span>آيات مصنفة</span><span class="stat-val" id="stat-classified">0</span></div>
+      <div class="stat-row"><span>تم نشرها</span><span class="stat-val" id="stat-done">0</span></div>
+      <div class="stat-row"><span>متبقية</span><span class="stat-val" id="stat-remain">0</span></div>
+      <div class="stat-row"><span>أخطاء</span><span class="stat-val" id="stat-err">0</span></div>
+
+      <br>
+      <h2>تحذير</h2>
+      <p style="font-size:.75em;color:var(--txt2);line-height:1.7">
+        كل آية تستهلك رصيداً من Workers API.<br>
+        تأكد من رصيد كافٍ قبل التشغيل الجماعي.
+      </p>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+      <h2>قائمة الآيات المصنفة</h2>
+
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+
+      <div class="batch-bar">
+        <label>تشغيل:</label>
+        <select id="batch-mode">
+          <option value="selected">المحددة فقط</option>
+          <option value="pending">المتبقية فقط</option>
+          <option value="all">الكل</option>
+        </select>
+        <label>تأخير:</label>
+        <input type="number" id="batch-delay" value="8" min="3" max="60" style="width:60px">
+        <span>ث</span>
+        <button class="batch-btn go" id="btn-run" onclick="startBatch()">▶ تشغيل</button>
+        <button class="batch-btn stop" id="btn-stop" onclick="stopBatch()" disabled>⏹ إيقاف</button>
+        <button class="batch-btn go" style="background:var(--bg3);color:var(--txt);border:1px solid rgba(184,134,11,.3)" onclick="selectAll()">تحديد الكل</button>
+        <button class="batch-btn go" style="background:var(--bg3);color:var(--txt);border:1px solid rgba(184,134,11,.3)" onclick="selectNone()">إلغاء التحديد</button>
+      </div>
+
+      <div class="queue-grid" id="queue-grid"></div>
+
+      <h2 style="margin:20px 0 10px">سجل العمليات</h2>
+      <div class="log-box" id="log-box"></div>
+    </div>
+  </div>
+</div>
 
 <script>
-const GH_API = 'https://api.github.com';
-const SURAHS = [
-  {n:1,name:'الفاتحة',ayahs:7},{n:2,name:'البقرة',ayahs:286},{n:3,name:'آل عمران',ayahs:200},{n:4,name:'النساء',ayahs:176},{n:5,name:'المائدة',ayahs:120},{n:6,name:'الأنعام',ayahs:165},{n:7,name:'الأعراف',ayahs:206},{n:8,name:'الأنفال',ayahs:75},{n:9,name:'التوبة',ayahs:129},{n:10,name:'يونس',ayahs:109},{n:11,name:'هود',ayahs:123},{n:12,name:'يوسف',ayahs:111},{n:13,name:'الرعد',ayahs:43},{n:14,name:'إبراهيم',ayahs:52},{n:15,name:'الحجر',ayahs:99},{n:16,name:'النحل',ayahs:128},{n:17,name:'الإسراء',ayahs:111},{n:18,name:'الكهف',ayahs:110},{n:19,name:'مريم',ayahs:98},{n:20,name:'طه',ayahs:135},{n:21,name:'الأنبياء',ayahs:112},{n:22,name:'الحج',ayahs:78},{n:23,name:'المؤمنون',ayahs:118},{n:24,name:'النور',ayahs:64},{n:25,name:'الفرقان',ayahs:77},{n:26,name:'الشعراء',ayahs:227},{n:27,name:'النمل',ayahs:93},{n:28,name:'القصص',ayahs:88},{n:29,name:'العنكبوت',ayahs:69},{n:30,name:'الروم',ayahs:60},{n:31,name:'لقمان',ayahs:34},{n:32,name:'السجدة',ayahs:30},{n:33,name:'الأحزاب',ayahs:73},{n:34,name:'سبأ',ayahs:54},{n:35,name:'فاطر',ayahs:45},{n:36,name:'يس',ayahs:83},{n:37,name:'الصافات',ayahs:182},{n:38,name:'ص',ayahs:88},{n:39,name:'الزمر',ayahs:75},{n:40,name:'غافر',ayahs:85},{n:41,name:'فصلت',ayahs:54},{n:42,name:'الشورى',ayahs:53},{n:43,name:'الزخرف',ayahs:89},{n:44,name:'الدخان',ayahs:59},{n:45,name:'الجاثية',ayahs:37},{n:46,name:'الأحقاف',ayahs:35},{n:47,name:'محمد',ayahs:38},{n:48,name:'الفتح',ayahs:29},{n:49,name:'الحجرات',ayahs:18},{n:50,name:'ق',ayahs:45},{n:51,name:'الذاريات',ayahs:60},{n:52,name:'الطور',ayahs:49},{n:53,name:'النجم',ayahs:62},{n:54,name:'القمر',ayahs:55},{n:55,name:'الرحمن',ayahs:78},{n:56,name:'الواقعة',ayahs:96},{n:57,name:'الحديد',ayahs:29},{n:58,name:'المجادلة',ayahs:22},{n:59,name:'الحشر',ayahs:24},{n:60,name:'الممتحنة',ayahs:13},{n:61,name:'الصف',ayahs:14},{n:62,name:'الجمعة',ayahs:11},{n:63,name:'المنافقون',ayahs:11},{n:64,name:'التغابن',ayahs:18},{n:65,name:'الطلاق',ayahs:12},{n:66,name:'التحريم',ayahs:12},{n:67,name:'الملك',ayahs:30},{n:68,name:'القلم',ayahs:52},{n:69,name:'الحاقة',ayahs:52},{n:70,name:'المعارج',ayahs:44},{n:71,name:'نوح',ayahs:28},{n:72,name:'الجن',ayahs:28},{n:73,name:'المزمل',ayahs:20},{n:74,name:'المدثر',ayahs:56},{n:75,name:'القيامة',ayahs:40},{n:76,name:'الإنسان',ayahs:31},{n:77,name:'المرسلات',ayahs:50},{n:78,name:'النبأ',ayahs:40},{n:79,name:'النازعات',ayahs:46},{n:80,name:'عبس',ayahs:42},{n:81,name:'التكوير',ayahs:29},{n:82,name:'الانفطار',ayahs:19},{n:83,name:'المطففين',ayahs:36},{n:84,name:'الانشقاق',ayahs:25},{n:85,name:'البروج',ayahs:22},{n:86,name:'الطارق',ayahs:17},{n:87,name:'الأعلى',ayahs:19},{n:88,name:'الغاشية',ayahs:26},{n:89,name:'الفجر',ayahs:30},{n:90,name:'البلد',ayahs:20},{n:91,name:'الشمس',ayahs:15},{n:92,name:'الليل',ayahs:21},{n:93,name:'الضحى',ayahs:11},{n:94,name:'الشرح',ayahs:8},{n:95,name:'التين',ayahs:8},{n:96,name:'العلق',ayahs:19},{n:97,name:'القدر',ayahs:5},{n:98,name:'البينة',ayahs:8},{n:99,name:'الزلزلة',ayahs:8},{n:100,name:'العاديات',ayahs:11},{n:101,name:'القارعة',ayahs:11},{n:102,name:'التكاثر',ayahs:8},{n:103,name:'العصر',ayahs:3},{n:104,name:'الهمزة',ayahs:9},{n:105,name:'الفيل',ayahs:5},{n:106,name:'قريش',ayahs:4},{n:107,name:'الماعون',ayahs:7},{n:108,name:'الكوثر',ayahs:3},{n:109,name:'الكافرون',ayahs:6},{n:110,name:'النصر',ayahs:3},{n:111,name:'المسد',ayahs:5},{n:112,name:'الإخلاص',ayahs:4},{n:113,name:'الفلق',ayahs:5},{n:114,name:'الناس',ayahs:6}
-];
-let currentArticle = null;
+/* ══════════════════════════════════════════════════════
+   PIN PROTECTION
+══════════════════════════════════════════════════════ */
+const ADMIN_PIN = "1426"; /* غيّر هذا الرقم */
 
-function log(msg){ document.getElementById('log').textContent = msg; }
-function cfg(){ return {
-  groqKey: document.getElementById('groqKey').value.trim(),
-  ghToken: document.getElementById('ghToken').value.trim(),
-  ghUser: document.getElementById('ghUser').value.trim(),
-  ghRepo: document.getElementById('ghRepo').value.trim()
-}; }
-function slugify(sn, an){ return `surah-${sn}-ayah-${an}`; }
-function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function populate(){
-  const surah = document.getElementById('surah');
-  SURAHS.forEach(s=>{ const o=document.createElement('option'); o.value=s.n; o.textContent=`${s.n}. ${s.name}`; surah.appendChild(o); });
-  surah.addEventListener('change', updateAyah);
-  updateAyah();
+function pinNext(i){
+  const v = document.getElementById('p'+i).value;
+  if(v && i < 3) document.getElementById('p'+(i+1)).focus();
+  if(i === 3) checkPin();
 }
-function updateAyah(){
-  const sn = parseInt(document.getElementById('surah').value || '1');
-  const s = SURAHS.find(x=>x.n===sn);
-  const ayah = document.getElementById('ayah');
-  ayah.innerHTML='';
-  for(let i=1;i<=s.ayahs;i++){ const o=document.createElement('option'); o.value=i; o.textContent='الآية '+i; ayah.appendChild(o); }
-}
-async function testGithub(){
-  const c=cfg();
-  if(!c.ghToken||!c.ghUser||!c.ghRepo){ log('أدخل GitHub token/user/repo'); return; }
-  log('يختبر GitHub...');
-  const res = await fetch(`${GH_API}/repos/${c.ghUser}/${c.ghRepo}`, {headers:{Authorization:'token '+c.ghToken,Accept:'application/vnd.github.v3+json'}});
-  if(res.ok){ log('GitHub OK'); } else { const t=await res.text(); log('GitHub failed: '+t); }
-}
-function buildPrompt(surahName, ayahNumber){
-  return `أرجع JSON فقط بدون أي شرح ولا markdown.
-الصيغة المطلوبة:
-{
-  "title":"",
-  "ayah_text":"",
-  "intro":"",
-  "tafsir":"",
-  "nuzul":"",
-  "balagha":"",
-  "shaarawi":"",
-  "ijaz":"",
-  "ibra_aqida":"",
-  "ibra_nafs":"",
-  "ibra_hadara":"",
-  "question":"",
-  "example":"",
-  "application":"",
-  "closing":""
-}
-
-الموضوع: سورة ${surahName} الآية ${ayahNumber}.
-الشروط:
-- العربية فقط.
-- نصوص قصيرة إلى متوسطة، واضحة ونظيفة.
-- إذا لم يثبت سبب نزول خاص فقل ذلك بوضوح.
-- إذا لم يوجد إعجاز علمي قوي فاذكر وجهاً بيانياً أو تربوياً.
-- لا تكتب HTML.
-- لا تكتب أي كلام خارج JSON.`;
-}
-function extractJson(raw){
-  raw = String(raw||'').trim();
-  raw = raw.replace(/```json|```/gi,'').trim();
-  const start = raw.indexOf('{');
-  const end = raw.lastIndexOf('}');
-  if(start === -1 || end === -1 || end <= start) throw new Error('لم يتم العثور على JSON صالح');
-  return raw.slice(start, end+1);
-}
-function renderArticle(a, surahName, ayahNumber){
-  return `
-    <div class="ayah"><div style="font-size:28px;color:#0a3d2e;font-weight:bold;line-height:2">${escapeHtml(a.ayah_text)}</div><div class="small">سورة ${escapeHtml(surahName)} — الآية ${ayahNumber}</div></div>
-    <h1>${escapeHtml(a.title)}</h1>
-    <h2>📍 مدخل</h2><p>${escapeHtml(a.intro)}</p>
-    <h2>📚 التفسير</h2><p>${escapeHtml(a.tafsir)}</p>
-    <h2>🕰️ سبب النزول والسياق</h2><p>${escapeHtml(a.nuzul)}</p>
-    <h2>🔤 المفردات والبلاغة</h2><p>${escapeHtml(a.balagha)}</p>
-    <h2>🎙️ لمسة الشعراوي</h2><p>${escapeHtml(a.shaarawi)}</p>
-    <h2>🔬 الإعجاز</h2><p>${escapeHtml(a.ijaz)}</p>
-    <div class="ibra">
-      <h2>💎 العبرة العميقة</h2>
-      <p><strong>① المستوى العقدي:</strong> ${escapeHtml(a.ibra_aqida)}</p>
-      <p><strong>② المستوى النفسي:</strong> ${escapeHtml(a.ibra_nafs)}</p>
-      <p><strong>③ المستوى الحضاري:</strong> ${escapeHtml(a.ibra_hadara)}</p>
-      <p><strong>❓ سؤال:</strong> ${escapeHtml(a.question)}</p>
-    </div>
-    <h2>📌 مثال واقعي</h2><p>${escapeHtml(a.example)}</p>
-    <h2>🌍 التطبيق</h2><p>${escapeHtml(a.application)}</p>
-    <h2>🕌 خاتمة</h2><p>${escapeHtml(a.closing)}</p>`;
-}
-async function generateArticle(){
-  const c=cfg();
-  if(!c.groqKey){ log('أدخل Groq key'); return; }
-  const sn = parseInt(document.getElementById('surah').value);
-  const an = parseInt(document.getElementById('ayah').value);
-  const s = SURAHS.find(x=>x.n===sn);
-  const prompt = buildPrompt(s.name, an);
-  log('يتصل بـ Groq... طلب واحد فقط.');
-  document.querySelector('button.secondary').disabled = true;
-  try{
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+c.groqKey},
-      body: JSON.stringify({
-        model:'llama-3.1-8b-instant',
-        temperature:0.4,
-        max_tokens:1800,
-        messages:[{role:'user',content:prompt}]
-      })
-    });
-    const data = await res.json();
-    if(!res.ok) throw new Error((data.error && data.error.message) || ('HTTP '+res.status));
-    const raw = data.choices[0].message.content;
-    document.getElementById('rawJson').value = raw;
-    const jsonText = extractJson(raw);
-    const obj = JSON.parse(jsonText);
-    currentArticle = { surah: sn, ayah: an, surahName: s.name, slug: slugify(sn,an), data: obj };
-    document.getElementById('preview').innerHTML = renderArticle(obj, s.name, an);
-    document.getElementById('publishBtn').disabled = false;
-    log('OK: تم التوليد والمعاينة جاهزة.');
-  }catch(e){
-    document.getElementById('preview').innerHTML = '<div style="color:red">فشل التوليد: '+escapeHtml(e.message)+'</div>';
-    log('فشل: '+e.message);
-  }finally{
-    document.querySelector('button.secondary').disabled = false;
+function checkPin(){
+  const pin = [0,1,2,3].map(i=>document.getElementById('p'+i).value).join('');
+  if(pin === ADMIN_PIN){
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    initApp();
+  } else {
+    document.getElementById('pin-err').textContent = 'رمز خاطئ — حاول مرة أخرى';
+    [0,1,2,3].forEach(i=>{document.getElementById('p'+i).value='';});
+    document.getElementById('p0').focus();
   }
 }
-async function ghGet(path){
-  const c=cfg();
-  const res = await fetch(`${GH_API}/repos/${c.ghUser}/${c.ghRepo}/contents/${path}`, {headers:{Authorization:'token '+c.ghToken,Accept:'application/vnd.github.v3+json'}});
-  return res.ok ? await res.json() : null;
-}
-async function ghPut(path, content, message){
-  const c=cfg();
-  const existing = await ghGet(path);
-  const body = {message, content:btoa(unescape(encodeURIComponent(content)))};
-  if(existing && existing.sha) body.sha = existing.sha;
-  const res = await fetch(`${GH_API}/repos/${c.ghUser}/${c.ghRepo}/contents/${path}`, {
-    method:'PUT', headers:{Authorization:'token '+c.ghToken,'Content-Type':'application/json',Accept:'application/vnd.github.v3+json'}, body:JSON.stringify(body)
-  });
-  if(!res.ok){ const t=await res.text(); throw new Error(t); }
-  return await res.json();
-}
-function articleHtmlPage(article){
-  return `<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${escapeHtml(article.data.title)}</title><style>body{font-family:Arial,sans-serif;background:#f5ead0;margin:0;color:#1e1e1e}.wrap{max-width:900px;margin:20px auto;background:#fff;border:1px solid #e8d5a0;padding:20px}.ayah{background:#fdf6e3;border:2px solid #b8860b;padding:18px;text-align:center;margin:16px 0}.ibra{background:#fff8db;border:2px solid #b8860b;padding:14px;margin:18px 0}h1{color:#0a3d2e}h2{color:#0a3d2e;border-right:4px solid #b8860b;padding-right:8px}p{line-height:1.9}</style></head><body><div class="wrap">${renderArticle(article.data, article.surahName, article.ayah)}</div></body></html>`;
-}
-async function publishAll(){
-  const c=cfg();
-  if(!currentArticle){ log('لا يوجد مقال جاهز'); return; }
-  if(!c.ghToken||!c.ghUser||!c.ghRepo){ log('أدخل بيانات GitHub'); return; }
-  log('ينشر...');
-  try{
-    const jsonPath = `data/articles/${currentArticle.slug}.json`;
-    const htmlPath = `articles/${currentArticle.slug}.html`;
-    await ghPut(jsonPath, JSON.stringify(currentArticle, null, 2), `data: ${currentArticle.slug}`);
-    await ghPut(htmlPath, articleHtmlPage(currentArticle), `article: ${currentArticle.slug}`);
+document.addEventListener('keydown', e=>{ if(e.key==='Enter') checkPin(); });
 
-    let index = [];
-    const idxExisting = await ghGet('data/index.json');
-    if(idxExisting && idxExisting.download_url){ index = await (await fetch(idxExisting.download_url)).json(); }
-    index = Array.isArray(index) ? index.filter(x=>x.slug!==currentArticle.slug) : [];
-    index.push({slug: currentArticle.slug, title: currentArticle.data.title, surah: currentArticle.surah, ayah: currentArticle.ayah, surahName: currentArticle.surahName});
-    index.sort((a,b)=>a.surah-b.surah || a.ayah-b.ayah);
-    await ghPut('data/index.json', JSON.stringify(index, null, 2), 'update index.json');
-    log(`تم النشر: ${currentArticle.slug}`);
-  }catch(e){ log('فشل النشر: '+e.message); }
+/* ══════════════════════════════════════════════════════
+   CONFIG
+══════════════════════════════════════════════════════ */
+const SOURCES_WORKER = "https://worker-nour-sources-v1.khayati1hafedh.workers.dev";
+const AI_WORKER      = "https://worker-nour-ai-v1.khayati1hafedh.workers.dev";
+const GH_OWNER = "khayati-quran", GH_REPO = "ibar-for-all-verses";
+const GH_API   = "https://api.github.com";
+
+/* ══════════════════════════════════════════════════════
+   AYAH TYPE MAP — مصدر التصنيف الثابت
+   يُحدَّث من c35 عند إضافة دفعات جديدة
+══════════════════════════════════════════════════════ */
+const AYAH_TYPE_MAP = {
+  "1:1": "tawhid",  "1:2": "tawhid",  "1:3": "tawhid",  "1:4": "tawhid",
+  "1:5": "ibada",   "1:6": "hidaya",  "1:7": "hidaya",
+  "2:1": "tawhid",  "2:2": "hidaya",  "2:3": "ibada",
+  "2:4": "hidaya",  "2:5": "hidaya",  "2:6": "waeid",
+  "2:7": "waeid",   "2:8": "akhlaqi", "2:9": "akhlaqi", "2:10": "waeid",
+};
+
+const TYPE_LABELS = {
+  tawhid:"توحيد", hidaya:"هداية", ibada:"عبادة", qissa:"قصة",
+  tashri3:"تشريع", waad:"وعد", waeid:"وعيد", kawni:"كوني",
+  akhlaqi:"أخلاقي", duaa:"دعاء"
+};
+
+const SURAHS=[
+  {n:1,name:'الفاتحة',ayahs:7},{n:2,name:'البقرة',ayahs:286},{n:3,name:'آل عمران',ayahs:200},
+  {n:4,name:'النساء',ayahs:176},{n:5,name:'المائدة',ayahs:120},{n:6,name:'الأنعام',ayahs:165},
+  {n:7,name:'الأعراف',ayahs:206},{n:8,name:'الأنفال',ayahs:75},{n:9,name:'التوبة',ayahs:129},
+  {n:10,name:'يونس',ayahs:109},{n:11,name:'هود',ayahs:123},{n:12,name:'يوسف',ayahs:111},
+  {n:114,name:'الناس',ayahs:6}
+];
+
+/* ══════════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════════ */
+let queue = [];       // [{key, sn, an, type, status}]
+let isRunning = false;
+let stopFlag  = false;
+let doneKeys  = new Set(); // keys already published
+let errCount  = 0;
+
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+function initApp(){
+  // Restore token & delay
+  const t = localStorage.getItem('nq_token');
+  const d = localStorage.getItem('nq_delay');
+  if(t) document.getElementById('cfg-token').value = t;
+  if(d) document.getElementById('cfg-delay').value = d;
+
+  buildQueue();
+  renderQueue();
+  syncStatus();
 }
-populate();
+
+function buildQueue(){
+  queue = Object.entries(AYAH_TYPE_MAP).map(([key, type]) => {
+    const [sn, an] = key.split(':').map(Number);
+    return {key, sn, an, type, status:'pending', msg:''};
+  });
+  document.getElementById('hdr-count').textContent = queue.length;
+  document.getElementById('stat-classified').textContent = queue.length;
+  updateStats();
+}
+
+function renderQueue(){
+  const grid = document.getElementById('queue-grid');
+  grid.innerHTML = '';
+  queue.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'q-card ' + (item.status === 'done' ? 'done' : item.status === 'error' ? 'error' : item.status === 'running' ? 'running' : '');
+    card.id = 'card-' + item.key.replace(':','-');
+    const sur = SURAHS.find(s=>s.n===item.sn);
+    const surName = sur ? sur.name : 'سورة '+item.sn;
+    card.innerHTML = `
+      <div class="q-check"><input type="checkbox" class="item-check" data-key="${item.key}" ${item.status==='pending'?'checked':''}></div>
+      <div class="q-key">${item.key} — ${surName}</div>
+      <span class="q-type ${item.type}">${TYPE_LABELS[item.type]||item.type}</span>
+      <div class="q-status ${item.status}">${statusLabel(item)}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function statusLabel(item){
+  if(item.status==='done') return '✅ منشور';
+  if(item.status==='error') return '❌ ' + (item.msg||'خطأ');
+  if(item.status==='running') return '⚡ جاري...';
+  return '⏳ منتظر';
+}
+
+function updateCard(key){
+  const item = queue.find(x=>x.key===key);
+  if(!item) return;
+  const card = document.getElementById('card-'+key.replace(':','-'));
+  if(!card) return;
+  card.className = 'q-card ' + (item.status==='done'?'done':item.status==='error'?'error':item.status==='running'?'running':'');
+  card.querySelector('.q-status').className = 'q-status '+item.status;
+  card.querySelector('.q-status').textContent = statusLabel(item);
+}
+
+function updateStats(){
+  const done = queue.filter(x=>x.status==='done').length;
+  const err  = queue.filter(x=>x.status==='error').length;
+  const rem  = queue.filter(x=>x.status==='pending').length;
+  document.getElementById('stat-done').textContent = done;
+  document.getElementById('stat-err').textContent  = err;
+  document.getElementById('stat-remain').textContent = rem;
+  const pct = queue.length > 0 ? Math.round((done/queue.length)*100) : 0;
+  document.getElementById('prog-fill').style.width = pct + '%';
+}
+
+function selectAll(){
+  document.querySelectorAll('.item-check').forEach(c=>c.checked=true);
+}
+function selectNone(){
+  document.querySelectorAll('.item-check').forEach(c=>c.checked=false);
+}
+
+/* ══════════════════════════════════════════════════════
+   CONNECTION TEST
+══════════════════════════════════════════════════════ */
+async function testConnections(){
+  const token = document.getElementById('cfg-token').value.trim();
+  log('اختبار الاتصال...','info');
+
+  // GitHub
+  try{
+    const r = await fetch(`${GH_API}/repos/${GH_OWNER}/${GH_REPO}`,
+      {headers:{Authorization:'token '+token,Accept:'application/vnd.github.v3+json'}});
+    if(r.ok){ setDot('gh','ok'); log('GitHub: متصل ✅','ok'); }
+    else { setDot('gh','err'); log('GitHub: خطأ '+r.status,'err'); }
+  }catch(e){ setDot('gh','err'); log('GitHub: '+e.message,'err'); }
+
+  // Workers
+  try{
+    const r = await fetch(SOURCES_WORKER,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({surah_number:1,ayah_number:1})});
+    if(r.ok){ setDot('api','ok'); log('Workers: متصل ✅','ok'); }
+    else { setDot('api','err'); log('Workers: خطأ '+r.status,'err'); }
+  }catch(e){ setDot('api','err'); log('Workers: '+e.message,'err'); }
+}
+
+function setDot(id, state){
+  const dot = document.getElementById(id+'-dot');
+  dot.className = 'status-dot ' + (state==='ok'?'ok':'err');
+}
+
+/* ══════════════════════════════════════════════════════
+   SYNC STATUS — check which articles already published
+══════════════════════════════════════════════════════ */
+async function syncStatus(){
+  const token = document.getElementById('cfg-token').value.trim();
+  if(!token){ log('أدخل GitHub Token أولاً','warn'); return; }
+  log('مزامنة الحالة من GitHub...','info');
+  try{
+    const r = await fetch(`${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/articles.json`,
+      {headers:{Authorization:'token '+token,Accept:'application/vnd.github.v3+json'}});
+    if(r.ok){
+      const j = await r.json();
+      const txt = decodeURIComponent(escape(atob(j.content.replace(/\n/g,''))));
+      const arts = JSON.parse(txt);
+      doneKeys = new Set(arts.map(a=>`${a.surah_number}:${a.ayah_number}`));
+      queue.forEach(item=>{
+        if(doneKeys.has(item.key)) item.status = 'done';
+      });
+      renderQueue();
+      updateStats();
+      log(`مزامنة: ${doneKeys.size} مقال منشور`,'ok');
+    } else {
+      log('articles.json غير موجود — سيُنشأ عند أول نشر','warn');
+    }
+  }catch(e){ log('خطأ في المزامنة: '+e.message,'err'); }
+}
+
+/* ══════════════════════════════════════════════════════
+   BATCH RUN
+══════════════════════════════════════════════════════ */
+async function startBatch(){
+  const token = document.getElementById('cfg-token').value.trim();
+  if(!token){ log('أدخل GitHub Token','warn'); return; }
+  if(isRunning){ log('التشغيل جارٍ بالفعل','warn'); return; }
+
+  const mode = document.getElementById('batch-mode').value;
+  const delay = parseInt(document.getElementById('batch-delay').value||'8') * 1000;
+
+  let targets = [];
+  if(mode === 'selected'){
+    const checked = [...document.querySelectorAll('.item-check:checked')].map(c=>c.dataset.key);
+    targets = queue.filter(x=>checked.includes(x.key) && x.status !== 'done');
+  } else if(mode === 'pending'){
+    targets = queue.filter(x=>x.status === 'pending');
+  } else {
+    targets = queue.filter(x=>x.status !== 'done');
+  }
+
+  if(!targets.length){ log('لا توجد آيات للتشغيل','warn'); return; }
+
+  isRunning = true; stopFlag = false;
+  document.getElementById('btn-run').disabled = true;
+  document.getElementById('btn-stop').disabled = false;
+  log(`بدء التشغيل: ${targets.length} آية`,'info');
+
+  for(const item of targets){
+    if(stopFlag) break;
+    await processOne(item, token);
+    updateStats();
+    if(!stopFlag && targets.indexOf(item) < targets.length - 1){
+      log(`انتظار ${delay/1000}ث...`,'info');
+      await sleep(delay);
+    }
+  }
+
+  isRunning = false;
+  document.getElementById('btn-run').disabled  = false;
+  document.getElementById('btn-stop').disabled = true;
+  log(stopFlag ? 'تم الإيقاف' : '✅ اكتمل التشغيل', stopFlag?'warn':'ok');
+}
+
+function stopBatch(){
+  stopFlag = true;
+  log('إيقاف بعد الآية الحالية...','warn');
+}
+
+async function processOne(item, token){
+  item.status = 'running';
+  updateCard(item.key);
+  log(`⚡ [${item.key}] جاري التوليد...`,'info');
+
+  try{
+    // 1) جلب المصادر
+    const sourceRes = await fetch(SOURCES_WORKER,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({surah_number:item.sn, ayah_number:item.an})
+    });
+    if(!sourceRes.ok) throw new Error('Sources Worker: '+sourceRes.status);
+    const sourceData = await sourceRes.json();
+
+    // 2) توليد AI
+    const aiRes = await fetch(AI_WORKER,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({surah_number:item.sn, ayah_number:item.an, sources:sourceData})
+    });
+    if(!aiRes.ok) throw new Error('AI Worker: '+aiRes.status);
+    const aiData = await aiRes.json();
+
+    // 3) دمج البيانات
+    const d = Object.assign({}, sourceData, aiData, {
+      surah_number: item.sn, ayah_number: item.an,
+      ayah_type: item.type,
+      fetched_sources: sourceData
+    });
+
+    // 4) بناء الـ HTML (نفس اسم الملف من generator)
+    const fn = `surah-${item.sn}-ayah-${item.an}g.html`;
+    const html = buildArticleHtml(d);
+
+    // 5) نشر على GitHub
+    await writeF(token, fn, html, `نشر: سورة ${d.surah_name||item.sn} — الآية ${item.an}`);
+
+    // 6) تحديث articles.json
+    await updateArticlesJson(token, d);
+
+    item.status = 'done';
+    updateCard(item.key);
+    log(`✅ [${item.key}] نُشر بنجاح`,'ok');
+
+  } catch(e){
+    item.status = 'error';
+    item.msg = e.message.slice(0,40);
+    updateCard(item.key);
+    errCount++;
+    log(`❌ [${item.key}] ${e.message}`,'err');
+  }
+}
+
+/* بناء HTML للمقال — يعيد توجيه للـ generator للتوليد الفعلي */
+function buildArticleHtml(d){
+  const title = `تفسير سورة ${d.surah_name||''}  — الآية ${d.ayah_number}`;
+  /* هنا يُستدعى generator المباشر عبر iframe أو يُعاد بناء HTML
+     في المرحلة الحالية: نبني redirect يشغّل generator لإنتاج الصفحة */
+  return `<!DOCTYPE html><html lang="ar" dir="rtl"><head>
+<meta charset="UTF-8"><title>${title}</title>
+<meta name="description" content="تفسير وعبرة — ${title}">
+<meta http-equiv="refresh" content="0;url=generator35.html?s=${d.surah_number}&a=${d.ayah_number}&auto=1">
+</head><body><p style="text-align:center;padding:40px;font-family:Cairo,sans-serif">
+جاري التحميل...</p></body></html>`;
+}
+
+/* ══════════════════════════════════════════════════════
+   GITHUB HELPERS
+══════════════════════════════════════════════════════ */
+async function writeF(token, path, text, msg){
+  let sha = null;
+  const c = await fetch(`${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/${path}`,
+    {headers:{Authorization:'token '+token,Accept:'application/vnd.github.v3+json'}});
+  if(c.ok){ const j=await c.json(); sha=j.sha||null; }
+  const body = {message:msg, content:btoa(unescape(encodeURIComponent(text)))};
+  if(sha) body.sha = sha;
+  const p = await fetch(`${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/${path}`,
+    {method:'PUT',headers:{Authorization:'token '+token,Accept:'application/vnd.github.v3+json','Content-Type':'application/json'},
+     body:JSON.stringify(body)});
+  if(!p.ok){ const t=await p.text(); throw new Error('GitHub write: '+t.slice(0,60)); }
+}
+
+async function updateArticlesJson(token, d){
+  let arts = [];
+  try{
+    const r = await fetch(`${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/articles.json`,
+      {headers:{Authorization:'token '+token,Accept:'application/vnd.github.v3+json'}});
+    if(r.ok){
+      const j = await r.json();
+      arts = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,'')))));
+    }
+  }catch(e){}
+
+  const key = `${d.surah_number}:${d.ayah_number}`;
+  const existing = arts.findIndex(a=>`${a.surah_number}:${a.ayah_number}` === key);
+  const entry = {
+    surah_number: d.surah_number,
+    ayah_number:  d.ayah_number,
+    surah_name:   d.surah_name  || '',
+    ayah_type:    d.ayah_type   || '',
+    title:        `تفسير سورة ${d.surah_name||d.surah_number} — الآية ${d.ayah_number}`,
+    url:          `surah-${d.surah_number}-ayah-${d.ayah_number}g.html`,
+    published_at: new Date().toISOString()
+  };
+  if(existing >= 0) arts[existing] = entry;
+  else arts.unshift(entry);
+
+  await writeF(token,'articles.json',JSON.stringify(arts,null,2),
+    `تحديث المقالات: ${entry.title}`);
+}
+
+/* ══════════════════════════════════════════════════════
+   LOG
+══════════════════════════════════════════════════════ */
+function log(msg, type=''){
+  const box = document.getElementById('log-box');
+  const line = document.createElement('div');
+  line.className = 'log-line ' + type;
+  const ts = new Date().toLocaleTimeString('ar-DZ');
+  line.textContent = `[${ts}] ${msg}`;
+  box.appendChild(line);
+  box.scrollTop = box.scrollHeight;
+}
+
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 </script>
 </body>
 </html>
