@@ -25,6 +25,9 @@ body{font-family:'Cairo',sans-serif;background:var(--parch);color:#1a0e05;direct
 .logo p{font-size:.72em;opacity:.75;}
 nav a{color:rgba(255,255,255,.85);text-decoration:none;font-size:.84em;padding:5px 12px;border:1px solid rgba(184,134,11,.3);margin-right:4px;}
 nav a:hover{background:rgba(184,134,11,.2);color:var(--gold3);}
+.page-switch{background:#fff8ec;border-bottom:1px solid var(--gold2);padding:8px 12px;text-align:center;display:flex;justify-content:center;gap:7px;flex-wrap:wrap;}
+.page-switch a{color:var(--em);text-decoration:none;font-size:.82em;font-weight:700;border:1px solid rgba(184,134,11,.45);padding:5px 12px;background:white;}
+.page-switch a.active{background:var(--em);color:var(--gold3);}
 
 /* ── BISMILLAH BAR ── */
 .bism-bar{background:linear-gradient(160deg,#071f17,#0a3d2e);padding:14px 20px;text-align:center;border-bottom:2px solid rgba(184,134,11,.4);}
@@ -121,6 +124,13 @@ nav a:hover{background:rgba(184,134,11,.2);color:var(--gold3);}
     </nav>
   </div>
 </header>
+
+<div class="page-switch" aria-label="روابط الصفحات الأساسية">
+  <a class="active" href="index.html">الرئيسية</a>
+  <a href="intro.html">عن المشروع</a>
+  <a href="articles.html">المقالات</a>
+  <a href="references.html">المراجع</a>
+</div>
 
 <!-- BISMILLAH + SALAH -->
 <div class="bism-bar">
