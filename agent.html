@@ -230,15 +230,33 @@ body{background:var(--bg);color:var(--txt);font-family:'Cairo',sans-serif;min-he
 
       <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
 
+      <!-- فلتر السورة / الآية -->
+      <div class="batch-bar" style="flex-wrap:wrap;gap:7px;margin-bottom:7px">
+        <label>📖 سورة:</label>
+        <select id="filter-surah" onchange="applyQueueFilter()" style="flex:1;min-width:120px">
+          <option value="all">كل السور</option>
+        </select>
+        <label>من آية:</label>
+        <input type="number" id="filter-from" value="1" min="1" max="286"
+          style="width:58px" onchange="applyQueueFilter()">
+        <label>إلى:</label>
+        <input type="number" id="filter-to" value="286" min="1" max="286"
+          style="width:58px" onchange="applyQueueFilter()">
+        <button class="batch-btn go" style="background:var(--bg3);color:var(--gold);border:1px solid var(--gold);font-size:.8em"
+          onclick="applyQueueFilter()">🔍 فلتر</button>
+        <button class="batch-btn go" style="background:var(--bg3);color:var(--txt);border:1px solid rgba(184,134,11,.3);font-size:.8em"
+          onclick="resetQueueFilter()">↺ إعادة</button>
+      </div>
+
       <div class="batch-bar">
         <label>تشغيل:</label>
         <select id="batch-mode">
-          <option value="selected">المحددة فقط</option>
           <option value="pending">المتبقية فقط</option>
+          <option value="selected">المحددة فقط</option>
           <option value="all">الكل</option>
         </select>
         <label>تأخير:</label>
-        <input type="number" id="batch-delay" value="8" min="3" max="60" style="width:60px">
+        <input type="number" id="batch-delay" value="15" min="5" max="60" style="width:56px">
         <span>ث</span>
         <button class="batch-btn go" id="btn-run" onclick="startBatch()">▶ تشغيل</button>
         <button class="batch-btn stop" id="btn-stop" onclick="stopBatch()" disabled>⏹ إيقاف</button>
@@ -330,8 +348,53 @@ function initApp(){
   const d = localStorage.getItem('nq_delay');
   if(d) document.getElementById('cfg-delay').value = d;
   buildQueue();
+  buildSurahFilterOptions();
   renderQueue();
   syncStatus();
+}
+
+function buildSurahFilterOptions(){
+  const sel = document.getElementById('filter-surah');
+  if(!sel) return;
+  /* جمع السور الفريدة من SURAHS */
+  SURAHS.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.n;
+    opt.textContent = `${s.n}. ${s.name}`;
+    sel.appendChild(opt);
+  });
+}
+
+function applyQueueFilter(){
+  const surahVal = document.getElementById('filter-surah').value;
+  const fromVal  = parseInt(document.getElementById('filter-from').value) || 1;
+  const toVal    = parseInt(document.getElementById('filter-to').value)   || 999;
+
+  queue.forEach(item => {
+    const card = document.getElementById('card-'+item.key);
+    if(!card) return;
+    const matchSurah = surahVal === 'all' || item.sn == surahVal;
+    const matchRange = item.an >= fromVal && item.an <= toVal;
+    card.style.display = (matchSurah && matchRange) ? '' : 'none';
+  });
+
+  /* تحديث العداد المرئي */
+  const visible = queue.filter(item => {
+    const card = document.getElementById('card-'+item.key);
+    return card && card.style.display !== 'none';
+  }).length;
+  log(`فلتر: يظهر ${visible} آية`, 'info');
+}
+
+function resetQueueFilter(){
+  document.getElementById('filter-surah').value = 'all';
+  document.getElementById('filter-from').value  = 1;
+  document.getElementById('filter-to').value    = 286;
+  queue.forEach(item => {
+    const card = document.getElementById('card-'+item.key);
+    if(card) card.style.display = '';
+  });
+  log('تم إعادة الفلتر — تظهر كل الآيات','info');
 }
 
 function buildQueue(){
@@ -419,7 +482,8 @@ async function testConnections(){
     }
   }catch(e){ setDot('gh','err'); log('GitHub Worker: '+e.message,'err'); }
 
-  /* 2 — GitHub Worker read test (articles.json) */
+  /* 2 — GitHub Worker read test (articles.json) — نضيف تأخير 2.5ث لتجنب rate limit */
+  await new Promise(r=>setTimeout(r,2500));
   try{
     const r2 = await fetch(GH_WORKER, {
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -428,6 +492,8 @@ async function testConnections(){
     const j2 = await r2.json();
     if(r2.ok && j2.content){
       log('GitHub read articles.json: ✅ — SHA: '+j2.sha.slice(0,8),'ok');
+    } else if(r2.status===429){
+      log('GitHub read: rate limit (طبيعي عند الاختبار السريع)','warn');
     } else {
       log('GitHub read articles.json: HTTP '+r2.status+' — '+(j2.error||JSON.stringify(j2).slice(0,80)),'err');
     }
