@@ -621,7 +621,7 @@ async function processOne(item){
     // 2) توليد AI
     const aiRes = await fetch(AI_WORKER,{
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({surah_name:surName, surah_number:item.sn, ayah_number:item.an, sources:sourceData})
+      body: JSON.stringify({source_payload:sourceData})
     });
     if(!aiRes.ok) throw new Error('AI Worker: '+aiRes.status);
     const aiData = await aiRes.json();
