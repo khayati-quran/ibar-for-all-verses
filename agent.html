@@ -609,9 +609,11 @@ async function processOne(item){
 
   try{
     // 1) جلب المصادر
+    /* Sources Worker يطلب: surah_name + surah_number + ayah_number */
+    const surName = (SURAHS.find(s=>s.n===item.sn)||{name:''}).name;
     const sourceRes = await fetch(SOURCES_WORKER,{
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({surah_number:item.sn, ayah_number:item.an})
+      body: JSON.stringify({surah_name:surName, surah_number:item.sn, ayah_number:item.an})
     });
     if(!sourceRes.ok) throw new Error('Sources Worker: '+sourceRes.status);
     const sourceData = await sourceRes.json();
@@ -619,7 +621,7 @@ async function processOne(item){
     // 2) توليد AI
     const aiRes = await fetch(AI_WORKER,{
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({surah_number:item.sn, ayah_number:item.an, sources:sourceData})
+      body: JSON.stringify({surah_name:surName, surah_number:item.sn, ayah_number:item.an, sources:sourceData})
     });
     if(!aiRes.ok) throw new Error('AI Worker: '+aiRes.status);
     const aiData = await aiRes.json();
