@@ -404,7 +404,7 @@ function selectNone(){
 async function testConnections(){
   log('اختبار الاتصال...','info');
 
-  /* GitHub عبر Worker */
+  /* 1 — GitHub Worker ping */
   try{
     const r = await fetch(GH_WORKER, {
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -419,12 +419,30 @@ async function testConnections(){
     }
   }catch(e){ setDot('gh','err'); log('GitHub Worker: '+e.message,'err'); }
 
-  /* Sources Worker */
+  /* 2 — GitHub Worker read test (articles.json) */
+  try{
+    const r2 = await fetch(GH_WORKER, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({action:'read', path:'articles.json'})
+    });
+    const j2 = await r2.json();
+    if(r2.ok && j2.content){
+      log('GitHub read articles.json: ✅ — SHA: '+j2.sha.slice(0,8),'ok');
+    } else {
+      log('GitHub read articles.json: HTTP '+r2.status+' — '+(j2.error||JSON.stringify(j2).slice(0,80)),'err');
+    }
+  }catch(e){ log('GitHub read test: '+e.message,'err'); }
+
+  /* 3 — Sources Worker — ping only (no real ayah) */
   try{
     const r = await fetch(SOURCES_WORKER,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({surah_number:1,ayah_number:1})});
-    if(r.ok){ setDot('api','ok'); log('Sources Worker: متصل ✅','ok'); }
-    else { setDot('api','err'); log('Sources Worker: خطأ '+r.status,'err'); }
+      body:JSON.stringify({ping:true})});
+    if(r.ok || r.status===400){
+      setDot('api','ok');
+      log('Sources Worker: يستجيب ✅ (status '+r.status+')','ok');
+    } else {
+      setDot('api','err'); log('Sources Worker: خطأ '+r.status,'err');
+    }
   }catch(e){ setDot('api','err'); log('Sources Worker: '+e.message,'err'); }
 }
 
@@ -445,6 +463,7 @@ async function syncStatus(){
     });
     if(r.ok){
       const j = await r.json();
+      if(!j.content){ log('articles.json: محتوى فارغ','warn'); return; }
       const txt = decodeURIComponent(escape(atob(j.content.replace(/\n/g,''))));
       const arts = JSON.parse(txt);
       doneKeys = new Set(arts.map(a=>`${a.surah_number}:${a.ayah_number}`));
@@ -453,9 +472,19 @@ async function syncStatus(){
       });
       renderQueue();
       updateStats();
-      log(`مزامنة: ${doneKeys.size} مقال منشور`,'ok');
+      log(`مزامنة: ${doneKeys.size} مقال منشور ✅`,'ok');
     } else {
-      log('articles.json غير موجود — سيُنشأ عند أول نشر','warn');
+      /* نقرأ body الخطأ لتشخيص دقيق */
+      try{
+        const errJ = await r.json();
+        if(r.status === 404){
+          log('articles.json: ملف غير موجود بعد — سيُنشأ عند أول نشر','warn');
+        } else {
+          log('GitHub خطأ '+r.status+': '+(errJ.error||JSON.stringify(errJ).slice(0,80)),'err');
+        }
+      }catch(e2){
+        log('GitHub خطأ '+r.status+' (لا يمكن قراءة الرد)','err');
+      }
     }
   }catch(e){ log('خطأ في المزامنة: '+e.message,'err'); }
 }
