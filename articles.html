@@ -7,51 +7,141 @@
 <title>المقالات | نور القرآن</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--em:#0a3d2e;--em2:#1a5c42;--gold:#b8860b;--gold2:#daa520;--gold3:#f0c040;--parch:#fdf6e3;--parch2:#f5ead0;}
+:root{
+  --em:#0a3d2e;--em2:#1a5c42;--gold:#b8860b;--gold2:#daa520;--gold3:#f0c040;
+  --parch:#fdf6e3;--parch2:#f5ead0;--red:#c0392b;
+}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Cairo',sans-serif;background:var(--parch);color:#1a0e05;direction:rtl;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 0L60 30L30 60L0 30Z' fill='none' stroke='%23b8860b' stroke-width='0.5' opacity='0.2'/%3E%3C/svg%3E");background-size:60px 60px;}
+body{font-family:'Cairo',sans-serif;background:var(--parch);color:#1a0e05;direction:rtl;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 0L60 30L30 60L0 30Z' fill='none' stroke='%23b8860b' stroke-width='0.5' opacity='0.18'/%3E%3C/svg%3E");
+  background-size:60px 60px;}
+
+/* ── HEADER ── */
 .site-header{background:linear-gradient(180deg,var(--em),var(--em2));color:#fff;border-bottom:3px solid var(--gold);}
 .hborder{height:5px;background:repeating-linear-gradient(90deg,var(--gold) 0,var(--gold) 8px,var(--gold2) 8px,var(--gold2) 16px,var(--gold3) 16px,var(--gold3) 24px,var(--gold2) 24px,var(--gold2) 32px);}
 .htop{display:flex;align-items:center;justify-content:space-between;padding:12px 22px;}
-.logo{display:flex;align-items:center;gap:12px;}
-.logo-gem{width:40px;height:40px;border:2px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2em;background:rgba(184,134,11,.1);}
-.logo h1{font-family:'Amiri',serif;font-size:1.3em;color:var(--gold3);}
-nav a{color:rgba(255,255,255,.85);text-decoration:none;font-size:.82em;padding:5px 11px;border:1px solid rgba(184,134,11,.3);margin-right:4px;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-gem{width:38px;height:38px;border:2px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1em;background:rgba(184,134,11,.1);}
+.logo h1{font-family:'Amiri',serif;font-size:1.25em;color:var(--gold3);}
+nav a{color:rgba(255,255,255,.85);text-decoration:none;font-size:.8em;padding:5px 10px;border:1px solid rgba(184,134,11,.3);margin-right:3px;}
 nav a:hover,nav a.active{background:rgba(184,134,11,.25);color:var(--gold3);}
-.pg-head{background:linear-gradient(160deg,#0a3d2e,#1a5c42);color:white;padding:30px 20px 22px;text-align:center;border-bottom:2px solid var(--gold);}
-.pg-head h2{font-family:'Amiri',serif;font-size:1.9em;color:var(--gold3);margin-bottom:5px;}
-.pg-head p{font-size:.82em;opacity:.75;}
-.pg-count{display:inline-block;background:rgba(184,134,11,.2);border:1px solid rgba(184,134,11,.5);padding:4px 16px;margin-top:10px;font-size:.82em;color:var(--gold3);}
-.toolbar{background:#fff;border-bottom:1px solid var(--gold2);padding:11px 18px;display:flex;gap:9px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.07);}
-.toolbar input{flex:1;min-width:150px;padding:7px 10px;border:1px solid rgba(184,134,11,.4);background:var(--parch);color:#1a0e05;font-family:'Cairo',sans-serif;font-size:.82em;outline:none;}
+
+/* ── PAGE HEAD ── */
+.pg-head{background:linear-gradient(160deg,#071f17,#0a3d2e);color:white;padding:26px 20px 18px;text-align:center;border-bottom:2px solid var(--gold);}
+.pg-head h2{font-family:'Amiri',serif;font-size:1.85em;color:var(--gold3);margin-bottom:4px;}
+.pg-head p{font-size:.8em;opacity:.7;}
+
+/* ── STATS BAR ── */
+.stats-bar{background:#fff;border-bottom:1px solid var(--gold2);padding:10px 18px;display:flex;gap:0;justify-content:center;flex-wrap:wrap;}
+.stt{text-align:center;padding:6px 20px;border-right:1px solid rgba(184,134,11,.25);}
+.stt:last-child{border:none;}
+.stt-n{font-family:'Amiri',serif;font-size:1.4em;color:var(--em);font-weight:700;}
+.stt-l{font-size:.7em;color:#888;}
+.prog-wrap{width:100%;padding:6px 18px 0;}
+.prog-track{height:6px;background:#e8d5a0;border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--em),var(--gold2));border-radius:3px;transition:width .6s;}
+.prog-lbl{font-size:.7em;color:#888;text-align:center;margin-top:3px;}
+
+/* ── TOOLBAR ── */
+.toolbar{background:#fff8ec;border-bottom:1px solid var(--gold2);padding:10px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.07);}
+.toolbar input{flex:1;min-width:140px;padding:7px 10px;border:1px solid rgba(184,134,11,.4);background:white;color:#1a0e05;font-family:'Cairo',sans-serif;font-size:.82em;outline:none;}
 .toolbar input:focus{border-color:var(--gold);}
-.sort-btn{padding:7px 12px;border:1px solid rgba(184,134,11,.4);background:white;color:var(--em);font-family:'Cairo',sans-serif;font-size:.8em;cursor:pointer;white-space:nowrap;}
-.sort-btn.active{background:var(--em);color:var(--gold3);border-color:var(--em);}
-.surah-tabs{background:#fff8ec;border-bottom:1px solid var(--gold2);padding:8px 14px;display:flex;gap:6px;flex-wrap:wrap;overflow-x:auto;}
-.surah-tab{padding:5px 13px;border:1px solid rgba(184,134,11,.35);background:white;color:var(--em);font-size:.79em;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;white-space:nowrap;}
-.surah-tab.active{background:var(--em);color:var(--gold3);border-color:var(--em);}
-.wrap{max-width:1100px;margin:0 auto;padding:20px 15px;}
-.ag{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:13px;}
-.ac{background:#fff;border:1px solid var(--gold2);padding:16px;transition:box-shadow .2s,border-color .2s;}
-.ac:hover{box-shadow:0 4px 18px rgba(184,134,11,.18);border-color:var(--gold);}
-.ac-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
-.ac-num{font-size:.72em;font-weight:700;color:var(--gold);background:rgba(184,134,11,.1);padding:2px 8px;border:1px solid rgba(184,134,11,.3);}
-.ac-date{font-size:.7em;color:#aaa;}
-.ac h3{font-family:'Amiri',serif;margin:0 0 7px;color:var(--em);font-size:.95em;line-height:1.5;}
-.ac-meta{font-size:.76em;color:#777;margin-bottom:10px;}
-.ac a{display:inline-block;text-decoration:none;color:var(--em2);border:1px solid var(--em2);padding:5px 12px;font-size:.8em;}
-.ac a:hover{background:var(--em2);color:white;}
-.ac a.nav-lnk{font-size:.74em;padding:4px 9px;margin-right:5px;}
-.surah-div{grid-column:1/-1;padding:8px 14px;background:linear-gradient(90deg,var(--em),var(--em2));color:var(--gold3);font-family:'Amiri',serif;font-size:1em;margin-top:8px;}
-.state-box{text-align:center;padding:52px 20px;background:white;border:1px solid #e8d5a0;grid-column:1/-1;}
-.state-box .ico{font-size:3em;margin-bottom:12px;}
-.state-box p{color:#888;font-size:.9em;}
-.site-footer{background:var(--em);color:rgba(255,255,255,.7);padding:28px 20px;text-align:center;border-top:3px solid var(--gold);margin-top:36px;}
-.fayah{font-family:'Amiri',serif;font-size:1.25em;color:var(--gold3);margin-bottom:6px;}
-@media(max-width:600px){.htop nav{display:none;}.toolbar{gap:6px;}}
+.tbtn{padding:7px 11px;border:1px solid rgba(184,134,11,.4);background:white;color:var(--em);font-family:'Cairo',sans-serif;font-size:.79em;cursor:pointer;white-space:nowrap;}
+.tbtn.active{background:var(--em);color:var(--gold3);border-color:var(--em);}
+.tbtn:hover:not(.active){background:var(--parch2);}
+.sep{width:1px;height:26px;background:rgba(184,134,11,.3);flex-shrink:0;}
+
+/* ── SURAH TABS ── */
+.surah-tabs{background:#fff;border-bottom:1px solid #e8d5a0;padding:7px 14px;display:flex;gap:5px;flex-wrap:wrap;}
+.stab{padding:4px 12px;border:1px solid rgba(184,134,11,.3);background:white;color:var(--em);font-size:.77em;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;}
+.stab.active{background:var(--em);color:var(--gold3);}
+.stab:hover:not(.active){background:var(--parch2);}
+
+.wrap{max-width:1100px;margin:0 auto;padding:18px 14px;}
+
+/* ════════════════════════════════
+   VIEW 1 — CARDS
+════════════════════════════════ */
+.v-cards .ag{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;}
+.v-cards .ac{background:#fff;border:1px solid var(--gold2);padding:15px;transition:box-shadow .2s,border-color .2s;}
+.v-cards .ac:hover{box-shadow:0 4px 16px rgba(184,134,11,.18);border-color:var(--gold);}
+.v-cards .ac-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.v-cards .ac-num{font-size:.7em;font-weight:700;color:var(--gold);background:rgba(184,134,11,.1);padding:2px 7px;border:1px solid rgba(184,134,11,.3);}
+.v-cards .ac-date{font-size:.68em;color:#bbb;}
+.v-cards .ac h3{font-family:'Amiri',serif;margin:0 0 6px;color:var(--em);font-size:.93em;line-height:1.45;}
+.v-cards .ac-meta{font-size:.74em;color:#888;margin-bottom:9px;}
+.v-cards .ac a{display:inline-block;text-decoration:none;color:var(--em2);border:1px solid var(--em2);padding:4px 10px;font-size:.78em;}
+.v-cards .ac a:hover{background:var(--em2);color:white;}
+.v-cards .ac a.nav-lnk{font-size:.72em;padding:3px 8px;margin-right:4px;}
+.surah-div{grid-column:1/-1;padding:7px 14px;background:linear-gradient(90deg,var(--em),var(--em2));color:var(--gold3);font-family:'Amiri',serif;font-size:.95em;margin-top:6px;}
+
+/* ════════════════════════════════
+   VIEW 2 — SEQUENTIAL (متتابع)
+════════════════════════════════ */
+.v-seq .seq-list{display:flex;flex-direction:column;gap:0;}
+.v-seq .seq-item{background:#fff;border:1px solid var(--gold2);border-bottom:none;display:flex;align-items:stretch;gap:0;}
+.v-seq .seq-item:last-child{border-bottom:1px solid var(--gold2);}
+.v-seq .seq-item:hover{background:#fffdf5;}
+.v-seq .seq-num{width:64px;flex-shrink:0;background:linear-gradient(180deg,var(--em),var(--em2));display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 6px;color:var(--gold3);}
+.v-seq .seq-num .sn-ref{font-family:'Amiri',serif;font-size:1.15em;font-weight:700;}
+.v-seq .seq-num .sn-type{font-size:.6em;opacity:.7;margin-top:2px;text-align:center;}
+.v-seq .seq-body{flex:1;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.v-seq .seq-title{font-family:'Amiri',serif;font-size:.95em;color:var(--em);flex:1;}
+.v-seq .seq-date{font-size:.7em;color:#bbb;white-space:nowrap;}
+.v-seq .seq-actions{display:flex;gap:5px;flex-shrink:0;}
+.v-seq .seq-actions a{text-decoration:none;color:var(--em2);border:1px solid var(--em2);padding:4px 10px;font-size:.76em;}
+.v-seq .seq-actions a:hover{background:var(--em2);color:white;}
+.v-seq .seq-surah-hdr{padding:7px 14px;background:var(--parch2);border:1px solid var(--gold2);border-bottom:none;font-family:'Amiri',serif;color:var(--em);font-size:.88em;display:flex;justify-content:space-between;align-items:center;}
+.v-seq .seq-surah-hdr span{font-size:.75em;color:#888;}
+
+/* ════════════════════════════════
+   VIEW 3 — INDEX (فهرس)
+════════════════════════════════ */
+.v-idx .idx-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:16px;}
+.v-idx .idx-stat-card{background:#fff;border:1px solid var(--gold2);padding:14px;text-align:center;}
+.v-idx .idx-stat-card .isn{font-family:'Amiri',serif;font-size:1.7em;color:var(--em);font-weight:700;}
+.v-idx .idx-stat-card .isl{font-size:.74em;color:#888;margin-top:2px;}
+.v-idx .surah-block{margin-bottom:18px;}
+.v-idx .surah-hdr{background:linear-gradient(90deg,var(--em),var(--em2));color:var(--gold3);padding:9px 14px;display:flex;justify-content:space-between;align-items:center;}
+.v-idx .surah-hdr-name{font-family:'Amiri',serif;font-size:1em;}
+.v-idx .surah-hdr-count{font-size:.75em;opacity:.8;}
+.v-idx .idx-table{width:100%;border-collapse:collapse;background:#fff;}
+.v-idx .idx-table th{background:var(--parch2);color:var(--em);font-size:.75em;padding:7px 12px;text-align:right;border-bottom:2px solid var(--gold2);font-weight:700;}
+.v-idx .idx-table td{padding:7px 12px;font-size:.8em;border-bottom:1px solid #f0e8d0;vertical-align:middle;}
+.v-idx .idx-table tr:hover td{background:#fffdf5;}
+.v-idx .idx-table .td-num{font-weight:700;color:var(--gold);font-size:.85em;white-space:nowrap;}
+.v-idx .idx-table .td-title{font-family:'Amiri',serif;color:var(--em);font-size:.88em;}
+.v-idx .idx-table .td-date{color:#aaa;white-space:nowrap;font-size:.75em;}
+.v-idx .idx-table a{color:var(--em2);text-decoration:none;border:1px solid var(--em2);padding:3px 8px;font-size:.75em;}
+.v-idx .idx-table a:hover{background:var(--em2);color:white;}
+.v-idx .surah-prog{height:5px;background:var(--gold2);margin:0;}
+.v-idx .surah-prog-fill{height:100%;background:linear-gradient(90deg,var(--em),var(--gold2));}
+.v-idx .coverage-row{display:flex;align-items:center;gap:8px;margin-bottom:16px;background:#fff;padding:12px 16px;border:1px solid var(--gold2);}
+.v-idx .coverage-row .cov-lbl{font-size:.8em;color:#666;flex-shrink:0;}
+.v-idx .coverage-track{flex:1;height:10px;background:#e8d5a0;border-radius:5px;overflow:hidden;}
+.v-idx .coverage-fill{height:100%;background:linear-gradient(90deg,var(--em),var(--gold2));border-radius:5px;transition:width .8s;}
+.v-idx .cov-pct{font-size:.85em;font-weight:700;color:var(--em);flex-shrink:0;}
+
+/* ── EMPTY / LOADING ── */
+.state-box{text-align:center;padding:48px 20px;background:white;border:1px solid #e8d5a0;}
+.state-box .ico{font-size:2.5em;margin-bottom:10px;}
+.state-box p{color:#888;font-size:.88em;}
+
+/* ── FOOTER ── */
+.site-footer{background:var(--em);color:rgba(255,255,255,.7);padding:26px 20px;text-align:center;border-top:3px solid var(--gold);margin-top:32px;}
+.fayah{font-family:'Amiri',serif;font-size:1.2em;color:var(--gold3);margin-bottom:5px;}
+
+@media(max-width:640px){
+  .htop nav{display:none;}
+  .stt{padding:5px 12px;}
+  .stt-n{font-size:1.2em;}
+  .v-seq .seq-num{width:52px;}
+  .v-idx .idx-stats{grid-template-columns:repeat(2,1fr);}
+}
 </style>
 </head>
 <body>
+
 <header class="site-header">
   <div class="hborder"></div>
   <div class="htop">
@@ -71,111 +161,303 @@ nav a:hover,nav a.active{background:rgba(184,134,11,.25);color:var(--gold3);}
 <div class="pg-head">
   <h2>📚 مكتبة التفسير</h2>
   <p>جميع مقالات نور القرآن — مرتبة سورةً وآيةً</p>
-  <div class="pg-count" id="pg-count">⏳ جاري التحميل…</div>
 </div>
 
+<!-- شريط الإحصاء -->
+<div class="stats-bar" id="stats-bar">
+  <div class="stt"><div class="stt-n" id="s-total">…</div><div class="stt-l">مقال منشور</div></div>
+  <div class="stt"><div class="stt-n" id="s-surahs">…</div><div class="stt-l">سورة مغطّاة</div></div>
+  <div class="stt"><div class="stt-n" id="s-remain">…</div><div class="stt-l">آية متبقية</div></div>
+  <div class="stt"><div class="stt-n" id="s-pct">…</div><div class="stt-l">من القرآن</div></div>
+</div>
+<div class="prog-wrap">
+  <div class="prog-track"><div class="prog-fill" id="main-prog" style="width:0%"></div></div>
+  <div class="prog-lbl" id="prog-lbl">جاري التحميل…</div>
+</div>
+
+<!-- شريط الأدوات -->
 <div class="toolbar">
-  <input type="text" id="search-box" placeholder="🔍 ابحث باسم السورة أو رقم الآية…" oninput="filterAndRender()">
-  <button class="sort-btn active" id="btn-sort-quran" onclick="setSort('quran')">ترتيب مصحفي</button>
-  <button class="sort-btn" id="btn-sort-date" onclick="setSort('date')">الأحدث أولاً</button>
+  <input type="text" id="search-box" placeholder="🔍 ابحث…" oninput="filterAndRender()">
+  <div class="sep"></div>
+  <!-- ترتيب -->
+  <button class="tbtn active" id="btn-sq" onclick="setSort('quran')">📖 مصحفي</button>
+  <button class="tbtn" id="btn-sd" onclick="setSort('date')">🕐 أحدث</button>
+  <div class="sep"></div>
+  <!-- وضع العرض -->
+  <button class="tbtn active" id="vbtn-cards" onclick="setView('cards')">⊞ كروت</button>
+  <button class="tbtn" id="vbtn-seq" onclick="setView('seq')">☰ متتابع</button>
+  <button class="tbtn" id="vbtn-idx" onclick="setView('idx')">📋 فهرس</button>
 </div>
 
+<!-- تبويبات السور -->
 <div class="surah-tabs" id="surah-tabs">
-  <button class="surah-tab active" data-surah="all" onclick="filterSurah('all',this)">الكل</button>
+  <button class="stab active" data-surah="all" onclick="filterSurah('all',this)">الكل</button>
 </div>
 
+<!-- المحتوى -->
 <div class="wrap">
-  <div class="ag" id="articles-grid">
-    <div class="state-box">
-      <div class="ico">⏳</div>
-      <p>جاري تحميل المقالات…</p>
-    </div>
+  <div id="view-area">
+    <div class="state-box"><div class="ico">⏳</div><p>جاري التحميل…</p></div>
   </div>
 </div>
 
 <footer class="site-footer">
-  <div class="hborder" style="margin-bottom:14px"></div>
+  <div class="hborder" style="margin-bottom:12px"></div>
   <div class="fayah">﴿ إِنَّا نَحْنُ نَزَّلْنَا الذِّكْرَ وَإِنَّا لَهُ لَحَافِظُونَ ﴾</div>
-  <p style="font-size:.8em;margin-top:6px">نور القرآن — سليم عبّار وحافظ الخياطي</p>
+  <p style="font-size:.78em;margin-top:5px">نور القرآن — سليم عبّار وحافظ الخياطي</p>
 </footer>
 
 <script>
-const BASE='https://khayati-quran.github.io/ibar-for-all-verses/';
-const JSON_URL=BASE+'articles.json';
-let allArts=[],curSurah='all',curSort='quran';
+const BASE = 'https://khayati-quran.github.io/ibar-for-all-verses/';
+const JSON_URL = BASE + 'articles.json';
+const QURAN_TOTAL = 6236;
 
-async function init(){
-  try{
-    const r=await fetch(JSON_URL+'?t='+Date.now());
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    allArts=await r.json();
-    buildTabs();filterAndRender();
-  }catch(err){
-    document.getElementById('articles-grid').innerHTML='<div class="state-box"><div class="ico">⚠️</div><p>تعذّر تحميل المقالات: '+err.message+'</p></div>';
-    document.getElementById('pg-count').textContent='خطأ';
+let allArts = [], curSurah = 'all', curSort = 'quran', curView = 'cards';
+
+/* ══ INIT ══ */
+async function init() {
+  try {
+    const r = await fetch(JSON_URL + '?t=' + Date.now());
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    allArts = await r.json();
+    buildStats();
+    buildSurahTabs();
+    filterAndRender();
+  } catch(err) {
+    document.getElementById('view-area').innerHTML =
+      '<div class="state-box"><div class="ico">⚠️</div><p>تعذّر التحميل: ' + err.message + '</p></div>';
   }
 }
 
-function buildTabs(){
-  const surahs=[...new Map(allArts.map(a=>[a.surah_number,{n:a.surah_number,name:a.surah_name}])).values()].sort((a,b)=>a.n-b.n);
-  const tabs=document.getElementById('surah-tabs');
-  surahs.forEach(s=>{
-    const b=document.createElement('button');
-    b.className='surah-tab';b.dataset.surah=s.n;
-    b.textContent=s.name;b.onclick=()=>filterSurah(s.n,b);
+/* ══ STATS ══ */
+function buildStats() {
+  const total = allArts.length;
+  const surahs = new Set(allArts.map(a => a.surah_number)).size;
+  const remain = QURAN_TOTAL - total;
+  const pct = ((total / QURAN_TOTAL) * 100).toFixed(2);
+
+  document.getElementById('s-total').textContent   = total;
+  document.getElementById('s-surahs').textContent  = surahs;
+  document.getElementById('s-remain').textContent  = remain.toLocaleString('ar');
+  document.getElementById('s-pct').textContent     = pct + '%';
+  document.getElementById('main-prog').style.width = pct + '%';
+  document.getElementById('prog-lbl').textContent  =
+    total + ' من أصل ' + QURAN_TOTAL.toLocaleString('ar') + ' آية — ' + pct + '%';
+}
+
+/* ══ SURAH TABS ══ */
+function buildSurahTabs() {
+  const surahs = [...new Map(allArts.map(a => [a.surah_number, {n:a.surah_number, name:a.surah_name}])).values()]
+    .sort((a,b) => a.n - b.n);
+  const tabs = document.getElementById('surah-tabs');
+  surahs.forEach(s => {
+    const b = document.createElement('button');
+    b.className = 'stab'; b.dataset.surah = s.n;
+    b.textContent = s.name;
+    b.onclick = () => filterSurah(s.n, b);
     tabs.appendChild(b);
   });
 }
 
-function filterSurah(val,el){
-  curSurah=val;
-  document.querySelectorAll('.surah-tab').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');filterAndRender();
+/* ══ CONTROLS ══ */
+function filterSurah(val, el) {
+  curSurah = val;
+  document.querySelectorAll('.stab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  filterAndRender();
 }
-
-function setSort(m){
-  curSort=m;
-  document.getElementById('btn-sort-quran').classList.toggle('active',m==='quran');
-  document.getElementById('btn-sort-date').classList.toggle('active',m==='date');
+function setSort(m) {
+  curSort = m;
+  document.getElementById('btn-sq').classList.toggle('active', m === 'quran');
+  document.getElementById('btn-sd').classList.toggle('active', m === 'date');
+  filterAndRender();
+}
+function setView(v) {
+  curView = v;
+  ['cards','seq','idx'].forEach(x =>
+    document.getElementById('vbtn-' + x).classList.toggle('active', x === v));
   filterAndRender();
 }
 
-function filterAndRender(){
-  const q=document.getElementById('search-box').value.trim().toLowerCase();
-  let arts=allArts.filter(a=>{
-    const mS=curSurah==='all'||a.surah_number==curSurah;
-    const mQ=!q||a.surah_name.includes(q)||String(a.ayah_number).includes(q)||String(a.surah_number).includes(q)||(a.title&&a.title.includes(q));
-    return mS&&mQ;
+/* ══ FILTER + SORT ══ */
+function getFilteredArts() {
+  const q = document.getElementById('search-box').value.trim().toLowerCase();
+  let arts = allArts.filter(a => {
+    const mS = curSurah === 'all' || a.surah_number == curSurah;
+    const mQ = !q || a.surah_name.includes(q) ||
+      String(a.ayah_number).includes(q) || String(a.surah_number).includes(q) ||
+      (a.title && a.title.includes(q));
+    return mS && mQ;
   });
-  if(curSort==='quran') arts.sort((a,b)=>a.surah_number!==b.surah_number?a.surah_number-b.surah_number:a.ayah_number-b.ayah_number);
-  else arts.sort((a,b)=>new Date(b.date)-new Date(a.date));
-  document.getElementById('pg-count').textContent=arts.length+' مقال'+(allArts.length!==arts.length?' من أصل '+allArts.length:'');
-  const grid=document.getElementById('articles-grid');
-  if(!arts.length){grid.innerHTML='<div class="state-box"><div class="ico">🔍</div><p>لا توجد مقالات تطابق البحث</p></div>';return;}
-  grid.innerHTML='';
-  let lastS=null;
-  arts.forEach((a,i)=>{
-    if(curSort==='quran'&&a.surah_number!==lastS){
-      const d=document.createElement('div');d.className='surah-div';
-      d.textContent='📖 سورة '+a.surah_name;grid.appendChild(d);lastS=a.surah_number;
+  if (curSort === 'quran')
+    arts.sort((a,b) => a.surah_number !== b.surah_number ? a.surah_number - b.surah_number : a.ayah_number - b.ayah_number);
+  else
+    arts.sort((a,b) => new Date(b.date) - new Date(a.date));
+  return arts;
+}
+
+function artUrl(a) {
+  return BASE + (a.file || 'surah-' + a.surah_number + '-ayah-' + a.ayah_number + 'g.html');
+}
+function fmtDate(d) {
+  if (!d) return '';
+  return new Date(d).toLocaleDateString('ar-TN', {year:'numeric', month:'short', day:'numeric'});
+}
+
+/* ══ MAIN RENDER ══ */
+function filterAndRender() {
+  const arts = getFilteredArts();
+  const area = document.getElementById('view-area');
+
+  if (!arts.length) {
+    area.innerHTML = '<div class="state-box"><div class="ico">🔍</div><p>لا توجد مقالات تطابق البحث</p></div>';
+    return;
+  }
+
+  if (curView === 'cards') renderCards(arts, area);
+  else if (curView === 'seq')  renderSeq(arts, area);
+  else                          renderIdx(arts, area);
+}
+
+/* ════════════════════════════════
+   VIEW 1 — CARDS
+════════════════════════════════ */
+function renderCards(arts, area) {
+  area.className = 'v-cards';
+  const grid = document.createElement('div');
+  grid.className = 'ag';
+  let lastS = null;
+
+  arts.forEach((a, i) => {
+    if (curSort === 'quran' && a.surah_number !== lastS) {
+      const d = document.createElement('div');
+      d.className = 'surah-div';
+      d.textContent = '📖 سورة ' + a.surah_name;
+      grid.appendChild(d);
+      lastS = a.surah_number;
     }
-    const url=BASE+(a.file||'surah-'+a.surah_number+'-ayah-'+a.ayah_number+'g.html');
-    const dt=a.date?new Date(a.date).toLocaleDateString('ar-TN',{year:'numeric',month:'short',day:'numeric'}):'';
-    const prev=curSort==='quran'&&i>0?arts[i-1]:null;
-    const next=curSort==='quran'&&i<arts.length-1?arts[i+1]:null;
-    const prevUrl=prev?BASE+(prev.file||'surah-'+prev.surah_number+'-ayah-'+prev.ayah_number+'g.html'):'';
-    const nextUrl=next?BASE+(next.file||'surah-'+next.surah_number+'-ayah-'+next.ayah_number+'g.html'):'';
-    const c=document.createElement('div');c.className='ac';
-    c.innerHTML='<div class="ac-top"><span class="ac-num">'+a.surah_number+':'+a.ayah_number+'</span><span class="ac-date">'+dt+'</span></div>'
-      +'<h3>'+(a.title||'تفسير سورة '+a.surah_name+' — الآية '+a.ayah_number)+'</h3>'
-      +'<p class="ac-meta">سورة '+a.surah_name+' • الآية '+a.ayah_number+'</p>'
-      +'<a href="'+url+'" target="_blank">📖 فتح المقال</a>'
-      +(prevUrl?'<a href="'+prevUrl+'" target="_blank" class="nav-lnk">◄ سابقة</a>':'')
-      +(nextUrl?'<a href="'+nextUrl+'" target="_blank" class="nav-lnk">تالية ►</a>':'');
+    const prev = curSort === 'quran' && i > 0 ? arts[i-1] : null;
+    const next = curSort === 'quran' && i < arts.length-1 ? arts[i+1] : null;
+    const dt = fmtDate(a.date);
+
+    const c = document.createElement('div');
+    c.className = 'ac';
+    c.innerHTML =
+      '<div class="ac-top"><span class="ac-num">' + a.surah_number + ':' + a.ayah_number + '</span><span class="ac-date">' + dt + '</span></div>' +
+      '<h3>' + (a.title || 'تفسير سورة ' + a.surah_name + ' — الآية ' + a.ayah_number) + '</h3>' +
+      '<p class="ac-meta">سورة ' + a.surah_name + ' • الآية ' + a.ayah_number + '</p>' +
+      '<a href="' + artUrl(a) + '" target="_blank">📖 فتح المقال</a>' +
+      (prev ? '<a href="' + artUrl(prev) + '" target="_blank" class="nav-lnk">◄ سابقة</a>' : '') +
+      (next ? '<a href="' + artUrl(next) + '" target="_blank" class="nav-lnk">تالية ►</a>' : '');
     grid.appendChild(c);
   });
+
+  area.innerHTML = '';
+  area.appendChild(grid);
+}
+
+/* ════════════════════════════════
+   VIEW 2 — SEQUENTIAL
+════════════════════════════════ */
+function renderSeq(arts, area) {
+  area.className = 'v-seq';
+  const list = document.createElement('div');
+  list.className = 'seq-list';
+  let lastS = null;
+
+  arts.forEach((a, i) => {
+    /* رأس السورة */
+    if (curSort === 'quran' && a.surah_number !== lastS) {
+      const hdr = document.createElement('div');
+      hdr.className = 'seq-surah-hdr';
+      const count = arts.filter(x => x.surah_number === a.surah_number).length;
+      hdr.innerHTML = '📖 سورة ' + a.surah_name + '<span>' + count + ' آية منشورة</span>';
+      list.appendChild(hdr);
+      lastS = a.surah_number;
+    }
+
+    const prev = curSort === 'quran' && i > 0 ? arts[i-1] : null;
+    const next = curSort === 'quran' && i < arts.length-1 ? arts[i+1] : null;
+
+    const row = document.createElement('div');
+    row.className = 'seq-item';
+    row.innerHTML =
+      '<div class="seq-num"><div class="sn-ref">' + a.surah_number + ':' + a.ayah_number + '</div></div>' +
+      '<div class="seq-body">' +
+        '<div>' +
+          '<div class="seq-title">' + (a.title || 'تفسير سورة ' + a.surah_name + ' — الآية ' + a.ayah_number) + '</div>' +
+        '</div>' +
+        '<div class="seq-date">' + fmtDate(a.date) + '</div>' +
+        '<div class="seq-actions">' +
+          (prev ? '<a href="' + artUrl(prev) + '" target="_blank">◄</a>' : '') +
+          '<a href="' + artUrl(a) + '" target="_blank">📖 قراءة</a>' +
+          (next ? '<a href="' + artUrl(next) + '" target="_blank">►</a>' : '') +
+        '</div>' +
+      '</div>';
+    list.appendChild(row);
+  });
+
+  area.innerHTML = '';
+  area.appendChild(list);
+}
+
+/* ════════════════════════════════
+   VIEW 3 — INDEX
+════════════════════════════════ */
+function renderIdx(arts, area) {
+  area.className = 'v-idx';
+  let html = '';
+
+  /* إحصاءات التفصيل */
+  const total = arts.length;
+  const sNum  = new Set(arts.map(a => a.surah_number)).size;
+  const covPct = ((total / QURAN_TOTAL) * 100).toFixed(3);
+  const firstDate = arts.reduce((m, a) => (!m || a.date < m) ? a.date : m, null);
+  const lastDate  = arts.reduce((m, a) => (!m || a.date > m) ? a.date : m, null);
+
+  html += '<div class="idx-stats">';
+  html += '<div class="idx-stat-card"><div class="isn">' + total + '</div><div class="isl">مقال في المكتبة</div></div>';
+  html += '<div class="idx-stat-card"><div class="isn">' + sNum + '</div><div class="isl">سورة مغطّاة</div></div>';
+  html += '<div class="idx-stat-card"><div class="isn">' + (QURAN_TOTAL - total).toLocaleString('ar') + '</div><div class="isl">آية متبقية</div></div>';
+  html += '<div class="idx-stat-card"><div class="isn">' + covPct + '%</div><div class="isl">تغطية القرآن</div></div>';
+  if (firstDate) html += '<div class="idx-stat-card"><div class="isn" style="font-size:.95em">' + fmtDate(firstDate) + '</div><div class="isl">أول مقال</div></div>';
+  if (lastDate)  html += '<div class="idx-stat-card"><div class="isn" style="font-size:.95em">' + fmtDate(lastDate)  + '</div><div class="isl">آخر مقال</div></div>';
+  html += '</div>';
+
+  /* شريط التغطية الكلي */
+  html += '<div class="coverage-row"><span class="cov-lbl">التغطية الكلية</span><div class="coverage-track"><div class="coverage-fill" style="width:' + covPct + '%"></div></div><span class="cov-pct">' + covPct + '% من القرآن</span></div>';
+
+  /* جداول مجمّعة بالسورة */
+  if (curSort === 'quran') {
+    const byS = {};
+    arts.forEach(a => {
+      if (!byS[a.surah_number]) byS[a.surah_number] = {name: a.surah_name, items: []};
+      byS[a.surah_number].items.push(a);
+    });
+    Object.keys(byS).sort((a,b) => +a - +b).forEach(sn => {
+      const {name, items} = byS[sn];
+      html += '<div class="surah-block">';
+      html += '<div class="surah-hdr"><span class="surah-hdr-name">📖 سورة ' + name + ' (رقم ' + sn + ')</span><span class="surah-hdr-count">' + items.length + ' مقال</span></div>';
+      html += '<table class="idx-table"><thead><tr><th>#</th><th>الآية</th><th>العنوان</th><th>التاريخ</th><th>رابط</th></tr></thead><tbody>';
+      items.forEach((a, i) => {
+        html += '<tr><td class="td-num">' + (i+1) + '</td><td class="td-num">' + a.surah_number + ':' + a.ayah_number + '</td><td class="td-title">' + (a.title || '') + '</td><td class="td-date">' + fmtDate(a.date) + '</td><td><a href="' + artUrl(a) + '" target="_blank">📖 فتح</a></td></tr>';
+      });
+      html += '</tbody></table>';
+      html += '</div>';
+    });
+  } else {
+    /* بدون تجميع في وضع الأحدث */
+    html += '<table class="idx-table" style="width:100%;background:#fff;border:1px solid var(--gold2)"><thead><tr><th>#</th><th>سورة:آية</th><th>العنوان</th><th>التاريخ</th><th>رابط</th></tr></thead><tbody>';
+    arts.forEach((a, i) => {
+      html += '<tr><td class="td-num">' + (i+1) + '</td><td class="td-num">' + a.surah_number + ':' + a.ayah_number + '</td><td class="td-title">' + (a.title || '') + '</td><td class="td-date">' + fmtDate(a.date) + '</td><td><a href="' + artUrl(a) + '" target="_blank">📖 فتح</a></td></tr>';
+    });
+    html += '</tbody></table>';
+  }
+
+  area.innerHTML = html;
 }
 
 init();
 </script>
-</body></html>
+</body>
+</html>
