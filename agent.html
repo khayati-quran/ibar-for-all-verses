@@ -2759,13 +2759,11 @@ function buildSitemap(arts){
     .filter(Boolean);
   const urls = [...new Set([...fixed, ...artUrls])];
   const today = new Date().toISOString().split('T')[0];
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-`
-    + urls.map(u=>`  <url><loc>${u}</loc><lastmod>${today}</lastmod></url>`).join('
-')
-    + `
-</urlset>`;
+  const rows = urls.map(u=>`  <url><loc>${u}</loc><lastmod>${today}</lastmod></url>`).join('\n');
+  return '<?xml version="1.0" encoding="UTF-8"?>\n'
+    + '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    + rows
+    + '\n</urlset>';
 }
 
 async function ghWrite(path, content, message){
