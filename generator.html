@@ -3574,6 +3574,76 @@ function downloadHTML(){
 /* ════════════════════════════════════
    STANDALONE — permanent baked HTML
 ════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════
+   SEO HELPERS — meta description + JSON-LD schemas
+══════════════════════════════════════════════════════ */
+function buildMetaDescription(d){
+  const sf = AYAH_SUB_FOCUS[`${d.surah_number}:${d.ayah_number}`] || null;
+  let desc = '';
+  if(sf){
+    /* نفضّل ibra ثم what لأنها أكثر تركيزاً */
+    const raw = (sf.ibra || sf.what || '').replace(/["'`]/g,'');
+    desc = raw.slice(0,150).trim();
+    if(raw.length > 150) desc += '…';
+  }
+  if(!desc){
+    desc = `تدبر سورة ${d.surah_name} — الآية ${d.ayah_number}: تفسير أصيل موثّق من كبار المفسرين | نور القرآن`;
+    desc = desc.slice(0,155);
+  }
+  return desc;
+}
+
+function buildArticleSchema(d){
+  const BASE = 'https://khayati-quran.github.io/ibar-for-all-verses';
+  const url  = `${BASE}/surah-${d.surah_number}-ayah-${d.ayah_number}g.html`;
+  const now  = new Date().toISOString();
+  const sf   = AYAH_SUB_FOCUS[`${d.surah_number}:${d.ayah_number}`] || null;
+  const desc = buildMetaDescription(d);
+  const schema = {
+    '@context':          'https://schema.org',
+    '@type':             'Article',
+    'headline':          `تفسير سورة ${d.surah_name} — الآية ${d.ayah_number}`,
+    'description':       desc,
+    'inLanguage':        'ar',
+    'mainEntityOfPage':  { '@type':'WebPage', '@id': url },
+    'url':               url,
+    'datePublished':     now,
+    'dateModified':      now,
+    'articleSection':    `سورة ${d.surah_name}`,
+    'keywords':          `تفسير القرآن, سورة ${d.surah_name}, الآية ${d.ayah_number}, نور القرآن`,
+    'author': {
+      '@type': 'Organization',
+      'name':  'نور القرآن',
+      'url':   BASE
+    },
+    'publisher': {
+      '@type': 'Organization',
+      'name':  'نور القرآن',
+      'url':   BASE,
+      'logo':  { '@type':'ImageObject', 'url': `${BASE}/logo.png` }
+    }
+  };
+  if(sf && sf.what) schema['abstract'] = sf.what.slice(0,200);
+  return JSON.stringify(schema, null, 2);
+}
+
+function buildBreadcrumbSchema(d){
+  const BASE = 'https://khayati-quran.github.io/ibar-for-all-verses';
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type':    'BreadcrumbList',
+    'itemListElement': [
+      { '@type':'ListItem', 'position':1, 'name':'الرئيسية',          'item': `${BASE}/` },
+      { '@type':'ListItem', 'position':2, 'name':'المقالات',           'item': `${BASE}/articles.html` },
+      { '@type':'ListItem', 'position':3, 'name':`سورة ${d.surah_name}`,'item': `${BASE}/articles.html?s=${d.surah_number}` },
+      { '@type':'ListItem', 'position':4, 'name':`الآية ${d.ayah_number}`,
+        'item': `${BASE}/surah-${d.surah_number}-ayah-${d.ayah_number}g.html` }
+    ]
+  };
+  return JSON.stringify(schema, null, 2);
+}
+
 function buildStandalone(d){
   const sn=d.surah_number,an=d.ayah_number;
   const BASE="https://khayati-quran.github.io/ibar-for-all-verses";
@@ -3586,9 +3656,12 @@ function buildStandalone(d){
   return `<!DOCTYPE html>
 <html lang="ar" dir="rtl"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="تفسير سورة ${d.surah_name} الآية ${an} — تفسير أصيل موثّق المصادر | نور القرآن">
+<meta name="description" content="${buildMetaDescription(d)}">
 <meta property="og:title" content="تفسير سورة ${d.surah_name} — الآية ${an} | نور القرآن">
 <meta property="og:type" content="article">
+<meta property="og:description" content="${buildMetaDescription(d)}">
+<script type="application/ld+json">${buildArticleSchema(d)}<\/script>
+<script type="application/ld+json">${buildBreadcrumbSchema(d)}<\/script>
 <title>تفسير سورة ${d.surah_name} — الآية ${an} | نور القرآن</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
