@@ -2653,8 +2653,8 @@ function buildArticleHtml(d){
 <meta property="og:type" content="article">
 <meta property="og:url" content="${url}">
 <title>${title} | نور القرآن</title>
-<script type="application/ld+json">${buildArticleSchema(d,url)}<\/script>
-<script type="application/ld+json">${buildBreadcrumbSchema(d,url)}<\/script>
+<\x73cript type="application/ld+json">${buildArticleSchema(d,url)}<\/script>
+<\x73cript type="application/ld+json">${buildBreadcrumbSchema(d,url)}<\/script>
 <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--em:#0a3d2e;--em2:#1a5c42;--gold:#b8860b;--gold2:#daa520;--gold3:#f0c040;--parch:#fdf6e3;}
@@ -2733,7 +2733,7 @@ function injectSeoAndNav(html, d, url, nav, desc){
   }
   /* أضف JSON-LD إذا غائب */
   if(!html.includes('application/ld+json')){
-    const schemas = `<script type="application/ld+json">${buildArticleSchema(d,url)}<\/script>\n<script type="application/ld+json">${buildBreadcrumbSchema(d,url)}<\/script>`;
+    const schemas = `<\x73cript type="application/ld+json">${buildArticleSchema(d,url)}<\/script>\n<\x73cript type="application/ld+json">${buildBreadcrumbSchema(d,url)}<\/script>`;
     html = html.replace('</head>', schemas + '\n</head>');
   }
   /* أضف nav bar قبل </body> */
