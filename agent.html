@@ -596,7 +596,14 @@ async function processOne(item){
 function buildMetaDesc(d){
   /* نستخدم أي حقل وصفي يرجعه AI_WORKER */
   const raw = d.ibra || d.sub_focus_ibra || d.what || d.sub_focus_what || '';
-  if(raw){ return raw.replace(/["'`]/g,'').slice(0,150).trim() + (raw.length>150?'…':''); }
+  if(raw){
+    /* نزيل نبرة الخطاب المباشر "أنت..." لأن الـ schema يجب أن يكون هادئاً */
+    let clean = raw.replace(/["'`]/g,'')
+                   .replace(/^أنت\s+/,'تدبر في معنى الآية: ')
+                   .replace(/^أنت\b/,'تدبر في معنى الآية من خلال زاوية: ')
+                   .trim();
+    return clean.slice(0,150) + (clean.length>150?'…':'');
+  }
   return `تدبر سورة ${d.surah_name||''} — الآية ${d.ayah_number}: تفسير أصيل موثّق المصادر | نور القرآن`.slice(0,155);
 }
 
