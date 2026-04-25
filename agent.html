@@ -2520,7 +2520,10 @@ async function processOne(item){
     // 5) نشر على GitHub عبر Worker
     await ghWrite(fn, html, `نشر: سورة ${d.surah_name||item.sn} — الآية ${item.an}`);
 
-    // 6) تحديث articles.json
+    // تأخير 2.5ث بين الكتابات لتجنب rate limit
+    await new Promise(r=>setTimeout(r,2500));
+
+    // 6) تحديث articles.json + sitemap
     await updateArticlesJson(d);
 
     item.status = 'done';
@@ -2766,13 +2769,23 @@ function buildSitemap(arts){
     + '\n</urlset>';
 }
 
-async function ghWrite(path, content, message){
-  const r = await fetch(GH_WORKER, {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({action:'write', path, content, message})
-  });
-  if(!r.ok){ const t=await r.text(); throw new Error('GH write: '+t.slice(0,60)); }
-  return r.json();
+async function ghWrite(path, content, message, retries=3){
+  for(let attempt=1; attempt<=retries; attempt++){
+    const r = await fetch(GH_WORKER, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({action:'write', path, content, message})
+    });
+    if(r.ok) return r.json();
+    const errData = await r.json().catch(()=>({error:'unknown'}));
+    /* إذا rate limit → انتظر وأعد المحاولة */
+    if(r.status===429 && attempt<retries){
+      const wait = (errData.retry_after||2)*1000 + 500;
+      log(`⏳ rate limit — انتظار ${wait/1000}ث (محاولة ${attempt}/${retries})`, 'warn');
+      await new Promise(res=>setTimeout(res, wait));
+      continue;
+    }
+    throw new Error('GH write: '+JSON.stringify(errData).slice(0,80));
+  }
 }
 
 async function ghRead(path){
@@ -2809,6 +2822,8 @@ async function updateArticlesJson(d){
   await ghWrite('articles.json', JSON.stringify(arts,null,2),
     `تحديث المقالات: ${entry.title}`);
 
+  /* تأخير قبل sitemap */
+  await new Promise(r=>setTimeout(r,2500));
   /* تحديث sitemap.xml */
   try{
     await ghWrite('sitemap.xml', buildSitemap(arts),
