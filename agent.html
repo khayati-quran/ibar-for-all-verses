@@ -2499,12 +2499,24 @@ async function processOne(item){
     const sourceData = await sourceRes.json();
 
     // 2) توليد AI
-    const aiRes = await fetch(AI_WORKER,{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({source_payload:sourceData})
-    });
-    if(!aiRes.ok) throw new Error('AI Worker: '+aiRes.status);
-    const aiData = await aiRes.json();
+    /* AI Worker مع retry عند 500/429 */
+    let aiData, aiRes;
+    for(let attempt=1; attempt<=3; attempt++){
+      aiRes = await fetch(AI_WORKER,{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({source_payload:sourceData})
+      });
+      if(aiRes.ok){ aiData = await aiRes.json(); break; }
+      const errTxt = await aiRes.text().catch(()=>'');
+      if((aiRes.status===500||aiRes.status===429) && attempt<3){
+        const wait = aiRes.status===429 ? 10000 : 5000;
+        log(`⏳ AI Worker ${aiRes.status} — محاولة ${attempt}/3 — انتظار ${wait/1000}ث`,'warn');
+        await new Promise(r=>setTimeout(r,wait));
+        continue;
+      }
+      throw new Error('AI Worker: '+aiRes.status+' — '+errTxt.slice(0,60));
+    }
+    if(!aiData) throw new Error('AI Worker: فشل بعد 3 محاولات');
 
     // 3) دمج البيانات
     const d = Object.assign({}, sourceData, aiData, {
