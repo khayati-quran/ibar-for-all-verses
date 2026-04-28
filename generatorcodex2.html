@@ -5504,19 +5504,32 @@ function buildPageNav(d, prev, next, position){
 
 function buildSababBox(d,a){
   const txt=String(a.sabab_nuzul||"").trim();
-  const ayah=String(d.ayah_text||"");
   const isFatihaStart=Number(d.surah_number)===1 && Number(d.ayah_number)===1;
   const saysNone=/لا\s+(?:يوجد|يرد|يثبت)|لم\s+(?:يرد|يثبت)|لا\s+سبب/.test(txt);
+  const noSpecific=`لم يثبت في المصادر المقدمة سبب نزول خاص مستقل لهذه الآية. وهذا لا يعني أنها جاءت بلا حكمة؛ فقد تكون للآية أسباب لم تنقل، أو حكمة أرادها الله دون بيان مباشر. لذلك يقرأ موضعها من سياق السورة ومن بيان المفسرين، مع ترك الجزم بسبب خاص حتى يثبت بنقل صحيح.`;
+  const fatihaContext=`السياق العام للبسملة في أول الفاتحة أنها تعلم الأمة أن تفتتح القراءة والعمل باسم الله، وأن تدخل إلى القرآن من باب التعظيم والرحمة والاستعانة. وما يذكر في بعض كتب التفسير من آثار حول أوائل نزول الفاتحة وتعليم الحمد والثناء والدعاء يقرأ في باب السياق والآثار، لا على أنه سبب نزول قطعي مستقل.`;
+  const contextFromText=extractGeneralContextFromSabab(txt);
   if(isFatihaStart && (!txt || saysNone)){
-    return `<div class="sabab-box sabab-block article-block">لا يثبت للبسملة في أول الفاتحة سبب نزول خاص مستقل على طريقة أسباب النزول المباشرة، وهذا لا يعني أنها جاءت بلا حكمة؛ فالقرآن كله منزل بعلم الله وحكمته. وإنما يظهر سياقها في تعليم الأمة أن تفتتح القراءة والعمل باسم الله، وأن تدخل إلى القرآن من باب التعظيم والرحمة والاستعانة. وقد ذكرت بعض كتب التفسير آثاراً في أوائل نزول الفاتحة وتعليم النبي صلى الله عليه وسلم الحمد والثناء والدعاء، لكنها تذكر في باب السياق والآثار لا على أنها سبب نزول قطعي مستقل.</div>`;
+    return `<div class="sabab-box sabab-block article-block">${ae(noSpecific)}</div><div class="sabab-box sabab-block article-block"><strong>السياق العام:</strong> ${ae(fatihaContext)}</div>`;
   }
   if(!txt){
-    return `<div class="sabab-box sabab-block article-block">لم يثبت في المصادر المقدمة سبب نزول خاص مستقل لهذه الآية. وقد تكون للآية أسباب لم تُنقل، أو حكمة أرادها الله دون بيان مباشر، فكل آية نزلت بعلم الله وهدايته. ويُفهم سياقها من موضعها في السورة، ومن بيان المفسرين، ومن المعنى الذي أراد الله أن يبقى هاديا للأمة في كل زمن.</div>`;
+    return `<div class="sabab-box sabab-block article-block">${ae(noSpecific)}</div>`;
   }
   if(saysNone){
-    return `<div class="sabab-box sabab-block article-block">لم يثبت في المصادر المقدمة سبب نزول خاص مستقل لهذه الآية. وهذا لا يعني أنها جاءت بلا حكمة؛ فقد تكون للآية أسباب لم تنقل، أو حكمة أرادها الله دون بيان مباشر. لذلك يقرأ سياقها من موضعها في السورة، ومن بيان المفسرين، مع ترك الجزم بسبب خاص حتى يثبت بنقل صحيح.</div>`;
+    const ctx=contextFromText?`<div class="sabab-box sabab-block article-block"><strong>السياق العام:</strong> ${ae(contextFromText)}</div>`:"";
+    return `<div class="sabab-box sabab-block article-block">${ae(noSpecific)}</div>${ctx}`;
   }
   return `<div class="sabab-box sabab-block article-block">${ae(dedupeArabicSentences(txt))}</div>`;
+}
+function extractGeneralContextFromSabab(text){
+  const raw=dedupeArabicSentences(text);
+  if(!raw)return "";
+  const parts=raw.split(/(?<=[.؟!…؛])\s+/).map(x=>x.trim()).filter(Boolean);
+  const ctx=parts.filter(p=>{
+    if(/لا\s+(?:يوجد|يرد|يثبت)|لم\s+(?:يرد|يثبت)|لا\s+سبب/.test(p))return false;
+    return /سياق|السورة|المقطع|الموضع|افتتاح|تأتي الآية|جاءت الآية|ينتقل|يبين|تقرر|يعلم/.test(p);
+  }).join(" ");
+  return safeSentenceTrim(ctx,700);
 }
 function buildIslamicSupportSources(d){
   const extendedItems=Array.isArray(d.extended_books?.items)?d.extended_books.items:[];
@@ -5680,7 +5693,7 @@ function buildHCard(h,hideSource){
   if(h.relevance_score) chips.push(`<span class="hadith-chip">مدى الصلة: ${e(String(h.relevance_score))}</span>`);
   if(chips.length) s+=`<div class="hadith-meta">${chips.join("")}</div>`;
   const desc=h.description||buildHadithDescriptionFallback(h);
-  if(desc) s+=`<div class="hadith-desc"><strong>وصف مختصر:</strong> ${e(desc)}</div>`;
+  if(desc) s+=`<div class="hadith-desc"><strong>وصف منهجي مختصر:</strong> ${e(desc)}</div>`;
   if(h.text) s+=renderHadithText(h.text);
   if(h.link_reason) s+=`<div class="hadith-link-r"><strong>وجه الصلة بالآية:</strong> ${e(h.link_reason)}</div>`;
   if(h.matched_terms&&h.matched_terms.length) s+=`<div class="hadith-link-r"><strong>ألفاظ الالتقاء:</strong> ${e(h.matched_terms.join("، "))}</div>`;
@@ -5777,20 +5790,28 @@ function buildSharawi(d,a){
   return h;
 }
 function buildSharawiIframe(d){
-  const idx=Math.max((parseInt(d.ayah_number||1,10)||1)-1,0);
   const localVideo = d.sharawi_video_url || "";
+  if(!localVideo)return "";
+  const yt=toYoutubeEmbed(localVideo);
+  const media=yt
+    ? `<iframe src="${e(yt)}" title="تفسير الشعراوي للآية" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>`
+    : `<video src="${e(localVideo)}" controls preload="metadata" playsinline></video>`;
   return `<div class="sharawi-box sharawi-audio-box">
     <div class="sh-head"><span style="font-size:1.2em">▶</span>
       <div><div class="sh-title">الاستماع إلى الشيخ محمد متولي الشعراوي رحمه الله</div>
-      <div class="sh-sub">مقطع السورة مرتبط بالآية رقم ${e(String(d.ayah_number||""))}</div></div>
+      <div class="sh-sub">مقطع مرتبط بهذه الآية من المصدر المعتمد</div></div>
     </div>
     <div class="sh-body">
       <div class="sh-video-note">استمع إلى مقطع الشعراوي المرتبط بهذه الآية بعد التأمل في التطبيق العملي:</div>
-      <div class="yt-wrap">${localVideo
-        ? `<video src="${e(localVideo)}" controls preload="metadata" playsinline></video>`
-        : `<iframe src="https://www.youtube.com/embed/videoseries?list=PLiJSlz8e4RlG7I_eLF3tQ0MMpPgV68FoK&index=${idx}&rel=0" title="تفسير الشعراوي للآية" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>`}</div>
+      <div class="yt-wrap">${media}</div>
     </div>
   </div>`;
+}
+function toYoutubeEmbed(url){
+  const s=String(url||"").trim();
+  if(!s)return "";
+  const m=s.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{8,})/);
+  return m?`https://www.youtube.com/embed/${m[1]}?rel=0`:"";
 }
 function buildIjazIlmi(a){
   const txt=gt(a.ijaz_ilmi);
