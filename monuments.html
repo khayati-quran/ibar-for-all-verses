@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Voyari</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css"/>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI',sans-serif; }
+
+        #voy {
+            /* hauteur définie par JS via window.innerHeight */
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+        #voy-hdr {
+            position: absolute; top:0; left:0; right:0; height:52px;
+            background:rgba(255,255,255,.97); backdrop-filter:blur(10px);
+            border-bottom:1px solid #e0e0e0;
+            display:flex; align-items:center; gap:8px; padding:0 10px;
+            z-index:100;
+        }
+        #voy-logo { font-weight:800; font-size:.95rem; white-space:nowrap; flex-shrink:0; }
+        #voy-sw   { flex:1; min-width:0; position:relative; }
+        #voy-si   { width:100%; padding:6px 11px; border-radius:40px; border:1px solid #ccc; font-size:13px; outline:none; }
+        #voy-res  {
+            position:absolute; top:36px; left:0; right:0; background:#fff;
+            border-radius:12px; box-shadow:0 4px 14px rgba(0,0,0,.18);
+            max-height:200px; overflow-y:auto; display:none; z-index:200;
+        }
+        .vri { padding:8px 12px; cursor:pointer; border-bottom:1px solid #f0f0f0; font-size:13px; }
+        .vri:hover { background:#f5f5f5; }
+        #voy-gps  { flex-shrink:0; background:#fff; border:1px solid #ccc; border-radius:40px; padding:5px 9px; cursor:pointer; font-size:12px; }
+        #voy-cnt  { flex-shrink:0; background:#e67e22; color:#fff; border-radius:40px; padding:4px 9px; font-size:12px; font-weight:700; white-space:nowrap; }
+
+        #voy-map  { position:absolute; top:52px; left:0; right:0; /* bottom set by JS */ }
+
+        /* carte flottante */
+        #vcard {
+            position:absolute; z-index:800; background:#fff; border-radius:14px;
+            box-shadow:0 6px 22px rgba(0,0,0,.28); width:240px; display:none;
+            transform:translate(-50%,calc(-100% - 14px));
+        }
+        #vcard.open { display:block; }
+        #vci { width:100%; height:120px; object-fit:cover; border-radius:14px 14px 0 0; display:none; }
+        .vcb { padding:10px 12px; }
+        #vcn { font-size:13px; font-weight:700; margin-bottom:8px; line-height:1.3; color:#222; }
+        .vbt { display:flex; gap:5px; }
+        .vbt button { flex:1; padding:6px 4px; border-radius:20px; border:none; font-size:11px; font-weight:600; cursor:pointer; }
+        .bw { background:#e67e22; color:#fff; }
+        .bm { background:#f0f0f0; color:#333; }
+        .be { background:#e8f4fd; color:#1565c0; }
+        #vcx {
+            position:absolute; top:6px; right:7px; background:rgba(0,0,0,.45); color:#fff;
+            border:none; border-radius:50%; width:22px; height:22px; font-size:12px;
+            cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:1;
+        }
+        #vcard::after {
+            content:''; position:absolute; bottom:-9px; left:50%; transform:translateX(-50%);
+            border:9px solid transparent; border-top-color:#fff; border-bottom:none;
+        }
+
+        /* filtres */
+        #vcat {
+            position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
+            z-index:100; display:flex; gap:4px;
+            background:rgba(255,255,255,.93); backdrop-filter:blur(8px);
+            padding:5px 10px; border-radius:50px;
+            max-width:calc(100vw - 16px); overflow-x:auto; scrollbar-width:none;
+        }
+        #vcat::-webkit-scrollbar { display:none; }
+        .vca { border:none; background:transparent; padding:4px 8px; border-radius:40px; font-weight:600; cursor:pointer; font-size:11px; white-space:nowrap; }
+        .vca.on { background:#e67e22; color:#fff; }
+
+        /* alentour */
+        #vabt {
+            position:absolute; top:60px; right:10px; z-index:100;
+            background:#e67e22; color:#fff; border:none; border-radius:40px;
+            padding:6px 12px; font-weight:700; cursor:pointer; font-size:12px;
+        }
+        #vanr {
+            position:absolute; top:52px; right:0; bottom:0; width:280px;
+            background:#fff; transform:translateX(100%); transition:.2s;
+            z-index:150; border-left:1px solid #ddd; overflow-y:auto;
+        }
+        #vanr.open { transform:translateX(0); }
+        .vanh { padding:12px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; font-weight:700; }
+        #vanl { padding:8px; }
+        .vani { padding:8px; border-radius:10px; margin-bottom:5px; background:#f9f9f9; cursor:pointer; font-size:13px; }
+        .vani:hover { background:#fff0e0; }
+
+        /* loading bar */
+        #vbar {
+            position:absolute; top:52px; left:0; right:0; height:3px;
+            background:#e67e22; z-index:101; transform:scaleX(0); transform-origin:left; transition:.3s; display:none;
+        }
+        #vbar.on { display:block; transform:scaleX(.65); }
+
+        /* toast */
+        #vtst {
+            position:absolute; bottom:58px; left:50%; transform:translateX(-50%);
+            background:rgba(0,0,0,.72); color:#fff; padding:6px 16px; border-radius:40px;
+            font-size:12px; opacity:0; transition:.2s; z-index:200; pointer-events:none;
+            white-space:nowrap; max-width:92%;
+        }
+        .vmk { background:#fff; border-radius:24px; padding:3px 6px; font-size:16px; box-shadow:0 2px 6px rgba(0,0,0,.22); cursor:pointer; line-height:1; }
+    </style>
+</head>
+<body>
+<div id="voy">
+    <div id="voy-hdr">
+        <div id="voy-logo">&#127758; <strong>Voyari</strong></div>
+        <div id="voy-sw"><input type="text" id="voy-si" placeholder="Rechercher un lieu..."><div id="voy-res"></div></div>
+        <button id="voy-gps">GPS</button>
+        <div id="voy-cnt">0 sites</div>
+    </div>
+
+    <div id="voy-map">
+        <div id="vcard">
+            <button id="vcx">&#x2715;</button>
+            <img id="vci" alt="">
+            <div class="vcb">
+                <div id="vcn"></div>
+                <div class="vbt">
+                    <button class="bw" id="vbw">Wiki</button>
+                    <button class="bm" id="vbm">Maps</button>
+                    <button class="be" id="vbe">Meteo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="vbar"></div>
+    <div id="vcat"></div>
+    <button id="vabt">Alentour</button>
+    <div id="vanr">
+        <div class="vanh"><span>Sites proches</span><button id="vanx" style="background:none;border:none;font-size:18px;cursor:pointer;">&#x2715;</button></div>
+        <div id="vanl"></div>
+    </div>
+    <div id="vtst"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
+<script>
+// ── Taille via JS (contourne Blogger) ──
+function setSize(){
+    var h = window.innerHeight;
+    var voy = document.getElementById('voy');
+    var vmap = document.getElementById('voy-map');
+    voy.style.height  = h+'px';
+    vmap.style.height = (h-52)+'px';
+    if(window._leafMap) window._leafMap.invalidateSize();
+}
+setSize();
+window.addEventListener('resize', setSize);
+window.addEventListener('orientationchange', function(){ setTimeout(setSize,300); });
+
+// ── Emojis via unicode escapes (Blogger-safe) ──
+var IC = {
+    globe:'\uD83C\uDF0D', castle:'\uD83C\uDFF0', palace:'\uD83D\uDC51',
+    ruins:'\uD83C\uDFDB', mosque:'\uD83D\uDD4C', church:'\u26EA',
+    temple:'\uD83D\uDED5', synagogue:'\uD83D\uDD4D', nature:'\uD83C\uDF32',
+    museum:'\uD83C\uDFDB', historic:'\uD83C\uDFFA', attraction:'\uD83D\uDCCD',
+    def:'\uD83D\uDCCD'
+};
+var TL = { all:'Tous', castle:'chateau', palace:'palais', ruins:'ruines',
+    mosque:'mosquee', church:'eglise', temple:'temple', nature:'nature',
+    museum:'musee', historic:'histoire', attraction:'attraction' };
+function gi(t){ return IC[t]||IC.def; }
+
+// ── Carte ──
+var map = L.map('voy-map',{zoomControl:true}).setView([30.0444,31.2357],12);
+window._leafMap = map;
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{
+    attribution:'© Esri', maxZoom:19
+}).addTo(map);
+
+var clusters = L.markerClusterGroup({chunkedLoading:true,maxClusterRadius:50});
+map.addLayer(clusters);
+
+var loadedBoxes=new Map(), loadedIds=new Set();
+var isLoading=false, total=0, ltimer;
+
+// Wikidata throttle
+var wdN=0;
+async function wdGet(id){
+    if(!id) return null;
+    while(wdN>=4) await new Promise(function(r){setTimeout(r,350);});
+    wdN++;
+    try{
+        var ctrl=new AbortController(), t=setTimeout(function(){ctrl.abort();},6000);
+        var r=await fetch('https://www.wikidata.org/wiki/Special:EntityData/'+id+'.json',{signal:ctrl.signal});
+        clearTimeout(t);
+        if(!r.ok) return null;
+        var d=await r.json(), e=d.entities[id];
+        if(!e||!e.labels) return null;
+        return (e.labels.fr&&e.labels.fr.value)||(e.labels.en&&e.labels.en.value)||null;
+    }catch(e){return null;}
+    finally{wdN--;}
+}
+
+function bestName(t){
+    var ks=['name','name:fr','official_name','int_name','name:en','name:ar','alt_name'];
+    for(var i=0;i<ks.length;i++) if(t[ks[i]]&&t[ks[i]].trim()) return t[ks[i]].trim();
+    return null;
+}
+function getType(t){
+    if(t.historic==='castle')  return 'castle';
+    if(t.historic==='palace')  return 'palace';
+    if(t.historic==='ruins'||t.historic==='archaeological_site') return 'ruins';
+    if(t.tourism==='museum')   return 'museum';
+    if(t.natural)              return 'nature';
+    if(t.amenity==='place_of_worship'){
+        if(t.religion==='muslim')    return 'mosque';
+        if(t.religion==='christian') return 'church';
+        if(t.religion==='jewish')    return 'synagogue';
+        if(t.religion==='buddhist')  return 'temple';
+    }
+    if(t.historic) return 'historic';
+    if(t.tourism==='attraction') return 'attraction';
+    return 'def';
+}
+
+// ── Carte flottante ──
+var curSite=null, vcard=document.getElementById('vcard');
+function clamp(px,py){
+    var mw=document.getElementById('voy-map').clientWidth;
+    var mh=document.getElementById('voy-map').clientHeight;
+    return [Math.max(124,Math.min(px,mw-124)), Math.max(170,Math.min(py,mh-10))];
+}
+function posCard(ll){
+    var pt=map.latLngToContainerPoint(ll), p=clamp(pt.x,pt.y);
+    vcard.style.left=p[0]+'px'; vcard.style.top=p[1]+'px';
+}
+
+// fetch avec timeout manuel (compatible tous Android)
+function fetchWithTimeout(url, ms){
+    return new Promise(function(resolve, reject){
+        var ctrl = new AbortController();
+        var timer = setTimeout(function(){ ctrl.abort(); reject(new Error('timeout')); }, ms);
+        fetch(url, {signal:ctrl.signal}).then(function(r){
+            clearTimeout(timer); resolve(r);
+        }).catch(function(e){ clearTimeout(timer); reject(e); });
+    });
+}
+
+// Miniature : 3 stratégies dans l'ordre de fiabilité
+async function getThumb(site){
+    // 1. Tag "wikipedia" OSM → URL directe (le plus fiable)
+    if(site.wu){
+        try{
+            // wu = https://fr.wikipedia.org/wiki/Titre  ou  https://en.wikipedia.org/wiki/Titre
+            var parts = site.wu.split('/wiki/');
+            if(parts.length===2){
+                var lang = site.wu.indexOf('fr.wikipedia')>-1?'fr':site.wu.indexOf('ar.wikipedia')>-1?'ar':'en';
+                var title = decodeURIComponent(parts[1]);
+                var r = await fetchWithTimeout('https://'+lang+'.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(title), 5000);
+                if(r.ok){ var d=await r.json(); if(d.thumbnail&&d.thumbnail.source) return d.thumbnail.source; }
+            }
+        }catch(e){}
+    }
+
+    // 2. Wikidata sitelinks → cherche article dans fr/en/ar/de
+    if(site.wdId){
+        try{
+            var r2 = await fetchWithTimeout('https://www.wikidata.org/wiki/Special:EntityData/'+site.wdId+'.json', 6000);
+            if(r2.ok){
+                var wd = await r2.json();
+                var ent = wd.entities[site.wdId];
+                var sl  = ent&&ent.sitelinks;
+                var langs = ['frwiki','enwiki','arwiki','dewiki','eswiki'];
+                for(var i=0;i<langs.length;i++){
+                    if(sl&&sl[langs[i]]){
+                        var lc = langs[i].replace('wiki','');
+                        var t2 = sl[langs[i]].title;
+                        try{
+                            var r3 = await fetchWithTimeout('https://'+lc+'.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(t2), 5000);
+                            if(r3.ok){ var d3=await r3.json(); if(d3.thumbnail&&d3.thumbnail.source) return d3.thumbnail.source; }
+                        }catch(e){}
+                    }
+                }
+            }
+        }catch(e){}
+    }
+
+    // 3. Pas de miniature trouvée
+    return null;
+}
+
+async function showCard(site){
+    curSite=site;
+    document.getElementById('vcn').textContent = gi(site.type)+' '+site.name;
+    var img=document.getElementById('vci');
+    img.style.display='none';
+    vcard.classList.add('open');
+    posCard([site.lat,site.lon]);
+    // Miniature en arrière-plan
+    getThumb(site).then(function(src){
+        if(src){
+            img.onload=function(){ img.style.display='block'; posCard([site.lat,site.lon]); };
+            img.onerror=function(){ img.style.display='none'; };
+            img.src=src;
+        }
+    });
+}
+
+map.on('move zoom',function(){ if(curSite&&vcard.classList.contains('open')) posCard([curSite.lat,curSite.lon]); });
+map.on('click',function(){ vcard.classList.remove('open'); });
+document.getElementById('vcx').onclick=function(e){ e.stopPropagation(); vcard.classList.remove('open'); };
+document.getElementById('vbw').onclick=function(){ if(curSite) window.open(curSite.wu||'https://fr.wikipedia.org/wiki/'+encodeURIComponent(curSite.name)); };
+document.getElementById('vbm').onclick=function(){ if(curSite) window.open('https://www.google.com/maps?q='+curSite.lat+','+curSite.lon); };
+document.getElementById('vbe').onclick=function(){ if(curSite) window.open('https://open-meteo.com/fr/?lat='+curSite.lat+'&lon='+curSite.lon); };
+
+function addMarker(lat,lon,name,type,desc,wu,wdId){
+    var icon=L.divIcon({html:'<div class="vmk">'+gi(type)+'</div>',iconSize:[36,36],className:'',iconAnchor:[18,18]});
+    var m=L.marker([lat,lon],{icon:icon});
+    var site={lat:lat,lon:lon,type:type,desc:desc,wu:wu,wdId:wdId,name:name};
+    if(wdId){
+        (async function(){
+            var real=await wdGet(wdId);
+            if(real&&real!==name) site.name=real;
+        })();
+    }
+    m.on('click',function(e){ L.DomEvent.stopPropagation(e); showCard(site); });
+    clusters.addLayer(m); total++;
+    document.getElementById('voy-cnt').textContent=total+' sites';
+}
+
+// ── Chargement progressif ──
+function bkey(b){ var c=b.getCenter(),z=map.getZoom(); return z+'_'+c.lat.toFixed(3)+'_'+c.lng.toFixed(3); }
+async function loadArea(){
+    if(isLoading) return;
+    if(map.getZoom()<12){ toast('Zoomez (niv. 12+) pour charger'); return; }
+    var key=bkey(map.getBounds());
+    if(loadedBoxes.has(key)) return;
+    isLoading=true; loadedBoxes.set(key,true);
+    var bar=document.getElementById('vbar'); bar.style.display='block'; bar.style.transform='scaleX(.6)';
+    try{
+        var b=map.getBounds(),s=b.getSouth(),w=b.getWest(),n=b.getNorth(),e=b.getEast();
+        var q='[out:json][timeout:20][maxsize:2000000];('
+            +'node["historic"]["name"]('+s+','+w+','+n+','+e+');'
+            +'way["historic"]["name"]('+s+','+w+','+n+','+e+');'
+            +'node["tourism"~"attraction|museum|viewpoint"]["name"]('+s+','+w+','+n+','+e+');'
+            +'node["amenity"="place_of_worship"]["name"]('+s+','+w+','+n+','+e+');'
+            +'node["natural"~"peak|volcano|waterfall"]["name"]('+s+','+w+','+n+','+e+');'
+            +');out center 200;';
+        var ctrl=new AbortController(), timer=setTimeout(function(){ctrl.abort();},20000);
+        var resp=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q),signal:ctrl.signal});
+        clearTimeout(timer);
+        if(!resp.ok) throw new Error('HTTP '+resp.status);
+        var data=await resp.json(), added=0;
+        for(var i=0;i<data.elements.length;i++){
+            var el=data.elements[i], oid=el.type+'-'+el.id;
+            if(loadedIds.has(oid)) continue; loadedIds.add(oid);
+            var lat=el.lat||(el.center&&el.center.lat);
+            var lon=el.lon||(el.center&&el.center.lon);
+            if(!lat||!lon) continue;
+            var tags=el.tags||{}, name=bestName(tags);
+            if(!name) continue;
+            var type=getType(tags);
+            var wu=tags.wikipedia?'https://fr.wikipedia.org/wiki/'+tags.wikipedia.replace(' ','_'):'';
+            addMarker(lat,lon,name,type,'',wu,tags.wikidata||null);
+            added++;
+        }
+        if(added>0) toast('+'+added+' sites (total: '+total+')',2000);
+    }catch(err){
+        loadedBoxes.delete(key);
+        if(err.name!=='AbortError') toast('Erreur: '+err.message,3000);
+    }finally{
+        isLoading=false; bar.style.transform='scaleX(1)';
+        setTimeout(function(){bar.style.display='none';bar.style.transform='scaleX(0)';},300);
+    }
+}
+map.on('moveend zoomend',function(){clearTimeout(ltimer);ltimer=setTimeout(loadArea,500);});
+setTimeout(loadArea,700);
+
+// ── Recherche ──
+var si=document.getElementById('voy-si'), sr=document.getElementById('voy-res'), stimer;
+si.addEventListener('input',function(){
+    clearTimeout(stimer); var q=si.value.trim();
+    if(!q){sr.style.display='none';return;}
+    stimer=setTimeout(function(){doSearch(q);},300);
+});
+async function doSearch(q){
+    try{
+        var r=await fetchWithTimeout('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(q)+'&format=json&limit=5&accept-language=fr',5000);
+        var d=await r.json();
+        sr.innerHTML=d.length?d.map(function(i){
+            return '<div class="vri" onclick="pick('+i.lat+','+i.lon+',\''+i.display_name.substring(0,50).replace(/'/g,"\\'")+'\')">'
+                +i.display_name.substring(0,58)+'</div>';
+        }).join(''):'<div class="vri" style="color:#999">Aucun resultat</div>';
+        sr.style.display='block';
+    }catch(e){sr.style.display='none';}
+}
+window.pick=function(lat,lng,name){sr.style.display='none';si.value=name;map.flyTo([lat,lng],13);};
+document.addEventListener('click',function(e){if(!si.contains(e.target)&&!sr.contains(e.target))sr.style.display='none';});
+
+// ── Nearby ──
+function hav(a,b,c,d){var R=6371,dl=(c-a)*Math.PI/180,dg=(d-b)*Math.PI/180,x=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dg/2)*Math.sin(dg/2);return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
+document.getElementById('vabt').onclick=function(){
+    var c=map.getCenter(),all=[];
+    clusters.eachLayer(function(m){if(m instanceof L.Marker){var ll=m.getLatLng();all.push({lat:ll.lat,lng:ll.lng,d:hav(c.lat,c.lng,ll.lat,ll.lng)});}});
+    all.sort(function(a,b){return a.d-b.d;}); all=all.slice(0,25);
+    document.getElementById('vanl').innerHTML=all.map(function(m){
+        return '<div class="vani" onclick="map.flyTo(['+m.lat+','+m.lng+'],15);document.getElementById(\'vanr\').classList.remove(\'open\');">Site <span style="float:right;color:#999;font-size:11px">'+(m.d<1?Math.round(m.d*1000)+'m':m.d.toFixed(1)+'km')+'</span></div>';
+    }).join('');
+    document.getElementById('vanr').classList.add('open');
+};
+document.getElementById('vanx').onclick=function(){document.getElementById('vanr').classList.remove('open');};
+
+// ── Filtres ──
+var CATS=['all','castle','palace','ruins','mosque','church','temple','nature','museum','attraction'];
+var cc=document.getElementById('vcat');
+CATS.forEach(function(cat){
+    var b=document.createElement('button'); b.className='vca'+(cat==='all'?' on':'');
+    b.textContent=TL[cat]||cat;
+    b.onclick=function(){document.querySelectorAll('.vca').forEach(function(x){x.classList.remove('on');});b.classList.add('on');};
+    cc.appendChild(b);
+});
+
+// GPS
+document.getElementById('voy-gps').onclick=function(){
+    if(navigator.geolocation) navigator.geolocation.getCurrentPosition(
+        function(p){map.flyTo([p.coords.latitude,p.coords.longitude],13);},
+        function(){alert('Geoloc refusee');}
+    );
+};
+
+function toast(msg,d){ var t=document.getElementById('vtst'); t.textContent=msg; t.style.opacity='1'; setTimeout(function(){t.style.opacity='0';},d||2500); }
+setTimeout(function(){toast('Zoomez sur une region pour charger',3000);},800);
+</script>
+</body>
+</html>
