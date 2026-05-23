@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Voyari</title>
+    <title>https://voyari.slimabbar.workers.dev/api/maptiles/{z}/{x}/{y}.png</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css"/>
@@ -176,8 +176,8 @@ function gi(t){ return IC[t]||IC.def; }
 // ── Carte ──
 var map = L.map('voy-map',{zoomControl:true}).setView([30.0444,31.2357],12);
 window._leafMap = map;
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{
-    attribution:'© Esri', maxZoom:19
+L.tileLayer('https://voyari.slimabbar.workers.dev/api/maptiles/{z}/{x}/{y}.png', {
+    attribution: '© MapTiler © OSM', maxZoom: 20
 }).addTo(map);
 
 var clusters = L.markerClusterGroup({chunkedLoading:true,maxClusterRadius:50});
